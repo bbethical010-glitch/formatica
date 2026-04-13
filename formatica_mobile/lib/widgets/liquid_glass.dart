@@ -3,7 +3,7 @@ import 'package:flutter/material.dart';
 import '../core/theme.dart';
 
 /// A premium glass container with BackdropFilter refraction,
-/// specular highlights, and a signature 'Void' aesthetics.
+/// specular highlights, and prototype-matched 'Liquid Glass' aesthetics.
 class LiquidGlassContainer extends StatelessWidget {
   final Widget? child;
   final double? width;
@@ -24,14 +24,16 @@ class LiquidGlassContainer extends StatelessWidget {
     this.padding,
     this.margin,
     this.borderRadius = 20.0,
-    this.blur = 28.0,
+    this.blur = 28.0, // Prototype standard
     this.color,
     this.borderColor,
-    this.specularOpacity = 0.2,
+    this.specularOpacity = 0.15,
   });
 
   @override
   Widget build(BuildContext context) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    
     return Container(
       width: width,
       height: height,
@@ -43,16 +45,18 @@ class LiquidGlassContainer extends StatelessWidget {
           child: Container(
             padding: padding,
             decoration: BoxDecoration(
-              color: color ?? AppColors.darkGlassBg,
+              color: color ?? (isDark ? AppColors.darkGlassBg : AppColors.lightGlassBg),
               borderRadius: BorderRadius.circular(borderRadius),
               border: Border.all(
-                color: borderColor ?? AppColors.specularHighlight.withOpacity(specularOpacity),
-                width: 0.5,
+                color: borderColor ?? (isDark 
+                  ? Colors.white.withOpacity(0.1) 
+                  : Colors.black.withOpacity(0.05)),
+                width: 1.0,
               ),
             ),
             child: Stack(
               children: [
-                // Specular Highlight (Top-left inner glow)
+                // Inner Specular Highlight
                 Positioned.fill(
                   child: Container(
                     decoration: BoxDecoration(
@@ -61,10 +65,10 @@ class LiquidGlassContainer extends StatelessWidget {
                         begin: Alignment.topLeft,
                         end: Alignment.bottomRight,
                         colors: [
-                          Colors.white.withOpacity(specularOpacity),
+                          Colors.white.withOpacity(isDark ? specularOpacity : 0.4),
                           Colors.white.withOpacity(0.0),
                         ],
-                        stops: const [0.0, 0.4],
+                        stops: const [0.0, 0.5],
                       ),
                     ),
                   ),
@@ -79,8 +83,7 @@ class LiquidGlassContainer extends StatelessWidget {
   }
 }
 
-/// The atmospheric background for the Formatica studio.
-/// Represents 'Layer 0' with a deep void and shifting light sources.
+/// The atmospheric background using generated mesh assets.
 class MeshBackground extends StatelessWidget {
   final Widget child;
 
@@ -88,30 +91,24 @@ class MeshBackground extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    
     return Stack(
       children: [
-        // Base Void
+        // Premium Mesh Asset
         Positioned.fill(
-          child: Container(color: AppColors.darkBg),
-        ),
-        
-        // Ambient Light Source 1 (Indigo Glow)
-        Positioned(
-          top: -100,
-          right: -100,
-          child: _AmbientGlow(
-            color: AppColors.primaryIndigo.withOpacity(0.15),
-            size: 400,
+          child: Image.asset(
+            isDark ? 'assets/images/mesh_dark.png' : 'assets/images/mesh_light.png',
+            fit: BoxFit.cover,
           ),
         ),
         
-        // Ambient Light Source 2 (Accent Glow)
-        Positioned(
-          bottom: -50,
-          left: -50,
-          child: _AmbientGlow(
-            color: AppColors.videoPurple.withOpacity(0.1),
-            size: 300,
+        // Subtle Overlay to ensure readability
+        Positioned.fill(
+          child: Container(
+            color: isDark 
+              ? Colors.black.withOpacity(0.2) 
+              : Colors.white.withOpacity(0.1),
           ),
         ),
         
@@ -121,35 +118,3 @@ class MeshBackground extends StatelessWidget {
     );
   }
 }
-
-class _AmbientGlow extends StatelessWidget {
-  final Color color;
-  final double size;
-
-  const _AmbientGlow({required this.color, required this.size});
-
-  @override
-  Widget build(BuildContext context) {
-    return Container(
-      width: size,
-      height: size,
-      decoration: BoxDecoration(
-        shape: BoxShape.circle,
-        gradient: RadialGradient(
-          colors: [
-            color,
-            color.withOpacity(0.0),
-          ],
-        ),
-      ),
-    );
-  }
-}
-
-
-
-
-
-
-
-

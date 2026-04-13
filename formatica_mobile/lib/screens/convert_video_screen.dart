@@ -312,7 +312,7 @@ class _ConvertVideoScreenState extends State<ConvertVideoScreen> {
     showDialog(
       context: context,
       builder: (ctx) => AlertDialog(
-        backgroundColor: AppColors.darkSurfaceCard,
+        backgroundColor: AppColors.darkSurface,
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
         title: Text('CANCEL OPERATION', style: AppTextStyles.studioLabel),
         content: Text('Abort the multi-format transcode process?', style: AppTextStyles.bodyMedium),

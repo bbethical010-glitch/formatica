@@ -23,7 +23,7 @@ class PermissionDialog extends StatelessWidget {
     final isDark = Theme.of(context).brightness == Brightness.dark;
 
     return AlertDialog(
-      backgroundColor: isDark ? AppColors.darkSurfaceCard : AppColors.darkSurfaceCard,
+      backgroundColor: isDark ? AppColors.darkSurface : AppColors.darkSurface,
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
       title: Row(
         children: [
@@ -129,7 +129,7 @@ class PermissionDeniedDialog extends StatelessWidget {
     final isDark = Theme.of(context).brightness == Brightness.dark;
 
     return AlertDialog(
-      backgroundColor: isDark ? AppColors.darkSurfaceCard : AppColors.darkSurfaceCard,
+      backgroundColor: isDark ? AppColors.darkSurface : AppColors.darkSurface,
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
       title: Row(
         children: [

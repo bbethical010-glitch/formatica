@@ -5,9 +5,8 @@ import '../core/theme.dart';
 import '../services/pdf_tools_service.dart';
 import '../services/file_service.dart';
 import '../providers/task_provider.dart';
-import '../widgets/success_card.dart';
 import '../widgets/liquid_glass.dart';
-import '../widgets/media_pill_button.dart';
+import '../widgets/success_card.dart';
 
 class GreyscalePdfScreen extends StatefulWidget {
   const GreyscalePdfScreen({super.key});
@@ -21,9 +20,8 @@ class _GreyscalePdfScreenState extends State<GreyscalePdfScreen> {
   String? _fileName;
   int? _fileSizeBytes;
 
-  bool _isConverting = false;
+  bool _isLoading = false;
   double _progress = 0.0;
-  String? _currentTaskId;
   String? _errorMessage;
   String? _outputPath;
 
@@ -34,182 +32,215 @@ class _GreyscalePdfScreenState extends State<GreyscalePdfScreen> {
         backgroundColor: Colors.transparent,
         appBar: AppBar(
           leading: IconButton(
-            icon: const Icon(Icons.arrow_back_ios_new_rounded, size: 20),
+            icon: const Icon(Icons.arrow_back_ios_new, size: 20),
             onPressed: () => Navigator.pop(context),
           ),
-          title: Text('GREYSCALE PDF', style: AppTextStyles.studioLabel.copyWith(color: Colors.white)),
-        ),
-        body: SafeArea(
-          child: SingleChildScrollView(
-            padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 20),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                // Editorial Title
-                Text('Optimize', style: AppTextStyles.studioLabel),
-                const SizedBox(height: 8),
-                Text(
-                  'Monochrome',
-                  style: AppTextStyles.displayLarge.copyWith(
-                    color: AppColors.darkTextPrimary,
-                    fontSize: 42,
-                    height: 1.0,
-                  ),
-                ),
-                const SizedBox(height: 12),
-                Text(
-                  'Hardware-level B&W extraction.',
-                  style: AppTextStyles.bodyMedium.copyWith(color: AppColors.darkTextSecondary),
-                ),
-                
-                const SizedBox(height: 32),
-                
-                // File Selection Zone
-                GestureDetector(
-                  onTap: _isConverting ? null : _pickFile,
-                  child: LiquidGlassContainer(
-                    height: 160,
-                    width: double.infinity,
-                    color: _filePath == null ? Colors.white.withOpacity(0.03) : AppColors.primaryIndigo.withOpacity(0.1),
-                    child: Center(
-                      child: _filePath == null
-                          ? Column(
-                              mainAxisAlignment: MainAxisAlignment.center,
-                              children: [
-                                Icon(Icons.cloud_upload_outlined, size: 40, color: AppColors.darkTextSecondary.withOpacity(0.5)),
-                                const SizedBox(height: 12),
-                                Text('DRAG OR TAP TO IMPORT', style: AppTextStyles.studioLabel.copyWith(color: AppColors.darkTextSecondary)),
-                              ],
-                            )
-                          : Padding(
-                              padding: const EdgeInsets.all(20),
-                              child: Row(
-                                children: [
-                                  const Icon(Icons.picture_as_pdf_rounded, color: AppColors.audioRose, size: 32),
-                                  const SizedBox(width: 16),
-                                  Expanded(
-                                    child: Column(
-                                      mainAxisAlignment: MainAxisAlignment.center,
-                                      crossAxisAlignment: CrossAxisAlignment.start,
-                                      children: [
-                                        Text(_fileName!, style: AppTextStyles.headlineSmall.copyWith(fontSize: 16), overflow: TextOverflow.ellipsis),
-                                        Text(FileService.formatFileSize(_fileSizeBytes!), style: AppTextStyles.bodyMedium.copyWith(color: AppColors.darkTextSecondary)),
-                                      ],
-                                    ),
-                                  ),
-                                  Icon(Icons.refresh_rounded, color: AppColors.darkTextSecondary.withOpacity(0.5), size: 20),
-                                ],
-                              ),
-                            ),
-                    ),
-                  ),
-                ),
-
-                if (_isConverting) _progressSection(),
-                if (_errorMessage != null) _buildErrorCard(),
-                if (_outputPath != null && !_isConverting) _buildSuccessCard(),
-                
-                const SizedBox(height: 48),
-                
-                // Action Area
-                Center(
-                  child: _isConverting
-                    ? MediaPillButton(
-                        label: 'Cancel Operation',
-                        accentColor: AppColors.audioRose,
-                        onTap: () {
-                          if (_currentTaskId != null) {
-                            _showCancelDialog(context, _currentTaskId!);
-                          }
-                        },
-                      )
-                    : MediaPillButton(
-                        label: 'Execute Conversion',
-                        accentColor: AppColors.primaryIndigo,
-                        onTap: _filePath != null ? () => _onConvert() : () => {},
-                        icon: Icons.auto_fix_high_rounded,
-                      ),
-                ),
-              ],
+          actions: [
+            Container(
+              margin: const EdgeInsets.only(right: 16),
+              padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+              decoration: BoxDecoration(
+                color: Colors.greenAccent.withOpacity(0.1),
+                borderRadius: BorderRadius.circular(20),
+                border: Border.all(color: Colors.greenAccent.withOpacity(0.2)),
+              ),
+              child: Row(
+                children: [
+                  const Icon(Icons.security, size: 12, color: Colors.greenAccent),
+                  const SizedBox(width: 4),
+                  Text('On-Device', style: AppTextStyles.badge.copyWith(color: Colors.greenAccent, fontSize: 8)),
+                ],
+              ),
             ),
-          ),
+          ],
         ),
-      ),
-    );
-  }
+        body: Column(
+          children: [
+            Expanded(
+              child: SingleChildScrollView(
+                padding: const EdgeInsets.all(20),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text('Optimize', style: AppTextStyles.displayLarge.copyWith(fontSize: 32)),
+                    Text(
+                      'PRISM MONOCHROME ENGINE',
+                      style: AppTextStyles.studioLabel.copyWith(color: AppColors.greySlate),
+                    ),
+                    const SizedBox(height: 32),
 
-  Widget _progressSection() {
-    return Padding(
-      padding: const EdgeInsets.only(top: 32),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            children: [
-              Text('EXTRACTING LUMA...', style: AppTextStyles.studioLabel),
-              Text('${(_progress * 100).toInt()}%', style: AppTextStyles.studioLabel),
-            ],
-          ),
-          const SizedBox(height: 12),
-          LiquidGlassContainer(
-            height: 12,
-            borderRadius: 6,
-            blur: 0,
-            color: Colors.white.withOpacity(0.05),
-            child: FractionallySizedBox(
-              alignment: Alignment.centerLeft,
-              widthFactor: _progress,
-              child: Container(
-                decoration: BoxDecoration(
-                  borderRadius: BorderRadius.circular(6),
-                  gradient: const LinearGradient(
-                    colors: [AppColors.primaryIndigo, AppColors.videoPurple],
-                  ),
+                    // Preview Zone
+                    GestureDetector(
+                      onTap: _isLoading ? null : _pickFile,
+                      child: AspectRatio(
+                        aspectRatio: 16 / 9,
+                        child: LiquidGlassContainer(
+                          padding: EdgeInsets.zero,
+                          borderRadius: 24,
+                          child: Stack(
+                            fit: StackFit.expand,
+                            children: [
+                              Image.asset(
+                                'assets/images/pdf_hero.png',
+                                fit: BoxFit.cover,
+                              ),
+                              Container(color: Colors.black.withOpacity(0.4)),
+                              if (_fileName != null)
+                                Center(
+                                  child: Column(
+                                    mainAxisAlignment: MainAxisAlignment.center,
+                                    children: [
+                                      const Icon(Icons.picture_as_pdf, size: 64, color: Colors.white),
+                                      const SizedBox(height: 12),
+                                      Padding(
+                                        padding: const EdgeInsets.symmetric(horizontal: 24),
+                                        child: Text(
+                                          _fileName!,
+                                          textAlign: TextAlign.center,
+                                          style: const TextStyle(fontWeight: FontWeight.bold),
+                                        ),
+                                      ),
+                                    ],
+                                  ),
+                                )
+                              else
+                                const Center(
+                                  child: Column(
+                                    mainAxisAlignment: MainAxisAlignment.center,
+                                    children: [
+                                      Icon(Icons.file_open_outlined, size: 48, color: Colors.white54),
+                                      SizedBox(height: 12),
+                                      Text('SELECT SOURCE PDF', style: TextStyle(color: Colors.white54, letterSpacing: 1)),
+                                    ],
+                                  ),
+                                ),
+                            ],
+                          ),
+                        ),
+                      ),
+                    ),
+
+                    const SizedBox(height: 40),
+                    _buildSectionTitle('PROCESS OVERVIEW'),
+                    const SizedBox(height: 16),
+                    LiquidGlassContainer(
+                      padding: const EdgeInsets.all(20),
+                      child: Row(
+                        children: [
+                          const Icon(Icons.tonality, color: AppColors.greySlate),
+                          const SizedBox(width: 16),
+                          Expanded(
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                Text('HARDWARE ACCELERATION', style: AppTextStyles.studioLabel.copyWith(fontSize: 9)),
+                                const SizedBox(height: 4),
+                                Text(
+                                  'Applies monochrome luma extraction to all PDF assets while preserving text vector data.',
+                                  style: AppTextStyles.bodyMedium.copyWith(fontSize: 11, color: Colors.white54),
+                                ),
+                              ],
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                    
+                    if (_errorMessage != null)
+                      _buildErrorCard(),
+                    
+                    if (_outputPath != null && !_isLoading)
+                      SuccessCard(
+                        outputPath: _outputPath!,
+                        label: 'Extraction complete.',
+                        onConvertAnother: _resetForm,
+                      ),
+                    
+                    const SizedBox(height: 100),
+                  ],
                 ),
               ),
             ),
-          ),
-        ],
-      ),
-    );
-  }
-
-  Widget _buildErrorCard() {
-    return Padding(
-      padding: const EdgeInsets.only(top: 24),
-      child: LiquidGlassContainer(
-        padding: const EdgeInsets.all(16),
-        color: AppColors.audioRose.withOpacity(0.1),
-        child: Row(
-          children: [
-            const Icon(Icons.error_outline_rounded, color: AppColors.audioRose, size: 20),
-            const SizedBox(width: 12),
-            Expanded(
-              child: Text(_errorMessage!, style: AppTextStyles.bodyMedium.copyWith(color: AppColors.audioRose)),
-            ),
+            
+            // Sticky Bar
+            _buildStickyBar(),
           ],
         ),
       ),
     );
   }
 
-  Widget _buildSuccessCard() {
-    return Padding(
-      padding: const EdgeInsets.only(top: 24),
-      child: SuccessCard(
-        outputPath: _outputPath!,
-        label: 'Converted to greyscale successfully',
-        onConvertAnother: _resetForm,
+  Widget _buildSectionTitle(String title) {
+    return Text(
+      title,
+      style: AppTextStyles.badge.copyWith(
+        color: Colors.white.withOpacity(0.4),
+        letterSpacing: 2,
+      ),
+    );
+  }
+
+  Widget _buildStickyBar() {
+    final canConvert = _filePath != null && !_isLoading;
+    
+    return Container(
+      padding: const EdgeInsets.fromLTRB(20, 0, 20, 40),
+      child: LiquidGlassContainer(
+        borderRadius: 24,
+        padding: const EdgeInsets.all(12),
+        color: AppColors.darkSurfaceHigh,
+        child: _isLoading
+            ? Column(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      const Text('EXTRACTING LUMA...', style: TextStyle(fontSize: 10, fontWeight: FontWeight.bold)),
+                      Text('${(_progress * 100).toInt()}%', style: const TextStyle(fontSize: 10, color: AppColors.greySlate)),
+                    ],
+                  ),
+                  const SizedBox(height: 8),
+                  LinearProgressIndicator(
+                    value: _progress,
+                    backgroundColor: Colors.white.withOpacity(0.05),
+                    color: AppColors.greySlate,
+                    minHeight: 4,
+                  ),
+                ],
+              )
+            : ElevatedButton(
+                onPressed: canConvert ? _onConvert : null,
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: AppColors.greySlate,
+                  foregroundColor: Colors.white,
+                  minimumSize: const Size(double.infinity, 56),
+                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+                  elevation: 0,
+                ),
+                child: const Text('INITIATE CONVERSION', style: TextStyle(fontWeight: FontWeight.w800, letterSpacing: 1)),
+              ),
+      ),
+    );
+  }
+
+  Widget _buildErrorCard() {
+    return LiquidGlassContainer(
+      padding: const EdgeInsets.all(16),
+      color: AppColors.audioRose.withOpacity(0.1),
+      margin: const EdgeInsets.only(top: 24),
+      child: Row(
+        children: [
+          const Icon(Icons.error_outline, color: AppColors.audioRose, size: 20),
+          const SizedBox(width: 12),
+          Expanded(child: Text(_errorMessage!, style: const TextStyle(color: AppColors.audioRose, fontSize: 13))),
+        ],
       ),
     );
   }
 
   Future<void> _pickFile() async {
-    final result = await FilePicker.platform.pickFiles(
-      type: FileType.custom,
-      allowedExtensions: ['pdf'],
-    );
+    final result = await FilePicker.platform.pickFiles(type: FileType.custom, allowedExtensions: ['pdf']);
     if (result != null) {
       setState(() {
         _filePath = result.files.single.path;
@@ -222,43 +253,21 @@ class _GreyscalePdfScreenState extends State<GreyscalePdfScreen> {
   }
 
   Future<void> _onConvert() async {
-    setState(() {
-      _isConverting = true;
-      _errorMessage = null;
-    });
+    setState(() { _isLoading = true; _errorMessage = null; });
     final provider = context.read<TaskProvider>();
     final taskId = provider.addTask('Greyscale $_fileName', 'convert');
-    _currentTaskId = taskId;
-    
-    setState(() => _progress = 0.02);
 
     try {
       final outputPath = await PdfToolsService.greyScalePdf(
         inputFilePath: _filePath!,
-        onCancelSetup: (hook) => provider.setCancelHook(taskId, () async => hook()),
         onProgress: (p) {
-          if (mounted) {
-            setState(() => _progress = p);
-            provider.updateProgress(taskId, p);
-          }
+          if (mounted) setState(() => _progress = p);
         },
       );
       provider.completeTask(taskId, outputPath);
-      if (mounted) {
-        setState(() {
-          _outputPath = outputPath;
-          _isConverting = false;
-        });
-      }
+      if (mounted) setState(() { _outputPath = outputPath; _isLoading = false; });
     } catch (e) {
-      if (e.toString().contains('cancelled')) return;
-      provider.failTask(taskId, e.toString());
-      if (mounted) {
-        setState(() {
-          _errorMessage = e.toString();
-          _isConverting = false;
-        });
-      }
+      if (mounted) setState(() { _errorMessage = e.toString(); _isLoading = false; });
     }
   }
 
@@ -267,38 +276,9 @@ class _GreyscalePdfScreenState extends State<GreyscalePdfScreen> {
       _filePath = null;
       _fileName = null;
       _outputPath = null;
+      _errorMessage = null;
+      _progress = 0.0;
+      _isLoading = false;
     });
   }
-
-  void _showCancelDialog(BuildContext context, String taskId) {
-    showDialog(
-      context: context,
-      builder: (ctx) => AlertDialog(
-        backgroundColor: AppColors.darkSurfaceCard,
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
-        title: Text('CANCEL OPERATION', style: AppTextStyles.studioLabel),
-        content: Text('Abort the hardware-level monochrome extraction?', style: AppTextStyles.bodyMedium),
-        actions: [
-          TextButton(onPressed: () => Navigator.pop(ctx), child: const Text('KEEP GOING')),
-          TextButton(
-            onPressed: () {
-              final provider = Provider.of<TaskProvider>(context, listen: false);
-              provider.cancelTask(taskId);
-              Navigator.pop(ctx);
-              _resetForm();
-            },
-            child: const Text('ABORT', style: TextStyle(color: AppColors.audioRose)),
-          ),
-        ],
-      ),
-    );
-  }
 }
-
-
-
-
-
-
-
-

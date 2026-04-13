@@ -16,73 +16,74 @@ class SignatureDock extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    const double dockWidth = 240.0;
+    final itemWidth = (dockWidth - 32) / items.length;
+
     return Padding(
-      padding: const EdgeInsets.only(bottom: 24.0, left: 16, right: 16),
+      padding: const EdgeInsets.only(bottom: 24.0),
       child: Center(
-        child: UnconstrainedBox(
-          child: LiquidGlassContainer(
-            borderRadius: 34,
-            width: items.length * 70.0 + 32, // Dynamic width based on items
-            height: 68,
-            blur: 40, // Heaviest refraction
-            specularOpacity: 0.3,
-            padding: const EdgeInsets.symmetric(horizontal: 16),
-            child: Stack(
-              alignment: Alignment.center,
-              children: [
-                // Active Capsule Runner (The "Glow")
-                AnimatedPositioned(
-                  duration: const Duration(milliseconds: 500),
-                  curve: Curves.easeOutBack, // Springy energy
-                  left: currentIndex * 70.0,
-                  width: 58,
-                  height: 44,
-                  child: Container(
-                    decoration: BoxDecoration(
-                      borderRadius: BorderRadius.circular(22),
-                      gradient: LinearGradient(
-                        begin: Alignment.topLeft,
-                        end: Alignment.bottomRight,
-                        colors: [
-                          AppColors.primaryIndigo.withOpacity(1.0),
-                          AppColors.videoPurple.withOpacity(0.8),
-                        ],
-                      ),
-                      boxShadow: [
-                        BoxShadow(
-                          color: AppColors.primaryIndigo.withOpacity(0.4),
-                          blurRadius: 12,
-                          spreadRadius: 2,
-                        ),
+        child: LiquidGlassContainer(
+          borderRadius: 32,
+          width: dockWidth,
+          height: 64,
+          blur: 32,
+          padding: const EdgeInsets.symmetric(horizontal: 16),
+          child: Stack(
+            alignment: Alignment.center,
+            children: [
+              // Active Runner
+              AnimatedPositioned(
+                duration: const Duration(milliseconds: 600),
+                curve: Curves.elasticOut,
+                left: currentIndex * itemWidth,
+                width: itemWidth,
+                height: 48,
+                child: Container(
+                  margin: const EdgeInsets.all(4),
+                  decoration: BoxDecoration(
+                    borderRadius: BorderRadius.circular(24),
+                    gradient: LinearGradient(
+                      begin: Alignment.topLeft,
+                      end: Alignment.bottomRight,
+                      colors: [
+                        AppColors.primaryIndigo,
+                        AppColors.primaryIndigo.withOpacity(0.8),
                       ],
                     ),
+                    boxShadow: [
+                      BoxShadow(
+                        color: AppColors.primaryIndigo.withOpacity(0.3),
+                        blurRadius: 12,
+                        offset: const Offset(0, 4),
+                      ),
+                    ],
                   ),
                 ),
-                
-                // Icons
-                Row(
-                  mainAxisSize: MainAxisSize.min,
-                  children: List.generate(items.length, (index) {
-                    final item = items[index];
-                    final isSelected = index == currentIndex;
-                    
-                    return GestureDetector(
-                      onTap: () => onTap(index),
-                      behavior: HitTestBehavior.opaque,
-                      child: SizedBox(
-                        width: 70,
-                        height: 68,
-                        child: Icon(
-                          isSelected ? item.activeIcon : item.icon,
-                          color: isSelected ? Colors.white : AppColors.darkTextSecondary,
-                          size: 26,
-                        ),
+              ),
+              
+              // Icons
+              Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: List.generate(items.length, (index) {
+                  final item = items[index];
+                  final isSelected = index == currentIndex;
+                  
+                  return GestureDetector(
+                    onTap: () => onTap(index),
+                    behavior: HitTestBehavior.opaque,
+                    child: SizedBox(
+                      width: itemWidth,
+                      height: 64,
+                      child: Icon(
+                        isSelected ? item.activeIcon : item.icon,
+                        color: isSelected ? Colors.white : AppColors.darkTextSecondary.withOpacity(0.5),
+                        size: 22,
                       ),
-                    );
-                  }),
-                ),
-              ],
-            ),
+                    ),
+                  );
+                }),
+              ),
+            ],
           ),
         ),
       ),
@@ -101,11 +102,3 @@ class DockItem {
     required this.label,
   });
 }
-
-
-
-
-
-
-
-

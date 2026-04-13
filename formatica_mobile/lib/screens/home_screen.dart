@@ -1,144 +1,143 @@
 import 'package:flutter/material.dart';
 import '../core/theme.dart';
 import '../widgets/liquid_glass.dart';
-import '../widgets/media_pill_button.dart';
+import 'extract_audio_screen.dart';
+// Import other screens as they are refactored
 
-class HomeScreen extends StatelessWidget {
+class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});
+
+  @override
+  State<HomeScreen> createState() => _HomeScreenState();
+}
+
+class _HomeScreenState extends State<HomeScreen> with SingleTickerProviderStateMixin {
+  late AnimationController _pulseController;
+
+  @override
+  void initState() {
+    super.initState();
+    _pulseController = AnimationController(
+      vsync: this,
+      duration: const Duration(seconds: 2),
+    )..repeat(reverse: true);
+  }
+
+  @override
+  void dispose() {
+    _pulseController.dispose();
+    super.dispose();
+  }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: Colors.transparent,
-      body: SafeArea(
-        bottom: false,
+      body: MeshBackground(
         child: CustomScrollView(
-          physics: const BouncingScrollPhysics(),
           slivers: [
-            // 1. Asymmetric Editorial Header
-            SliverToBoxAdapter(
-              child: Padding(
-                padding: const EdgeInsets.fromLTRB(28, 48, 28, 32),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text('CORE', style: AppTextStyles.studioLabel),
-                    const SizedBox(height: 8),
-                    Text(
-                      'Studio',
-                      style: AppTextStyles.displayLarge.copyWith(
-                        color: AppColors.darkTextPrimary,
-                        height: 0.9,
+            // Top Bar
+            SliverAppBar(
+              floating: true,
+              backgroundColor: Colors.transparent,
+              elevation: 0,
+              title: Row(
+                children: [
+                  Container(
+                    width: 32,
+                    height: 32,
+                    decoration: BoxDecoration(
+                      color: AppColors.primaryIndigo,
+                      borderRadius: BorderRadius.circular(8),
+                    ),
+                    child: const Center(
+                      child: Text(
+                        'F',
+                        style: TextStyle(
+                          color: Colors.white,
+                          fontWeight: FontWeight.w900,
+                          fontSize: 18,
+                        ),
                       ),
                     ),
-                    const SizedBox(height: 12),
-                    Text(
-                      'Professional on-device media lab.',
-                      style: AppTextStyles.bodyMedium.copyWith(
-                        color: AppColors.darkTextSecondary,
-                        fontSize: 16,
+                  ),
+                  const SizedBox(width: 12),
+                  Text(
+                    'FORMATICA',
+                    style: AppTextStyles.headlineSmall.copyWith(
+                      fontSize: 18,
+                      letterSpacing: 1.2,
+                    ),
+                  ),
+                ],
+              ),
+              actions: [
+                IconButton(
+                  onPressed: () {
+                    // Toggle theme logic
+                  },
+                  icon: const Icon(Icons.wb_sunny_outlined),
+                ),
+                const SizedBox(width: 8),
+              ],
+            ),
+
+            // Search & Status
+            SliverPadding(
+              padding: const EdgeInsets.symmetric(horizontal: 20),
+              sliver: SliverList(
+                delegate: SliverChildListDelegate([
+                  const SizedBox(height: 20),
+                  // Search Box
+                  LiquidGlassContainer(
+                    blur: 16,
+                    borderRadius: 16,
+                    padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 4),
+                    child: const TextField(
+                      decoration: InputDecoration(
+                        icon: Icon(Icons.search, color: Colors.white38),
+                        hintText: 'Search for tools...',
+                        hintStyle: TextStyle(color: Colors.white38),
+                        border: InputBorder.none,
                       ),
                     ),
-                  ],
-                ),
+                  ),
+                  const SizedBox(height: 16),
+                  // Status Chip
+                  Row(
+                    children: [
+                      FadeTransition(
+                        opacity: _pulseController,
+                        child: Container(
+                          width: 8,
+                          height: 8,
+                          decoration: const BoxDecoration(
+                            color: Colors.greenAccent,
+                            shape: BoxShape.circle,
+                          ),
+                        ),
+                      ),
+                      const SizedBox(width: 8),
+                      Text(
+                        'ON-DEVICE MODE ACTIVE',
+                        style: AppTextStyles.badge.copyWith(
+                          color: Colors.greenAccent.withOpacity(0.8),
+                        ),
+                      ),
+                    ],
+                  ),
+                  const SizedBox(height: 24),
+                ]),
               ),
             ),
 
-            // 2. Storage Dashboard Module
-            SliverToBoxAdapter(
-              child: Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 24),
-                child: LiquidGlassContainer(
-                   padding: const EdgeInsets.all(24),
-                   child: Column(
-                     crossAxisAlignment: CrossAxisAlignment.start,
-                     children: [
-                       Row(
-                         mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                         children: [
-                           Column(
-                             crossAxisAlignment: CrossAxisAlignment.start,
-                             children: [
-                               Text('INTERNAL STORAGE', style: AppTextStyles.studioLabel.copyWith(color: AppColors.imageCyan)),
-                               const SizedBox(height: 4),
-                               Text('84.2 GB Used', style: AppTextStyles.headlineSmall.copyWith(fontSize: 18)),
-                             ],
-                           ),
-                           Icon(Icons.pie_chart_outline_rounded, color: AppColors.imageCyan, size: 32),
-                         ],
-                       ),
-                       const SizedBox(height: 16),
-                       // Progress bar
-                       Container(
-                         height: 6,
-                         decoration: BoxDecoration(
-                           borderRadius: BorderRadius.circular(3),
-                           color: Colors.white.withOpacity(0.05),
-                         ),
-                         child: FractionallySizedBox(
-                           alignment: Alignment.centerLeft,
-                           widthFactor: 0.65,
-                           child: Container(
-                             decoration: BoxDecoration(
-                               borderRadius: BorderRadius.circular(3),
-                               gradient: const LinearGradient(
-                                 colors: [AppColors.imageCyan, AppColors.primaryIndigo],
-                               ),
-                             ),
-                           ),
-                         ),
-                       ),
-                     ],
-                   ),
-                ),
-              ),
-            ),
+            // Document Tools
+            _buildSectionHeader('DOCUMENT TOOLS', AppColors.docIndigo),
+            _buildDocToolsGrid(),
 
-            // 3. Tool Sections (Staggered/Categorized)
-            SliverToBoxAdapter(
-              child: Padding(
-                padding: const EdgeInsets.fromLTRB(24, 40, 24, 16),
-                child: Text('MEDIA PROCESSING', style: AppTextStyles.studioLabel),
-              ),
-            ),
+            // Media Tools
+            _buildSectionHeader('MEDIA TOOLS', AppColors.videoPurple),
+            _buildMediaToolsGrid(),
 
-            // Video Tools
-            _buildToolSection(
-              context,
-              title: 'VIDEO STEWARD',
-              color: AppColors.videoPurple,
-              tools: [
-                _ToolData('Convert Video', 'MP4, MKV, GIF', Icons.video_file_outlined, '/convertVideo'),
-                _ToolData('Compress Video', 'Reduce footprint', Icons.compress_outlined, '/compressVideo'),
-                _ToolData('Extract Audio', 'MP3, AAC, WAV', Icons.music_note_outlined, '/extractAudio'),
-              ],
-            ),
-
-            // Image & PDF Tools
-            _buildToolSection(
-              context,
-              title: 'IMAGE & DOCUMENT',
-              color: AppColors.imageCyan,
-              tools: [
-                _ToolData('Images to PDF', 'Combine assets', Icons.photo_library_outlined, '/imagesToPdf'),
-                _ToolData('Convert Image', 'JPG, PNG, WEBP', Icons.image_outlined, '/convertImage'),
-                _ToolData('Convert Document', 'DOCX, ODT, HTML', Icons.description_outlined, '/convert'),
-              ],
-            ),
-
-            // PDF Utilities
-            _buildToolSection(
-              context,
-              title: 'PDF UTILITIES',
-              color: AppColors.audioRose,
-              tools: [
-                _ToolData('Merge PDF', 'Combine files', Icons.picture_as_pdf_outlined, '/mergePdf'),
-                _ToolData('Split PDF', 'Extract pages', Icons.splitscreen_outlined, '/splitPdf'),
-                _ToolData('Greyscale PDF', 'B&W Optimization', Icons.format_color_reset_outlined, '/greyscalePdf'),
-              ],
-            ),
-
-            // Bottom Spacing for Dock
             const SliverToBoxAdapter(child: SizedBox(height: 120)),
           ],
         ),
@@ -146,68 +145,149 @@ class HomeScreen extends StatelessWidget {
     );
   }
 
-  Widget _buildToolSection(BuildContext context, {required String title, required Color color, required List<_ToolData> tools}) {
+  Widget _buildSectionHeader(String title, Color accent) {
     return SliverPadding(
-      padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 8),
-      sliver: SliverList(
-        delegate: SliverChildBuilderDelegate(
-          (context, index) {
-            final tool = tools[index];
-            return Padding(
-              padding: const EdgeInsets.only(bottom: 12),
-              child: LiquidGlassContainer(
-                child: InkWell(
-                  onTap: () => Navigator.pushNamed(context, tool.route),
-                  borderRadius: BorderRadius.circular(20),
-                  child: Padding(
-                    padding: const EdgeInsets.all(20),
-                    child: Row(
-                      children: [
-                        Container(
-                          width: 48,
-                          height: 48,
-                          decoration: BoxDecoration(
-                            shape: BoxShape.circle,
-                            color: color.withOpacity(0.15),
-                          ),
-                          child: Icon(tool.icon, color: color, size: 24),
-                        ),
-                        const SizedBox(width: 16),
-                        Expanded(
-                          child: Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              Text(tool.title, style: AppTextStyles.headlineSmall.copyWith(fontSize: 16)),
-                              const SizedBox(height: 2),
-                              Text(tool.subtitle, style: AppTextStyles.bodyMedium.copyWith(color: AppColors.darkTextSecondary, fontSize: 12)),
-                            ],
-                          ),
-                        ),
-                        Icon(Icons.arrow_forward_ios_rounded, color: AppColors.darkTextSecondary.withOpacity(0.5), size: 14),
-                      ],
-                    ),
-                  ),
+      padding: const EdgeInsets.fromLTRB(20, 32, 20, 16),
+      sliver: SliverToBoxAdapter(
+        child: Row(
+          children: [
+            Container(
+              width: 3,
+              height: 14,
+              decoration: BoxDecoration(
+                color: accent,
+                borderRadius: BorderRadius.circular(2),
+              ),
+            ),
+            const SizedBox(width: 8),
+            Text(
+              title,
+              style: AppTextStyles.studioLabel.copyWith(color: accent),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _buildDocToolsGrid() {
+    return SliverPadding(
+      padding: const EdgeInsets.symmetric(horizontal: 20),
+      sliver: SliverGrid(
+        gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+          crossAxisCount: 2,
+          mainAxisSpacing: 12,
+          crossAxisSpacing: 12,
+          childAspectRatio: 1.1,
+        ),
+        delegate: SliverChildListDelegate([
+          _buildToolCard(
+            'Word to PDF',
+            Icons.description_outlined,
+            AppColors.docIndigo,
+            () {},
+          ),
+          _buildToolCard(
+            'Split PDF',
+            Icons.call_split_outlined,
+            AppColors.splitAmber,
+            () {},
+          ),
+          _buildToolCard(
+            'Merge PDF',
+            Icons.call_merge_outlined,
+            AppColors.mergeTeal,
+            () {},
+          ),
+          _buildToolCard(
+            'Extract Images',
+            Icons.image_outlined,
+            AppColors.imageCyan,
+            () {},
+          ),
+        ]),
+      ),
+    );
+  }
+
+  Widget _buildMediaToolsGrid() {
+    return SliverPadding(
+      padding: const EdgeInsets.symmetric(horizontal: 20),
+      sliver: SliverGrid(
+        gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+          crossAxisCount: 2,
+          mainAxisSpacing: 12,
+          crossAxisSpacing: 12,
+          childAspectRatio: 1.1,
+        ),
+        delegate: SliverChildListDelegate([
+          _buildToolCard(
+            'Extract Audio',
+            Icons.music_note_outlined,
+            AppColors.audioRose,
+            () {
+              Navigator.push(
+                context,
+                MaterialPageRoute(builder: (context) => const ExtractAudioScreen()),
+              );
+            },
+          ),
+          _buildToolCard(
+            'Optimize Video',
+            Icons.video_settings_outlined,
+            AppColors.videoPurple,
+            () {},
+          ),
+          _buildToolCard(
+            'Format Convert',
+            Icons.sync_alt_outlined,
+            AppColors.primaryLight,
+            () {},
+          ),
+          _buildToolCard(
+            'Compress Img',
+            Icons.compress_outlined,
+            AppColors.compressOrange,
+            () {},
+          ),
+        ]),
+      ),
+    );
+  }
+
+  Widget _buildToolCard(String title, IconData icon, Color color, VoidCallback onTap) {
+    return LiquidGlassContainer(
+      blur: 20,
+      borderRadius: 16,
+      child: InkWell(
+        onTap: onTap,
+        borderRadius: BorderRadius.circular(16),
+        child: Padding(
+          padding: const EdgeInsets.all(16.0),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              Container(
+                padding: const EdgeInsets.all(8),
+                decoration: BoxDecoration(
+                  color: color.withOpacity(0.15),
+                  shape: BoxShape.circle,
+                ),
+                child: Icon(icon, color: color, size: 24),
+              ),
+              Text(
+                title,
+                style: const TextStyle(
+                  fontWeight: FontWeight.w700,
+                  fontSize: 14,
+                  letterSpacing: -0.2,
                 ),
               ),
-            );
-          },
-          childCount: tools.length,
+            ],
+          ),
         ),
       ),
     );
   }
 }
-
-class _ToolData {
-  final String title, subtitle, route;
-  final IconData icon;
-  _ToolData(this.title, this.subtitle, this.icon, this.route);
-}
-
-
-
-
-
-
-
-
