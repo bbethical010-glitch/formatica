@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'dart:ui';
 import '../core/theme.dart';
 
 /// Permission request dialog with explanation and action buttons
@@ -20,95 +21,106 @@ class PermissionDialog extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final isDark = Theme.of(context).brightness == Brightness.dark;
-
-    return AlertDialog(
-      backgroundColor: isDark ? AppColors.darkSurface : AppColors.darkSurface,
-      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
-      title: Row(
-        children: [
-          Icon(
-            Icons.folder_open,
-            color: AppColors.primaryIndigo,
-            size: 28,
-          ),
-          const SizedBox(width: 12),
-          Expanded(
-            child: Text(
-              title,
-              style: AppTextStyles.displayLarge,
+    return BackdropFilter(
+      filter: ImageFilter.blur(sigmaX: 15, sigmaY: 15),
+      child: AlertDialog(
+        backgroundColor: Colors.black.withOpacity(0.85),
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(28),
+          side: BorderSide(color: Colors.white.withOpacity(0.08)),
+        ),
+        title: Row(
+          children: [
+            const Icon(
+              Icons.folder_open,
+              color: AppColors.docIndigo,
+              size: 24,
             ),
-          ),
-        ],
-      ),
-      content: Column(
-        mainAxisSize: MainAxisSize.min,
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Text(
-            description,
-            style: AppTextStyles.bodyMedium.copyWith(
-              color: isDark ? AppColors.darkTextSecondary : AppColors.darkTextSecondary,
-            ),
-          ),
-          const SizedBox(height: 16),
-          Container(
-            padding: const EdgeInsets.all(12),
-            decoration: BoxDecoration(
-              color: AppColors.primaryIndigo.withAlpha(20),
-              borderRadius: BorderRadius.circular(8),
-              border: Border.all(
-                color: AppColors.primaryIndigo.withAlpha(60),
+            const SizedBox(width: 12),
+            Expanded(
+              child: Text(
+                title.toUpperCase(),
+                style: AppTextStyles.studioLabel.copyWith(
+                  color: Colors.white,
+                  fontSize: 16,
+                  fontWeight: FontWeight.w900,
+                  letterSpacing: 1.5,
+                ),
               ),
             ),
-            child: Row(
-              children: [
-                Icon(
-                  Icons.info_outline,
-                  size: 18,
-                  color: AppColors.primaryIndigo,
+          ],
+        ),
+        content: Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text(
+              description,
+              style: AppTextStyles.bodyMedium.copyWith(
+                color: Colors.white60,
+                fontSize: 12,
+              ),
+            ),
+            const SizedBox(height: 20),
+            Container(
+              padding: const EdgeInsets.all(16),
+              decoration: BoxDecoration(
+                color: AppColors.docIndigo.withOpacity(0.1),
+                borderRadius: BorderRadius.circular(16),
+                border: Border.all(
+                  color: AppColors.docIndigo.withOpacity(0.2),
                 ),
-                const SizedBox(width: 8),
-                Expanded(
-                  child: Text(
-                    'This permission is required to save your converted files to the Downloads folder.',
-                    style: AppTextStyles.bodyMedium.copyWith(fontSize: 12).copyWith(
-                      color: AppColors.primaryIndigo,
+              ),
+              child: Row(
+                children: [
+                  const Icon(
+                    Icons.info_outline,
+                    size: 16,
+                    color: AppColors.docIndigo,
+                  ),
+                  const SizedBox(width: 12),
+                  Expanded(
+                    child: Text(
+                      'SYSTEM REQUIREMENT: FILE SYSTEM ACCESS IS NECESSARY FOR DATA PERSISTENCE.',
+                      style: AppTextStyles.studioLabel.copyWith(
+                        fontSize: 9, 
+                        color: AppColors.docIndigo,
+                        fontWeight: FontWeight.bold,
+                      ),
                     ),
                   ),
+                ],
+              ),
+            ),
+          ],
+        ),
+        actionsPadding: const EdgeInsets.all(16),
+        actions: [
+          if (settingsButtonText != null && onSettingsTap != null)
+            TextButton(
+              onPressed: onSettingsTap,
+              child: Text(
+                settingsButtonText!.toUpperCase(),
+                style: AppTextStyles.studioLabel.copyWith(
+                  color: Colors.white24,
+                  fontSize: 10,
+                  fontWeight: FontWeight.bold,
                 ),
-              ],
+              ),
+            ),
+          TextButton(
+            onPressed: onGrantTap,
+            child: Text(
+              'GRANT ACCESS',
+              style: AppTextStyles.studioLabel.copyWith(
+                color: AppColors.docIndigo,
+                fontSize: 10,
+                fontWeight: FontWeight.bold,
+              ),
             ),
           ),
         ],
       ),
-      actions: [
-        if (settingsButtonText != null && onSettingsTap != null)
-          TextButton(
-            onPressed: onSettingsTap,
-            child: Text(
-              settingsButtonText!,
-              style: AppTextStyles.studioLabel.copyWith(
-                color: isDark ? AppColors.darkTextSecondary : AppColors.darkTextSecondary,
-              ),
-            ),
-          ),
-        FilledButton(
-          onPressed: onGrantTap,
-          style: FilledButton.styleFrom(
-            backgroundColor: AppColors.primaryIndigo,
-            shape: RoundedRectangleBorder(
-              borderRadius: BorderRadius.circular(8),
-            ),
-          ),
-          child: Text(
-            'Grant Permission',
-            style: AppTextStyles.studioLabel.copyWith(
-              color: Colors.white,
-            ),
-          ),
-        ),
-      ],
     );
   }
 }
@@ -126,123 +138,140 @@ class PermissionDeniedDialog extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final isDark = Theme.of(context).brightness == Brightness.dark;
-
-    return AlertDialog(
-      backgroundColor: isDark ? AppColors.darkSurface : AppColors.darkSurface,
-      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
-      title: Row(
-        children: [
-          Icon(
-            Icons.warning_amber_rounded,
-            color: AppColors.audioRose,
-            size: 28,
-          ),
-          const SizedBox(width: 12),
-          const Text('Permission Required'),
-        ],
-      ),
-      content: Column(
-        mainAxisSize: MainAxisSize.min,
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Text(
-            'Storage permission was denied. The app cannot save files without this permission.',
-            style: AppTextStyles.bodyMedium.copyWith(
-              color: isDark ? AppColors.darkTextSecondary : AppColors.darkTextSecondary,
+    return BackdropFilter(
+      filter: ImageFilter.blur(sigmaX: 15, sigmaY: 15),
+      child: AlertDialog(
+        backgroundColor: Colors.black.withOpacity(0.85),
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(28),
+          side: BorderSide(color: Colors.white.withOpacity(0.08)),
+        ),
+        title: Row(
+          children: [
+            const Icon(
+              Icons.warning_amber_rounded,
+              color: AppColors.audioRose,
+              size: 24,
             ),
-          ),
-          const SizedBox(height: 16),
-          Text(
-            'To enable it manually:',
-            style: AppTextStyles.studioLabel.copyWith(
-              fontWeight: FontWeight.w600,
-            ),
-          ),
-          const SizedBox(height: 8),
-          _buildStep('1', 'Open Settings → Apps → Formatica', context),
-          _buildStep('2', 'Tap "Permissions"', context),
-          _buildStep('3', 'Enable "Files and media"', context),
-          const SizedBox(height: 8),
-          Container(
-            padding: const EdgeInsets.all(12),
-            decoration: BoxDecoration(
-              color: AppColors.audioRose.withAlpha(20),
-              borderRadius: BorderRadius.circular(8),
-              border: Border.all(
-                color: AppColors.audioRose.withAlpha(60),
+            const SizedBox(width: 12),
+            Text(
+              'ACCESS DENIED',
+              style: AppTextStyles.studioLabel.copyWith(
+                color: Colors.white,
+                fontSize: 16,
+                fontWeight: FontWeight.w900,
+                letterSpacing: 1.5,
               ),
             ),
+          ],
+        ),
+        content: Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text(
+              'Storage permission was denied. The system cannot persist extraction results without this authorization.',
+              style: AppTextStyles.bodyMedium.copyWith(
+                color: Colors.white60,
+                fontSize: 12,
+              ),
+            ),
+            const SizedBox(height: 20),
+            Text(
+              'RECOVERY SEQUENCE:',
+              style: AppTextStyles.studioLabel.copyWith(
+                fontWeight: FontWeight.bold,
+                color: Colors.white38,
+                fontSize: 10,
+              ),
+            ),
+            const SizedBox(height: 12),
+            _buildStep('1', 'OPEN SETTINGS → APPS → FORMATICA', context),
+            _buildStep('2', 'NAVIGATE TO PERMISSIONS', context),
+            _buildStep('3', 'AUTHORIZE FILES AND MEDIA', context),
+            const SizedBox(height: 16),
+            Container(
+              padding: const EdgeInsets.all(12),
+              decoration: BoxDecoration(
+                color: AppColors.audioRose.withOpacity(0.1),
+                borderRadius: BorderRadius.circular(12),
+                border: Border.all(
+                  color: AppColors.audioRose.withOpacity(0.2),
+                ),
+              ),
+              child: Text(
+                'ANDROID 11+ NOTICE: ACTIVATE "ALLOW MANAGEMENT OF ALL FILES"',
+                textAlign: TextAlign.center,
+                style: AppTextStyles.studioLabel.copyWith(
+                  fontSize: 9,
+                  color: AppColors.audioRose,
+                  fontWeight: FontWeight.bold,
+                ),
+              ),
+            ),
+          ],
+        ),
+        actionsPadding: const EdgeInsets.all(16),
+        actions: [
+          TextButton(
+            onPressed: onCancelTap,
             child: Text(
-              'For Android 11+, select "Allow management of all files"',
-              style: AppTextStyles.bodyMedium.copyWith(fontSize: 12).copyWith(
-                color: AppColors.audioRose,
-                fontWeight: FontWeight.w600,
+              'CANCEL',
+              style: AppTextStyles.studioLabel.copyWith(
+                color: Colors.white24,
+                fontSize: 10,
+                fontWeight: FontWeight.bold,
+              ),
+            ),
+          ),
+          TextButton(
+            onPressed: onSettingsTap,
+            child: Text(
+              'OPEN MODULE',
+              style: AppTextStyles.studioLabel.copyWith(
+                color: AppColors.docIndigo,
+                fontSize: 10,
+                fontWeight: FontWeight.bold,
               ),
             ),
           ),
         ],
       ),
-      actions: [
-        TextButton(
-          onPressed: onCancelTap,
-          child: Text(
-            'Cancel',
-            style: AppTextStyles.studioLabel.copyWith(
-              color: isDark ? AppColors.darkTextSecondary : AppColors.darkTextSecondary,
-            ),
-          ),
-        ),
-        FilledButton(
-          onPressed: onSettingsTap,
-          style: FilledButton.styleFrom(
-            backgroundColor: AppColors.primaryIndigo,
-            shape: RoundedRectangleBorder(
-              borderRadius: BorderRadius.circular(8),
-            ),
-          ),
-          child: Text(
-            'Open Settings',
-            style: AppTextStyles.studioLabel.copyWith(
-              color: Colors.white,
-            ),
-          ),
-        ),
-      ],
     );
   }
 
   Widget _buildStep(String number, String text, BuildContext context) {
-    final isDark = Theme.of(context).brightness == Brightness.dark;
     return Padding(
-      padding: const EdgeInsets.symmetric(vertical: 4),
+      padding: const EdgeInsets.symmetric(vertical: 6),
       child: Row(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Container(
-            width: 20,
-            height: 20,
+            width: 18,
+            height: 18,
             decoration: BoxDecoration(
-              color: AppColors.primaryIndigo.withAlpha(30),
+              color: AppColors.docIndigo.withOpacity(0.15),
               shape: BoxShape.circle,
             ),
             child: Center(
               child: Text(
                 number,
-                style: AppTextStyles.bodyMedium.copyWith(fontSize: 12).copyWith(
-                  color: AppColors.primaryIndigo,
+                style: AppTextStyles.studioLabel.copyWith(
+                  color: AppColors.docIndigo,
                   fontWeight: FontWeight.bold,
-                  fontSize: 10,
+                  fontSize: 9,
                 ),
               ),
             ),
           ),
-          const SizedBox(width: 10),
+          const SizedBox(width: 12),
           Expanded(
             child: Text(
               text,
-              style: AppTextStyles.bodyMedium.copyWith(fontSize: 12).copyWith(
-                color: isDark ? AppColors.darkTextSecondary : AppColors.darkTextSecondary,
+              style: AppTextStyles.studioLabel.copyWith(
+                fontSize: 10,
+                color: Colors.white38,
+                letterSpacing: 0.5,
               ),
             ),
           ),

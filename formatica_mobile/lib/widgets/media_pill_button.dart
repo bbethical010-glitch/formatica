@@ -12,7 +12,7 @@ class MediaPillButton extends StatefulWidget {
     super.key,
     required this.label,
     required this.onTap,
-    this.accentColor = AppColors.primaryIndigo,
+    this.accentColor = AppColors.docIndigo,
     this.icon,
     this.isLoading = false,
   });

@@ -19,6 +19,20 @@ impl CommandExt2 for Command {
     }
 }
 
+fn find_bin(bin: &str) -> String {
+    #[cfg(windows)]
+    let cmd = "where";
+    #[cfg(not(windows))]
+    let cmd = "which";
+
+    if let Ok(o) = std::process::Command::new(cmd).arg(bin).hide_window().output() {
+        if o.status.success() {
+            return String::from_utf8_lossy(&o.stdout).trim().lines().next().unwrap_or(bin).to_string();
+        }
+    }
+    String::new()
+}
+
 #[derive(Serialize, Deserialize, Debug)]
 #[serde(rename_all = "camelCase")]
 pub struct TaskResult {
@@ -28,25 +42,24 @@ pub struct TaskResult {
 }
 
 fn ytdlp_path() -> String {
+    let mut bin = "yt-dlp";
+    #[cfg(windows)] { bin = "yt-dlp.exe"; }
+
     // Managed download path
     let managed = dirs::config_dir()
         .unwrap_or_default()
         .join("Formatica")
         .join("bin")
-        .join("yt-dlp.exe");
+        .join(bin);
     if managed.exists() {
         return managed.to_string_lossy().to_string();
     }
     // Check PATH
-    if let Ok(o) = std::process::Command::new("where").arg("yt-dlp").hide_window().output() {
-        if o.status.success() {
-            return "yt-dlp".to_string();
-        }
-    }
-    String::new()
+    find_bin("yt-dlp")
 }
 
 fn tesseract_path() -> String {
+    let bin = if cfg!(windows) { "tesseract.exe" } else { "tesseract" };
     let base_managed = dirs::config_dir()
         .unwrap_or_default()
         .join("Formatica")
@@ -54,13 +67,25 @@ fn tesseract_path() -> String {
         .join("tesseract");
     
     // Check direct path and Tesseract-OCR subfolder created by some installers
-    let paths = [
-        base_managed.join("tesseract.exe"),
-        base_managed.join("Tesseract-OCR").join("tesseract.exe"),
-        std::path::PathBuf::from("C:\\Program Files\\Tesseract-OCR\\tesseract.exe"),
-        std::path::PathBuf::from("C:\\Program Files (x86)\\Tesseract-OCR\\tesseract.exe"),
-        dirs::cache_dir().and_then(|p| p.parent().map(|p| p.to_path_buf())).unwrap_or_default().join("Local").join("Tesseract-OCR").join("tesseract.exe"),
+    let mut paths = vec![
+        base_managed.join(bin),
+        base_managed.join("Tesseract-OCR").join(bin),
     ];
+
+    #[cfg(windows)]
+    {
+        paths.push(std::path::PathBuf::from("C:\\Program Files\\Tesseract-OCR\\tesseract.exe"));
+        paths.push(std::path::PathBuf::from("C:\\Program Files (x86)\\Tesseract-OCR\\tesseract.exe"));
+        if let Some(p) = dirs::cache_dir().and_then(|p| p.parent().map(|p| p.to_path_buf())) {
+            paths.push(p.join("Local").join("Tesseract-OCR").join("tesseract.exe"));
+        }
+    }
+
+    #[cfg(target_os = "macos")]
+    {
+        paths.push(std::path::PathBuf::from("/opt/homebrew/bin/tesseract"));
+        paths.push(std::path::PathBuf::from("/usr/local/bin/tesseract"));
+    }
 
     for p in paths {
         if p.exists() {
@@ -68,12 +93,7 @@ fn tesseract_path() -> String {
         }
     }
     
-    if let Ok(out) = std::process::Command::new("where").arg("tesseract").hide_window().output() {
-        if out.status.success() {
-            return String::from_utf8_lossy(&out.stdout).trim().to_string();
-        }
-    }
-    String::new()
+    find_bin("tesseract")
 }
 
 fn get_domain_path() -> std::path::PathBuf {
@@ -99,11 +119,12 @@ fn get_domain_path() -> std::path::PathBuf {
 }
 
 fn ffmpeg_path() -> String {
+    let bin = if cfg!(windows) { "ffmpeg.exe" } else { "ffmpeg" };
     let managed = dirs::config_dir()
         .unwrap_or_default()
         .join("Formatica")
         .join("bin")
-        .join("ffmpeg.exe");
+        .join(bin);
     if managed.exists() {
         return managed.to_string_lossy().to_string();
     }
@@ -114,53 +135,63 @@ fn ffmpeg_path() -> String {
         .and_then(|p| p.parent().map(|p| p.to_path_buf()));
     
     if let Some(dir) = exe_dir {
-        let bundled = dir.join("ffmpeg").join("ffmpeg.exe");
+        let bundled = dir.join("ffmpeg").join(bin);
         if bundled.exists() {
             return bundled.to_string_lossy().to_string();
         }
     }
 
     // Check PATH
-    if let Ok(o) = std::process::Command::new("where").arg("ffmpeg").hide_window().output() {
-        if o.status.success() {
-            return "ffmpeg".to_string();
-        }
-    }
-
-    String::new()
+    find_bin("ffmpeg")
 }
 
 fn libreoffice_path() -> String {
-    let standard = "C:\\Program Files\\LibreOffice\\program\\soffice.exe";
-    let standard_x86 = "C:\\Program Files (x86)\\LibreOffice\\program\\soffice.exe";
-    if std::path::Path::new(standard).exists() { return standard.to_string(); }
-    if std::path::Path::new(standard_x86).exists() { return standard_x86.to_string(); }
+    #[cfg(windows)]
+    {
+        let standard = "C:\\Program Files\\LibreOffice\\program\\soffice.exe";
+        let standard_x86 = "C:\\Program Files (x86)\\LibreOffice\\program\\soffice.exe";
+        if std::path::Path::new(standard).exists() { return standard.to_string(); }
+        if std::path::Path::new(standard_x86).exists() { return standard_x86.to_string(); }
+    }
     
-    if let Ok(out) = std::process::Command::new("where").arg("soffice").hide_window().output() {
-        if out.status.success() {
-            return String::from_utf8_lossy(&out.stdout).trim().to_string();
+    #[cfg(target_os = "macos")]
+    {
+        let paths = [
+            "/Applications/LibreOffice.app/Contents/MacOS/soffice",
+            "/opt/homebrew/bin/soffice",
+            "/usr/local/bin/soffice",
+        ];
+        for p in paths {
+            if std::path::Path::new(p).exists() { return p.to_string(); }
         }
     }
-    String::new()
+    
+    find_bin("soffice")
 }
 
 fn python_path() -> String {
-    if let Ok(out) = std::process::Command::new("where").arg("python").hide_window().output() {
-        if out.status.success() {
-            return String::from_utf8_lossy(&out.stdout).trim().to_string();
-        }
-    }
-    "python".to_string()
+    let p = find_bin("python");
+    if !p.is_empty() { return p; }
+    let p3 = find_bin("python3");
+    if !p3.is_empty() { return p3; }
+    
+    // Check standard macOS path
+    let mac_p3 = "/usr/bin/python3";
+    if std::path::Path::new(mac_p3).exists() { return mac_p3.to_string(); }
+
+    if cfg!(windows) { "python.exe".to_string() } else { "python3".to_string() }
 }
 
 #[tauri::command]
 async fn install_ytdlp(window: tauri::Window) -> Result<TaskResult, String> {
-    // Check if yt-dlp already exists at our managed path
+    let mut bin = "yt-dlp";
+    #[cfg(windows)] { bin = "yt-dlp.exe"; }
+
     let ytdlp_dir = dirs::config_dir()
         .unwrap_or_default()
         .join("Formatica")
         .join("bin");
-    let ytdlp_path = ytdlp_dir.join("yt-dlp.exe");
+    let ytdlp_path = ytdlp_dir.join(bin);
 
     if ytdlp_path.exists() {
         return Ok(TaskResult {
@@ -170,50 +201,55 @@ async fn install_ytdlp(window: tauri::Window) -> Result<TaskResult, String> {
         });
     }
 
-    // Download yt-dlp.exe from official GitHub releases
+    let w = window.clone();
     let result = tokio::task::spawn_blocking(move || {
         let _ = std::fs::create_dir_all(&ytdlp_dir);
-        let _ = window.emit("setup_progress", serde_json::json!({
+        let _ = w.emit("setup_progress", serde_json::json!({
             "step": "ytdlp",
             "status": "downloading",
             "message": "Downloading media downloader...",
             "percent": 20
         }));
 
-        let url = "https://github.com/yt-dlp/yt-dlp/releases/latest/download/yt-dlp.exe";
-        let output = std::process::Command::new("powershell")
-            .args([
-                "-NoProfile",
-                "-WindowStyle", "Hidden",
-                "-Command",
-                &format!(
-                    "[Net.ServicePointManager]::SecurityProtocol = [Net.SecurityProtocolType]::Tls12; \
-                     Invoke-WebRequest -Uri '{}' -OutFile '{}' -UseBasicParsing",
-                    url,
-                    ytdlp_path.to_string_lossy()
-                ),
-            ])
-            .hide_window()
-            .output();
-        match output {
-            Ok(o) if o.status.success() => {
-                let _ = window.emit("setup_progress", serde_json::json!({
-                    "step": "ytdlp",
-                    "status": "done",
-                    "percent": 100
-                }));
-                Ok(ytdlp_path.to_string_lossy().to_string())
+        #[cfg(windows)]
+        {
+            let url = "https://github.com/yt-dlp/yt-dlp/releases/latest/download/yt-dlp.exe";
+            let output = std::process::Command::new("powershell")
+                .args([
+                    "-NoProfile", "-WindowStyle", "Hidden", "-Command",
+                    &format!("[Net.ServicePointManager]::SecurityProtocol = [Net.SecurityProtocolType]::Tls12; Invoke-WebRequest -Uri '{}' -OutFile '{}' -UseBasicParsing", url, ytdlp_path.to_string_lossy())
+                ])
+                .hide_window()
+                .output();
+            if let Ok(o) = output {
+                if o.status.success() { return Ok(ytdlp_path.to_string_lossy().to_string()); }
+                return Err(String::from_utf8_lossy(&o.stderr).to_string());
             }
-            Ok(o) => {
-                let err = String::from_utf8_lossy(&o.stderr).to_string();
-                Err(if err.is_empty() { "Download failed (PowerShell error)".to_string() } else { err })
+            Err("Download failed".to_string())
+        }
+
+        #[cfg(not(windows))]
+        {
+            let url = "https://github.com/yt-dlp/yt-dlp/releases/latest/download/yt-dlp_macos";
+            let output = std::process::Command::new("curl")
+                .args(["-L", url, "-o", &ytdlp_path.to_string_lossy()])
+                .output();
+            if let Ok(o) = output {
+                if o.status.success() {
+                    let _ = std::process::Command::new("chmod").args(["+x", &ytdlp_path.to_string_lossy()]).output();
+                    return Ok(ytdlp_path.to_string_lossy().to_string());
+                }
+                return Err(String::from_utf8_lossy(&o.stderr).to_string());
             }
-            Err(e) => Err(e.to_string()),
+            Err("Download failed".to_string())
         }
     }).await.map_err(|e| e.to_string())?;
 
     match result {
-        Ok(path) => Ok(TaskResult { success: true, output_path: path, error_message: String::new() }),
+        Ok(path) => {
+            let _ = window.emit("setup_progress", serde_json::json!({ "step": "ytdlp", "status": "done", "percent": 100 }));
+            Ok(TaskResult { success: true, output_path: path, error_message: String::new() })
+        }
         Err(e) => Ok(TaskResult { success: false, output_path: String::new(), error_message: e }),
     }
 }
@@ -222,28 +258,15 @@ async fn install_ytdlp(window: tauri::Window) -> Result<TaskResult, String> {
 async fn open_url(url: String) -> Result<(), String> {
     if url.is_empty() { return Err("Path is empty".to_string()); }
     
-    // Normalize path for Windows: Replace // or \\ with single \
-    // However, if it starts with http, don't touch it.
-    let mut normalized = url.clone();
-    if !url.starts_with("http") {
-        // Normalize slashes to backslashes for Windows
-        normalized = url.replace("/", "\\");
-        
-        // Remove redundant double backslashes UNLESS it's at the very start (UNC path)
-        if normalized.len() > 2 {
-            let (prefix, rest) = normalized.split_at(2);
-            normalized = format!("{}{}", prefix, rest.replace("\\\\", "\\"));
-        }
-        
-        if !std::path::Path::new(&normalized).exists() {
-            return Err(format!("The file or location no longer exists: {}", normalized));
-        }
+    #[cfg(windows)]
+    {
+        let normalized = if !url.starts_with("http") { url.replace("/", "\\") } else { url };
+        let _ = std::process::Command::new("cmd").args(["/c", "start", "", &normalized]).hide_window().spawn();
     }
-
-    let _ = std::process::Command::new("cmd")
-        .args(["/c", "start", "", &normalized])
-        .hide_window()
-        .spawn();
+    #[cfg(not(windows))]
+    {
+        let _ = std::process::Command::new("open").arg(&url).spawn();
+    }
     Ok(())
 }
 
@@ -251,45 +274,37 @@ async fn open_url(url: String) -> Result<(), String> {
 async fn open_in_folder(path: String) -> Result<(), String> {
     if path.is_empty() { return Err("Path is empty".to_string()); }
     
-    // Normalize slashes to backslashes for Windows
-    let mut normalized = path.replace("/", "\\");
-    
-    // Preserve leading \\ for UNC paths, collapse elsewhere
-    if normalized.len() > 2 {
-        let (prefix, rest) = normalized.split_at(2);
-        normalized = format!("{}{}", prefix, rest.replace("\\\\", "\\"));
+    #[cfg(windows)]
+    {
+        let normalized = path.replace("/", "\\");
+        let p = std::path::Path::new(&normalized);
+        if !p.exists() { return Err(format!("The file or folder no longer exists: {}", normalized)); }
+        if p.is_dir() {
+            let _ = std::process::Command::new("explorer").arg(&normalized).hide_window().spawn();
+        } else {
+            let _ = std::process::Command::new("explorer").arg(format!("/select,{}", normalized)).hide_window().spawn();
+        }
     }
-    
-    let p = std::path::Path::new(&normalized);
-    
-    if !p.exists() {
-        return Err(format!("The file or folder no longer exists: {}", normalized));
-    }
-    
-    if p.is_dir() {
-        // Just open the directory directly
-        let _ = std::process::Command::new("explorer")
-            .arg(&normalized)
-            .hide_window()
-            .spawn();
-    } else {
-        // Highlight the file in its containing folder
-        // For /select to work with spaces, we use a slightly more robust syntax
-        let _ = std::process::Command::new("explorer")
-            .arg(format!("/select,{}", normalized))
-            .hide_window()
-            .spawn();
+    #[cfg(not(windows))]
+    {
+        if !std::path::Path::new(&path).exists() { return Err(format!("The file or folder no longer exists: {}", path)); }
+        let _ = std::process::Command::new("open").args(["-R", &path]).spawn();
     }
     Ok(())
 }
 #[tauri::command]
 async fn get_setup_status() -> Result<serde_json::Value, String> {
-    let _common_libre_paths = [
-        "C:\\Program Files\\LibreOffice\\program\\soffice.exe",
-        "C:\\Program Files (x86)\\LibreOffice\\program\\soffice.exe",
-    ];
     let libreoffice_installed = !libreoffice_path().is_empty();
-    let python_installed = std::process::Command::new("python").arg("--version").hide_window().output().map(|o| o.status.success()).unwrap_or(false);
+    
+    // Check python with --version to be sure it works
+    let py = python_path();
+    let python_installed = std::process::Command::new(&py)
+        .arg("--version")
+        .hide_window()
+        .output()
+        .map(|o| o.status.success())
+        .unwrap_or(false);
+
     let ytdlp_installed = !ytdlp_path().is_empty();
     let ffmpeg_installed = !ffmpeg_path().is_empty();
     let tesseract_installed = !tesseract_path().is_empty();
@@ -307,78 +322,52 @@ async fn get_setup_status() -> Result<serde_json::Value, String> {
 
 #[tauri::command]
 async fn install_libreoffice(window: tauri::Window) -> Result<TaskResult, String> {
-    let result = tokio::task::spawn_blocking(move || {
+    #[cfg(target_os = "macos")]
+    {
+        return Ok(TaskResult { 
+            success: false, 
+            output_path: String::new(), 
+            error_message: "Please install LibreOffice via Homebrew: brew install --cask libreoffice".to_string() 
+        });
+    }
+
+    let w = window.clone();
+    let result: Result<String, String> = tokio::task::spawn_blocking(move || {
         // Download LibreOffice installer
         let temp_dir = std::env::temp_dir().join("formatica_setup");
         let _ = std::fs::create_dir_all(&temp_dir);
         let installer_path = temp_dir.join("LibreOfficeInstaller.msi");
         
         // Emit progress event
-        let _ = window.emit("setup_progress", serde_json::json!({
-            "step": "libreoffice",
-            "status": "downloading",
-            "message": "Downloading document engine (LibreOffice)...",
-            "percent": 10
+        let _ = w.emit("setup_progress", serde_json::json!({
+            "step": "libreoffice", "status": "downloading", "message": "Downloading document engine...", "percent": 10
         }));
 
-        // Download using PowerShell with progress
-        let download = std::process::Command::new("powershell")
-            .args([
-                "-NoProfile",
-                "-WindowStyle", "Hidden",
-                "-Command",
-                &format!(
-                    "[Net.ServicePointManager]::SecurityProtocol = [Net.SecurityProtocolType]::Tls12; \
-                     $url = 'https://download.documentfoundation.org/libreoffice/stable/24.8.4/win/x86_64/LibreOffice_24.8.4_Win_x86-64.msi'; \
-                     $out = '{}'; \
-                     $wc = New-Object System.Net.WebClient; \
-                     $wc.DownloadFile($url, $out); \
-                     Write-Output 'downloaded'",
-                    installer_path.to_string_lossy()
-                ),
-            ])
-            .hide_window()
-            .output();
+        #[cfg(windows)]
+        {
+            let download = std::process::Command::new("powershell").args([
+                "-NoProfile", "-WindowStyle", "Hidden", "-Command",
+                &format!("[Net.ServicePointManager]::SecurityProtocol = [Net.SecurityProtocolType]::Tls12; $url = 'https://download.documentfoundation.org/libreoffice/stable/24.8.4/win/x86_64/LibreOffice_24.8.4_Win_x86-64.msi'; $out = '{}'; $wc = New-Object System.Net.WebClient; $wc.DownloadFile($url, $out); Write-Output 'downloaded'", installer_path.to_string_lossy())
+            ]).hide_window().output();
 
-        match download {
-            Ok(o) if o.status.success() => {
-                let _ = window.emit("setup_progress", serde_json::json!({
-                    "step": "libreoffice",
-                    "status": "installing",
-                    "message": "Installing document engine...",
-                    "percent": 60
-                }));
-
-                // Silent install
-                let install = std::process::Command::new("msiexec")
-                    .args([
-                        "/i", &installer_path.to_string_lossy(),
-                        "/quiet", "/norestart",
-                        "ALLUSERS=2",
-                        "MSIINSTALLPERUSER=1"
-                    ])
-                    .hide_window()
-                    .output();
-
-                // Cleanup
-                let _ = std::fs::remove_file(&installer_path);
-
-                match install {
-                    Ok(i) if i.status.success() => {
-                        let _ = window.emit("setup_progress", serde_json::json!({
-                            "step": "libreoffice",
-                            "status": "done",
-                            "message": "Document engine installed!",
-                            "percent": 100
-                        }));
-                        Ok("installed".to_string())
+            match download {
+                Ok(o) if o.status.success() => {
+                    let _ = window.emit("setup_progress", serde_json::json!({ "step": "libreoffice", "status": "installing", "message": "Installing...", "percent": 60 }));
+                    let install = std::process::Command::new("msiexec").args(["/i", &installer_path.to_string_lossy(), "/quiet", "/norestart", "ALLUSERS=2", "MSIINSTALLPERUSER=1"]).hide_window().output();
+                    let _ = std::fs::remove_file(&installer_path);
+                    match install {
+                        Ok(i) if i.status.success() => Ok("installed".to_string()),
+                        Ok(i) => Err(String::from_utf8_lossy(&i.stderr).to_string()),
+                        Err(e) => Err(e.to_string()),
                     }
-                    Ok(i) => Err(String::from_utf8_lossy(&i.stderr).to_string()),
-                    Err(e) => Err(e.to_string()),
                 }
+                Ok(o) => Err(String::from_utf8_lossy(&o.stderr).to_string()),
+                Err(e) => Err(e.to_string()),
             }
-            Ok(o) => Err(String::from_utf8_lossy(&o.stderr).to_string()),
-            Err(e) => Err(e.to_string()),
+        }
+        #[cfg(not(windows))]
+        {
+            Err("Automatic installation not supported on this platform".to_string())
         }
     }).await.map_err(|e| e.to_string())?;
 
@@ -392,182 +381,109 @@ async fn install_libreoffice(window: tauri::Window) -> Result<TaskResult, String
 
 #[tauri::command]
 async fn install_ffmpeg(window: tauri::Window) -> Result<TaskResult, String> {
-    let bin_dir = dirs::config_dir()
-        .unwrap_or_default()
-        .join("Formatica")
-        .join("bin");
-    let ffmpeg_exe = bin_dir.join("ffmpeg.exe");
+    let bin = if cfg!(windows) { "ffmpeg.exe" } else { "ffmpeg" };
+    let bin_dir = dirs::config_dir().unwrap_or_default().join("Formatica").join("bin");
+    let ffmpeg_exe = bin_dir.join(bin);
 
     if ffmpeg_exe.exists() {
         return Ok(TaskResult { success: true, output_path: ffmpeg_exe.to_string_lossy().to_string(), error_message: String::new() });
     }
 
+    let w = window.clone();
     let result = tokio::task::spawn_blocking(move || {
         let _ = std::fs::create_dir_all(&bin_dir);
-        let _ = window.emit("setup_progress", serde_json::json!({
-            "step": "ffmpeg",
-            "status": "downloading",
-            "message": "Downloading media engine (FFmpeg)...",
-            "percent": 10
+        let _ = w.emit("setup_progress", serde_json::json!({
+            "step": "ffmpeg", "status": "downloading", "message": "Downloading media engine...", "percent": 10
         }));
 
-        let zip_path = bin_dir.join("ffmpeg.zip");
-        let download = std::process::Command::new("powershell")
-            .args([
-                "-NoProfile",
-                "-WindowStyle", "Hidden",
-                "-Command",
-                &format!(
-                    "[Net.ServicePointManager]::SecurityProtocol = [Net.SecurityProtocolType]::Tls12; \
-                     Invoke-WebRequest -Uri 'https://www.gyan.dev/ffmpeg/builds/ffmpeg-release-essentials.zip' -OutFile '{}' -UseBasicParsing",
-                    zip_path.to_string_lossy()
-                ),
-            ])
-            .hide_window()
-            .output();
-
-        if let Ok(o) = download {
-            if o.status.success() {
-                let _ = window.emit("setup_progress", serde_json::json!({
-                    "step": "ffmpeg",
-                    "status": "extracting",
-                    "message": "Extracting FFmpeg...",
-                    "percent": 60
-                }));
-
-                // Extract and move ffmpeg.exe to bin folder
-                let extract = std::process::Command::new("powershell")
-                    .args([
-                        "-WindowStyle", "Hidden",
-                        "-Command",
-                        &format!(
-                            "Expand-Archive -Path '{}' -DestinationPath '{}' -Force; \
-                             Get-ChildItem -Path '{}' -Filter 'ffmpeg.exe' -Recurse | Move-Item -Destination '{}' -Force",
-                            zip_path.to_string_lossy(),
-                            bin_dir.join("temp_ffmpeg").to_string_lossy(),
-                            bin_dir.join("temp_ffmpeg").to_string_lossy(),
-                            bin_dir.to_string_lossy()
-                        ),
-                    ])
-                    .hide_window()
-                    .output();
-
-                let _ = std::fs::remove_file(&zip_path);
-                let _ = std::fs::remove_dir_all(bin_dir.join("temp_ffmpeg")).ok();
-
-                if let Ok(e) = extract {
-                    if e.status.success() {
-                        let _ = window.emit("setup_progress", serde_json::json!({
-                            "step": "ffmpeg",
-                            "status": "done",
-                            "percent": 100
-                        }));
-                        Ok(ffmpeg_exe.to_string_lossy().to_string())
-                    } else {
-                        Err(String::from_utf8_lossy(&e.stderr).to_string())
-                    }
-                } else {
-                    Err("Extraction failed".to_string())
-                }
-            } else {
-                Err(String::from_utf8_lossy(&o.stderr).to_string())
-            }
-        } else {
-            Err("Download failed".to_string())
+        #[cfg(windows)]
+        {
+            let zip_path = bin_dir.join("ffmpeg.zip");
+            let _ = std::process::Command::new("powershell").args([
+                "-NoProfile", "-WindowStyle", "Hidden", "-Command",
+                &format!("Invoke-WebRequest -Uri 'https://www.gyan.dev/ffmpeg/builds/ffmpeg-release-essentials.zip' -OutFile '{}' -UseBasicParsing", zip_path.to_string_lossy())
+            ]).hide_window().output();
+            let _ = std::process::Command::new("powershell").args([
+                "-Command", &format!("Expand-Archive -Path '{}' -DestinationPath '{}' -Force; Get-ChildItem -Path '{}' -Filter 'ffmpeg.exe' -Recurse | Move-Item -Destination '{}' -Force", zip_path.to_string_lossy(), bin_dir.join("temp").to_string_lossy(), bin_dir.join("temp").to_string_lossy(), bin_dir.to_string_lossy())
+            ]).hide_window().output();
+            let _ = std::fs::remove_file(&zip_path);
+            let _ = std::fs::remove_dir_all(bin_dir.join("temp")).ok();
         }
+
+        #[cfg(not(windows))]
+        {
+            let url = "https://evermeet.cx/ffmpeg/get/zip";
+            let zip_path = bin_dir.join("ffmpeg.zip");
+            let _ = std::process::Command::new("curl").args(["-L", url, "-o", &zip_path.to_string_lossy()]).output();
+            let _ = std::process::Command::new("unzip").args(["-o", &zip_path.to_string_lossy(), "-d", &bin_dir.to_string_lossy()]).output();
+            let _ = std::process::Command::new("chmod").args(["+x", &ffmpeg_exe.to_string_lossy()]).output();
+            let _ = std::fs::remove_file(&zip_path);
+        }
+
+        if ffmpeg_exe.exists() { Ok(ffmpeg_exe.to_string_lossy().to_string()) } else { Err("FFmpeg not found after install".to_string()) }
     }).await.map_err(|e| e.to_string())?;
 
     match result {
-        Ok(path) => Ok(TaskResult { success: true, output_path: path, error_message: String::new() }),
+        Ok(path) => {
+            let _ = window.emit("setup_progress", serde_json::json!({ "step": "ffmpeg", "status": "done", "percent": 100 }));
+            Ok(TaskResult { success: true, output_path: path, error_message: String::new() })
+        }
         Err(e) => Ok(TaskResult { success: false, output_path: String::new(), error_message: e }),
     }
 }
 
 #[tauri::command]
 async fn install_tesseract(window: tauri::Window) -> Result<TaskResult, String> {
-    let t_dir = dirs::config_dir()
-        .unwrap_or_default()
-        .join("Formatica")
-        .join("bin")
-        .join("tesseract");
+    #[cfg(target_os = "macos")]
+    {
+        return Ok(TaskResult { 
+            success: false, 
+            output_path: String::new(), 
+            error_message: "Please install Tesseract via Homebrew: brew install tesseract".to_string() 
+        });
+    }
+
+    let t_dir = dirs::config_dir().unwrap_or_default().join("Formatica").join("bin").join("tesseract");
     let t_exe = t_dir.join("tesseract.exe");
 
     if t_exe.exists() {
         return Ok(TaskResult { success: true, output_path: t_exe.to_string_lossy().to_string(), error_message: String::new() });
     }
 
+    let w = window.clone();
     let result = tokio::task::spawn_blocking(move || {
         let _ = std::fs::create_dir_all(&t_dir);
-        let _ = window.emit("setup_progress", serde_json::json!({
-            "step": "tesseract",
-            "status": "downloading",
-            "message": "Downloading OCR engine (Tesseract)...",
-            "percent": 10
+        let _ = w.emit("setup_progress", serde_json::json!({
+            "step": "tesseract", "status": "downloading", "message": "Downloading OCR engine...", "percent": 10
         }));
 
-        let installer = t_dir.parent().unwrap().join("tesseract_installer.exe");
-        let download = std::process::Command::new("powershell")
-            .args([
-                "-NoProfile",
-                "-WindowStyle", "Hidden",
-                "-Command",
-                &format!(
-                    "[Net.ServicePointManager]::SecurityProtocol = [Net.SecurityProtocolType]::Tls12; \
-                     Invoke-WebRequest -Uri 'https://github.com/UB-Mannheim/tesseract/releases/download/v5.4.0.20240606/tesseract-ocr-w64-setup-5.4.0.20240606.exe' -OutFile '{}' -UseBasicParsing",
-                    installer.to_string_lossy()
-                ),
-            ])
-            .hide_window()
-            .output();
+        #[cfg(windows)]
+        {
+            let installer = t_dir.parent().unwrap().join("tesseract_installer.exe");
+            let _ = std::process::Command::new("powershell").args([
+                "-NoProfile", "-WindowStyle", "Hidden", "-Command",
+                &format!("[Net.ServicePointManager]::SecurityProtocol = [Net.SecurityProtocolType]::Tls12; Invoke-WebRequest -Uri 'https://github.com/UB-Mannheim/tesseract/releases/download/v5.4.0.20240606/tesseract-ocr-w64-setup-5.4.0.20240606.exe' -OutFile '{}' -UseBasicParsing", installer.to_string_lossy())
+            ]).hide_window().output();
 
-        if let Ok(o) = download {
-            if o.status.success() {
-                let _ = window.emit("setup_progress", serde_json::json!({
-                    "step": "tesseract",
-                    "status": "installing",
-                    "message": "Installing OCR engine (Tesseract)...",
-                    "percent": 60
-                }));
+            let install = std::process::Command::new(installer.clone()).args(["/S", &format!("/D={}", t_dir.to_string_lossy())]).output();
+            let _ = std::fs::remove_file(&installer).ok();
 
-                // Installer MUST NOT be hidden so user can approve UAC prompt
-                let install = std::process::Command::new(installer.clone())
-                    .args([
-                        "/S", 
-                        &format!("/D={}", t_dir.to_string_lossy())
-                    ])
-                    // .hide_window() REMOVED to allow UAC prompt
-                    .output();
-
-                let _ = std::fs::remove_file(&installer).ok();
-
-                if let Ok(i) = install {
-                    if i.status.success() {
-                        if t_exe.exists() {
-                            let _ = window.emit("setup_progress", serde_json::json!({
-                                "step": "tesseract",
-                                "status": "done",
-                                "percent": 100
-                            }));
-                            Ok(t_exe.to_string_lossy().to_string())
-                        } else {
-                            Err("Installation appeared successful, but tesseract.exe was not found in the expected location. Please try manually installing Tesseract OCR.".to_string())
-                        }
-                    } else {
-                        Err(String::from_utf8_lossy(&i.stderr).to_string())
-                    }
-                } else {
-                    Err("Installation failed".to_string())
-                }
-            } else {
-                Err(String::from_utf8_lossy(&o.stderr).to_string())
-            }
-        } else {
-            Err("Download failed".to_string())
+            if let Ok(i) = install {
+                if i.status.success() && t_exe.exists() { Ok(t_exe.to_string_lossy().to_string()) }
+                else { Err("Installation failed or binary not found".to_string()) }
+            } else { Err("Installation failed".to_string()) }
+        }
+        #[cfg(not(windows))]
+        {
+            Err("Automatic installation not supported on this platform".to_string())
         }
     }).await.map_err(|e| e.to_string())?;
 
     match result {
-        Ok(path) => Ok(TaskResult { success: true, output_path: path, error_message: String::new() }),
+        Ok(path) => {
+            let _ = window.emit("setup_progress", serde_json::json!({ "step": "tesseract", "status": "done", "percent": 100 }));
+            Ok(TaskResult { success: true, output_path: path, error_message: String::new() })
+        }
         Err(e) => Ok(TaskResult { success: false, output_path: String::new(), error_message: e }),
     }
 }
@@ -623,8 +539,8 @@ async fn convert_document(input_path: String, output_format: String, output_dir:
                 &output_format 
             };
             
-            let temp_output = format!("{}\\{}.{}", output_dir, stem, actual_ext);
-            let final_output = format!("{}\\{}.{}", output_dir, output_name, actual_ext);
+            let temp_output = format!("{}/{}", output_dir, stem); // Extension added by tool usually
+            let final_output = format!("{}/{}.{}", output_dir, output_name, actual_ext);
             
             // Log for debugging if needed (invisible to user)
             println!("Renaming from {} to {}", temp_output, final_output);
@@ -662,7 +578,7 @@ async fn convert_document(input_path: String, output_format: String, output_dir:
 
 #[tauri::command]
 async fn convert_audio(input_path: String, output_format: String, bitrate: String, output_dir: String, output_name: String) -> TaskResult {
-    let output_file = format!("{}\\{}.{}", output_dir, output_name, output_format);
+    let output_file = format!("{}/{}.{}", output_dir, output_name, output_format);
     
     let mut args = vec!["-i".to_string(), input_path.clone(), "-y".to_string()];
     
@@ -706,7 +622,7 @@ async fn convert_video(
     preset: Option<String>,
     output_name: String,
 ) -> TaskResult {
-    let output_file = format!("{}\\{}.{}", output_dir, output_name, output_format);
+    let output_file = format!("{}/{}.{}", output_dir, output_name, output_format);
     
     // Always use H.264 for maximum compatibility
     // H.265 causes playback issues on Windows without codec packs
@@ -725,7 +641,7 @@ async fn convert_video(
     
     if output_format == "gif" {
         return tokio::task::spawn_blocking(move || {
-            let palette_file = format!("{}\\palette.png", output_dir_clone);
+            let palette_file = format!("{}/palette.png", output_dir_clone);
             Command::new(ffmpeg_path())
                 .args(["-i", &input_path_clone, "-vf", "fps=15,scale=480:-1:flags=lanczos,palettegen", "-y", &palette_file])
                 .hide_window()
@@ -835,7 +751,7 @@ print(out)
     output_format, output_format);
 
     let result = tokio::task::spawn_blocking(move || {
-        Command::new("python")
+        Command::new(python_path())
             .args(["-c", &script])
             .hide_window()
             .output()
@@ -862,9 +778,9 @@ async fn download_media(
     cookies_path: Option<String>
 ) -> TaskResult {
     let output_template = if output_name.is_empty() {
-        format!("{}\\%(title)s.%(ext)s", output_dir)
+        format!("{}/%(title)s.%(ext)s", output_dir)
     } else {
-        format!("{}\\{}.%(ext)s", output_dir, output_name)
+        format!("{}/{}.%(ext)s", output_dir, output_name)
     };
 
     let format_arg = if format == "mp3" {
@@ -955,7 +871,7 @@ async fn images_to_pdf(image_paths: Vec<String>, output_path: String, layout: St
     );
     
     let result = tokio::task::spawn_blocking(move || {
-        Command::new("python")
+        Command::new(python_path())
             .args(["-c", &script])
             .hide_window()
             .output()
@@ -1007,7 +923,7 @@ async fn compress_video(
 ) -> Result<TaskResult, String> {
     use std::path::Path;
 
-    let output_path = format!("{}\\{}.{}", output_dir, output_name, output_format);
+    let output_path = format!("{}/{}.{}", output_dir, output_name, output_format);
 
     let crf_num: u32 = crf.parse().unwrap_or(23);
 
@@ -1138,7 +1054,7 @@ async fn merge_pdfs(input_paths: Vec<String>, output_path: String) -> Result<Tas
     let result = tokio::task::spawn_blocking(move || {
         let domain_dir = get_domain_path();
 
-        std::process::Command::new("python")
+        std::process::Command::new(python_path())
             .args([
                 "-c",
                 &format!(
@@ -1178,7 +1094,7 @@ async fn split_pdf(
 ) -> Result<TaskResult, String> {
     let result = tokio::task::spawn_blocking(move || {
         let domain_dir = get_domain_path();
-        std::process::Command::new("python")
+        std::process::Command::new(python_path())
             .args([
                 "-c",
                 &format!(
@@ -1214,7 +1130,7 @@ async fn split_pdf(
 async fn greyscale_pdf(input_path: String, output_path: String) -> Result<TaskResult, String> {
     let result = tokio::task::spawn_blocking(move || {
         let domain_dir = get_domain_path();
-        std::process::Command::new("python")
+        std::process::Command::new(python_path())
             .args([
                 "-c",
                 &format!(
@@ -1279,7 +1195,7 @@ async fn perform_ocr(
     let domain_path = get_domain_path();
 
     let result = tokio::task::spawn_blocking(move || {
-        std::process::Command::new("python")
+        std::process::Command::new(python_path())
             .args([
                 "-c",
                 &format!(
@@ -1329,7 +1245,7 @@ async fn apply_watermark(
     let logo_val = logo_path.unwrap_or_default();
 
     let result = tokio::task::spawn_blocking(move || {
-        std::process::Command::new("python")
+        std::process::Command::new(python_path())
             .args([
                 "-c",
                 &format!(
@@ -1366,7 +1282,7 @@ async fn apply_watermark(
 async fn check_python_deps() -> Result<TaskResult, String> {
     let result = tokio::task::spawn_blocking(move || {
         // Fast Check: Try to import all libraries first
-        let check_output = std::process::Command::new("python")
+        let check_output = std::process::Command::new(python_path())
             .args(["-c", "import pytesseract; import fitz; import PIL; import pypdf"])
             .hide_window()
             .output();
@@ -1382,7 +1298,7 @@ async fn check_python_deps() -> Result<TaskResult, String> {
         }
 
         // Slow Path: Run pip install if any imports failed
-        let output = std::process::Command::new("python")
+        let output = std::process::Command::new(python_path())
             .args([
                 "-m", "pip", "install", 
                 "pytesseract", "pymupdf", "Pillow", "pypdf", "--quiet"
@@ -1507,7 +1423,7 @@ async fn batch_convert_folder(
     }
 
     // 4. Process files in parallel
-    let mut set = tokio::task::JoinSet::new();
+    let mut set: tokio::task::JoinSet<Result<TaskResult, String>> = tokio::task::JoinSet::new();
     
     for file in target_files {
         let input_path = file["path"].as_str().unwrap_or_default().to_string();
@@ -1521,7 +1437,14 @@ async fn batch_convert_folder(
             
             match f_type.as_str() {
                 "document" => Ok(convert_document(input_path, t_fmt, out_dir, stem).await),
-                "video" => Ok(convert_video(input_path, t_fmt, out_dir, stem).await),
+                "video" => Ok(convert_video(
+                    input_path,
+                    t_fmt,
+                    out_dir,
+                    "medium".to_string(),
+                    Some("medium".to_string()),
+                    stem,
+                ).await),
                 "image" => Ok(convert_image_format(input_path, t_fmt, out_dir, stem).await),
                 "pdf" => {
                     // For PDF, we currently only have perform_ocr as a common batch-able tool

@@ -1,38 +1,65 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'dart:ui';
-import 'package:google_fonts/google_fonts.dart';
 import '../core/theme.dart';
 import '../models/task.dart';
 import '../models/task_status.dart';
 import '../providers/task_provider.dart';
 import '../services/file_service.dart';
 import '../widgets/liquid_glass.dart';
+import '../widgets/top_bar.dart';
 
 class HistoryScreen extends StatelessWidget {
   const HistoryScreen({super.key});
 
   @override
   Widget build(BuildContext context) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    
     return MeshBackground(
       child: Scaffold(
         backgroundColor: Colors.transparent,
+        appBar: StudioTopBar(
+          title: 'Chronology',
+          trailing: Consumer<TaskProvider>(
+            builder: (context, provider, _) {
+              if (provider.completedTasks.isEmpty) return const SizedBox.shrink();
+              return GestureDetector(
+                onTap: () => _confirmClear(context, provider),
+                child: Container(
+                  padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+                  decoration: BoxDecoration(
+                    borderRadius: BorderRadius.circular(12),
+                    color: AppColors.audioRose.withOpacity(0.1),
+                  ),
+                  child: Text(
+                    'PURGE',
+                    style: AppTextStyles.studioLabel.copyWith(
+                      fontSize: 9,
+                      fontWeight: FontWeight.bold,
+                      color: AppColors.audioRose,
+                    ),
+                  ),
+                ),
+              );
+            },
+          ),
+        ),
         body: SafeArea(
           child: Consumer<TaskProvider>(
             builder: (ctx, provider, _) {
               final active = provider.activeTasks;
               final completed = provider.completedTasks;
 
+              if (active.isEmpty && completed.isEmpty) {
+                return _buildEmptyState(context, isDark);
+              }
+
               return CustomScrollView(
                 physics: const BouncingScrollPhysics(),
                 slivers: [
-                  _buildHeader(context, provider, completed.isNotEmpty),
-                  
-                  if (active.isEmpty && completed.isEmpty)
-                    _buildEmptyState(context),
-
                   if (active.isNotEmpty) ...[
-                    _buildSectionHeader('SEQUENCES IN FLIGHT', AppColors.primaryIndigo),
+                    _buildSectionHeader('SEQUENCES IN FLIGHT', AppColors.docIndigo),
                     SliverPadding(
                       padding: const EdgeInsets.symmetric(horizontal: 20),
                       sliver: SliverList(
@@ -48,7 +75,7 @@ class HistoryScreen extends StatelessWidget {
                   ],
 
                   if (completed.isNotEmpty) ...[
-                    _buildSectionHeader('ARCHIVED LOGS', Colors.white.withOpacity(0.4)),
+                    _buildSectionHeader('ARCHIVED LOGS', isDark ? Colors.white24 : Colors.black26),
                     SliverPadding(
                       padding: const EdgeInsets.symmetric(horizontal: 20),
                       sliver: SliverList(
@@ -73,109 +100,41 @@ class HistoryScreen extends StatelessWidget {
     );
   }
 
-  Widget _buildHeader(BuildContext context, TaskProvider provider, bool hasCompleted) {
-    return SliverToBoxAdapter(
-      child: Padding(
-        padding: const EdgeInsets.fromLTRB(24, 40, 24, 32),
-        child: Row(
-          crossAxisAlignment: CrossAxisAlignment.end,
-          children: [
-            Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  'Chronology',
-                  style: GoogleFonts.outfit(
-                    fontWeight: FontWeight.w300,
-                    fontSize: 32,
-                    color: Colors.white,
-                    letterSpacing: -0.5,
-                  ),
-                ),
-                Text(
-                  'SYSTEM ACTIVITY LOGS',
-                  style: GoogleFonts.outfit(
-                    fontSize: 10,
-                    letterSpacing: 2,
-                    fontWeight: FontWeight.w600,
-                    color: Colors.white.withOpacity(0.3),
-                  ),
-                ),
-              ],
-            ),
-            const Spacer(),
-            if (hasCompleted)
-              _headerActionButton(
-                label: 'PURGE',
-                onTap: () => _confirmClear(context, provider),
-                color: AppColors.audioRose,
-              ),
-          ],
-        ),
-      ),
-    );
-  }
-
-  Widget _headerActionButton({required String label, required VoidCallback onTap, required Color color}) {
-    return GestureDetector(
-      onTap: onTap,
-      child: Container(
-        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-        decoration: BoxDecoration(
-          borderRadius: BorderRadius.circular(12),
-          border: Border.all(color: color.withOpacity(0.2)),
-          color: color.withOpacity(0.05),
-        ),
-        child: Text(
-          label,
-          style: GoogleFonts.outfit(
-            fontSize: 10,
-            fontWeight: FontWeight.w700,
-            letterSpacing: 1,
-            color: color,
-          ),
-        ),
-      ),
-    );
-  }
-
   Widget _buildSectionHeader(String title, Color color) {
     return SliverToBoxAdapter(
       child: Padding(
-        padding: const EdgeInsets.fromLTRB(24, 24, 24, 16),
+        padding: const EdgeInsets.fromLTRB(28, 24, 24, 16),
         child: Text(
           title,
-          style: GoogleFonts.outfit(
-            fontSize: 11,
-            letterSpacing: 1.5,
-            fontWeight: FontWeight.w600,
-            color: color,
+          style: AppTextStyles.studioLabel.copyWith(
+            color: color, 
+            fontSize: 10,
+            fontWeight: FontWeight.bold,
           ),
         ),
       ),
     );
   }
 
-  Widget _buildEmptyState(BuildContext context) {
-    return SliverFillRemaining(
-      hasScrollBody: false,
-      child: Center(
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            Icon(Icons.history_outlined, size: 48, color: Colors.white.withOpacity(0.1)),
-            const SizedBox(height: 24),
-            Text(
-              'EMPTY VOID',
-              style: GoogleFonts.outfit(
-                color: Colors.white.withOpacity(0.2),
-                letterSpacing: 3,
-                fontSize: 12,
-                fontWeight: FontWeight.w500,
-              ),
+  Widget _buildEmptyState(BuildContext context, bool isDark) {
+    return Center(
+      child: Column(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+          Icon(
+            Icons.history_outlined, 
+            size: 64, 
+            color: isDark ? Colors.white.withOpacity(0.05) : Colors.black.withOpacity(0.05),
+          ),
+          const SizedBox(height: 24),
+          Text(
+            'CHRONOLOGY IS EMPTY',
+            style: AppTextStyles.studioLabel.copyWith(
+              color: isDark ? Colors.white12 : Colors.black12,
+              letterSpacing: 3,
             ),
-          ],
-        ),
+          ),
+        ],
       ),
     );
   }
@@ -187,14 +146,35 @@ class HistoryScreen extends StatelessWidget {
         filter: ImageFilter.blur(sigmaX: 10, sigmaY: 10),
         child: AlertDialog(
           backgroundColor: Colors.black.withOpacity(0.8),
-          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(24), side: BorderSide(color: Colors.white.withOpacity(0.1))),
-          title: Text('Data Purge', style: GoogleFonts.outfit(color: Colors.white)),
-          content: Text('Permanently remove all archived operation logs?', style: GoogleFonts.outfit(color: Colors.white70)),
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(24), 
+            side: BorderSide(color: Colors.white.withOpacity(0.1)),
+          ),
+          title: Text(
+            'Data Purge', 
+            style: AppTextStyles.headlineSmall.copyWith(color: Colors.white, fontSize: 18),
+          ),
+          content: Text(
+            'Permanently remove all archived operation logs?', 
+            style: AppTextStyles.bodyMedium.copyWith(color: Colors.white70),
+          ),
           actions: [
-            TextButton(onPressed: () => Navigator.pop(ctx), child: Text('RETAIN', style: GoogleFonts.outfit(color: Colors.white30))),
             TextButton(
-              onPressed: () { provider.clearCompleted(); Navigator.pop(ctx); },
-              child: Text('PURGE', style: GoogleFonts.outfit(color: AppColors.audioRose)),
+              onPressed: () => Navigator.pop(ctx),
+              child: Text(
+                'RETAIN', 
+                style: AppTextStyles.studioLabel.copyWith(color: Colors.white30),
+              ),
+            ),
+            TextButton(
+              onPressed: () { 
+                provider.clearCompleted(); 
+                Navigator.pop(ctx); 
+              },
+              child: Text(
+                'PURGE', 
+                style: AppTextStyles.studioLabel.copyWith(color: AppColors.audioRose),
+              ),
             ),
           ],
         ),
@@ -209,12 +189,14 @@ class _ActiveTaskCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
     final isRunning = task.status == TaskStatus.running;
-    final statusColor = isRunning ? AppColors.primaryIndigo : AppColors.compressOrange;
+    final statusColor = isRunning ? AppColors.docIndigo : AppColors.compressOrange;
 
     return LiquidGlassContainer(
       padding: const EdgeInsets.all(20),
-      blur: 20,
+      blur: 24,
+      color: isDark ? Colors.white.withOpacity(0.03) : Colors.black.withOpacity(0.02),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
@@ -231,28 +213,26 @@ class _ActiveTaskCard extends StatelessWidget {
                   ),
                 ),
               ] else ...[
-                Icon(Icons.schedule, size: 14, color: statusColor),
+                Icon(Icons.schedule_rounded, size: 14, color: statusColor),
               ],
-              const SizedBox(width: 12),
+              const SizedBox(width: 14),
               Expanded(
                 child: Text(
                   task.label.toUpperCase(),
-                  style: GoogleFonts.outfit(
-                    color: Colors.white,
+                  style: AppTextStyles.bodyMedium.copyWith(
                     fontSize: 13,
-                    fontWeight: FontWeight.w600,
-                    letterSpacing: 0.5,
+                    fontWeight: FontWeight.bold,
+                    color: isDark ? Colors.white : Colors.black87,
                   ),
                   overflow: TextOverflow.ellipsis,
                 ),
               ),
               Text(
                 isRunning ? '${(task.progress * 100).toInt()}%' : 'QUEUED',
-                style: GoogleFonts.outfit(
+                style: AppTextStyles.studioLabel.copyWith(
                   color: statusColor,
-                  fontSize: 11,
-                  fontWeight: FontWeight.w700,
-                  letterSpacing: 1,
+                  fontSize: 10,
+                  fontWeight: FontWeight.w900,
                 ),
               ),
             ],
@@ -260,11 +240,11 @@ class _ActiveTaskCard extends StatelessWidget {
           if (isRunning) ...[
             const SizedBox(height: 16),
             Container(
-              height: 2,
+              height: 4,
               width: double.infinity,
               decoration: BoxDecoration(
-                color: Colors.white.withOpacity(0.03),
-                borderRadius: BorderRadius.circular(1),
+                color: isDark ? Colors.white.withOpacity(0.05) : Colors.black.withOpacity(0.05),
+                borderRadius: BorderRadius.circular(2),
               ),
               child: FractionallySizedBox(
                 alignment: Alignment.centerLeft,
@@ -272,9 +252,9 @@ class _ActiveTaskCard extends StatelessWidget {
                 child: Container(
                   decoration: BoxDecoration(
                     color: statusColor,
-                    borderRadius: BorderRadius.circular(1),
+                    borderRadius: BorderRadius.circular(2),
                     boxShadow: [
-                      BoxShadow(color: statusColor.withOpacity(0.3), blurRadius: 4),
+                      BoxShadow(color: statusColor.withOpacity(0.3), blurRadius: 6),
                     ],
                   ),
                 ),
@@ -284,43 +264,33 @@ class _ActiveTaskCard extends StatelessWidget {
           const SizedBox(height: 16),
           Align(
             alignment: Alignment.centerRight,
-            child: _taskAction(
-              label: 'TERMINATE',
-              icon: Icons.stop_rounded,
-              color: AppColors.audioRose,
+            child: GestureDetector(
               onTap: () => _confirmCancel(context, task.id),
+              child: Container(
+                padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
+                decoration: BoxDecoration(
+                  borderRadius: BorderRadius.circular(8),
+                  color: AppColors.audioRose.withOpacity(0.1),
+                ),
+                child: Row(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    const Icon(Icons.stop_rounded, size: 12, color: AppColors.audioRose),
+                    const SizedBox(width: 4),
+                    Text(
+                      'TERMINATE',
+                      style: AppTextStyles.studioLabel.copyWith(
+                        fontSize: 9,
+                        fontWeight: FontWeight.bold,
+                        color: AppColors.audioRose,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
             ),
           ),
         ],
-      ),
-    );
-  }
-
-  Widget _taskAction({required String label, required IconData icon, required Color color, required VoidCallback onTap}) {
-    return GestureDetector(
-      onTap: onTap,
-      child: Container(
-        padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
-        decoration: BoxDecoration(
-          borderRadius: BorderRadius.circular(8),
-          color: color.withOpacity(0.1),
-        ),
-        child: Row(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            Icon(icon, size: 12, color: color),
-            const SizedBox(width: 6),
-            Text(
-              label,
-              style: GoogleFonts.outfit(
-                fontSize: 9,
-                fontWeight: FontWeight.w700,
-                letterSpacing: 0.5,
-                color: color,
-              ),
-            ),
-          ],
-        ),
       ),
     );
   }
@@ -332,18 +302,35 @@ class _ActiveTaskCard extends StatelessWidget {
         filter: ImageFilter.blur(sigmaX: 10, sigmaY: 10),
         child: AlertDialog(
           backgroundColor: Colors.black.withOpacity(0.8),
-          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(24), side: BorderSide(color: Colors.white.withOpacity(0.1))),
-          title: Text('Sequence Break', style: GoogleFonts.outfit(color: Colors.white)),
-          content: Text('Abort this active processing sequence?', style: GoogleFonts.outfit(color: Colors.white70)),
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(24), 
+            side: BorderSide(color: Colors.white.withOpacity(0.1)),
+          ),
+          title: Text(
+            'Sequence Break', 
+            style: AppTextStyles.headlineSmall.copyWith(color: Colors.white, fontSize: 18),
+          ),
+          content: Text(
+            'Abort this active processing sequence?', 
+            style: AppTextStyles.bodyMedium.copyWith(color: Colors.white70),
+          ),
           actions: [
-            TextButton(onPressed: () => Navigator.pop(ctx), child: Text('REMAIN', style: GoogleFonts.outfit(color: Colors.white30))),
+            TextButton(
+              onPressed: () => Navigator.pop(ctx),
+              child: Text(
+                'REMAIN', 
+                style: AppTextStyles.studioLabel.copyWith(color: Colors.white30),
+              ),
+            ),
             TextButton(
               onPressed: () {
-                final provider = Provider.of<TaskProvider>(context, listen: false);
-                provider.cancelTask(taskId);
+                context.read<TaskProvider>().cancelTask(taskId);
                 Navigator.pop(ctx);
               },
-              child: Text('ABORT', style: GoogleFonts.outfit(color: AppColors.audioRose)),
+              child: Text(
+                'ABORT', 
+                style: AppTextStyles.studioLabel.copyWith(color: AppColors.audioRose),
+              ),
             ),
           ],
         ),
@@ -358,6 +345,7 @@ class _CompletedTaskCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
     Color statusColor;
     IconData statusIcon;
     String statusLabel;
@@ -365,49 +353,48 @@ class _CompletedTaskCard extends StatelessWidget {
     switch (task.status) {
       case TaskStatus.success:
         statusColor = AppColors.imageCyan;
-        statusIcon = Icons.check_circle_outline_rounded;
+        statusIcon = Icons.check_circle_rounded;
         statusLabel = 'RESOLVED';
         break;
       case TaskStatus.failed:
         statusColor = AppColors.audioRose;
-        statusIcon = Icons.error_outline_rounded;
+        statusIcon = Icons.error_rounded;
         statusLabel = 'FAILED';
         break;
       default:
-        statusColor = Colors.white24;
-        statusIcon = Icons.cancel_outlined;
+        statusColor = isDark ? Colors.white24 : Colors.black26;
+        statusIcon = Icons.cancel_rounded;
         statusLabel = 'VOID';
     }
 
     return LiquidGlassContainer(
       padding: const EdgeInsets.all(18),
-      blur: 10,
-      color: Colors.white.withOpacity(0.02),
+      blur: 16,
+      color: isDark ? Colors.white.withOpacity(0.01) : Colors.black.withOpacity(0.01),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Row(
             children: [
               Icon(statusIcon, size: 14, color: statusColor),
-              const SizedBox(width: 10),
+              const SizedBox(width: 12),
               Expanded(
                 child: Text(
                   task.label.toUpperCase(),
-                  style: GoogleFonts.outfit(
-                    color: Colors.white.withOpacity(0.8),
-                    fontSize: 12,
-                    fontWeight: FontWeight.w500,
+                  style: AppTextStyles.bodyMedium.copyWith(
+                    color: isDark ? Colors.white.withOpacity(0.85) : Colors.black87,
+                    fontSize: 13,
+                    fontWeight: FontWeight.w600,
                   ),
                   overflow: TextOverflow.ellipsis,
                 ),
               ),
               Text(
                 statusLabel,
-                style: GoogleFonts.outfit(
+                style: AppTextStyles.studioLabel.copyWith(
                   color: statusColor,
                   fontSize: 9,
-                  fontWeight: FontWeight.w700,
-                  letterSpacing: 1,
+                  fontWeight: FontWeight.w900,
                 ),
               ),
             ],
@@ -416,7 +403,10 @@ class _CompletedTaskCard extends StatelessWidget {
             const SizedBox(height: 12),
             Text(
               task.errorMessage!,
-              style: GoogleFonts.outfit(color: AppColors.audioRose.withOpacity(0.7), fontSize: 11),
+              style: AppTextStyles.bodyMedium.copyWith(
+                color: AppColors.audioRose.withOpacity(0.7), 
+                fontSize: 11,
+              ),
               maxLines: 2,
               overflow: TextOverflow.ellipsis,
             ),
@@ -431,11 +421,11 @@ class _CompletedTaskCard extends StatelessWidget {
                   color: AppColors.imageCyan,
                   onTap: () => FileService.openFile(task.outputPath!),
                 ),
-                const SizedBox(width: 12),
+                const SizedBox(width: 10),
                 _miniAction(
-                  label: 'PATH',
+                  label: 'VAULT',
                   icon: Icons.folder_open_rounded,
-                  color: AppColors.primaryIndigo,
+                  color: AppColors.docIndigo,
                   onTap: () => FileService.showInFolder(task.outputPath!),
                 ),
               ],
@@ -453,18 +443,19 @@ class _CompletedTaskCard extends StatelessWidget {
         padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
         decoration: BoxDecoration(
           borderRadius: BorderRadius.circular(8),
-          border: Border.all(color: color.withOpacity(0.2)),
+          color: color.withOpacity(0.05),
+          border: Border.all(color: color.withOpacity(0.1)),
         ),
         child: Row(
           children: [
-            Icon(icon, size: 12, color: color.withOpacity(0.8)),
+            Icon(icon, size: 11, color: color),
             const SizedBox(width: 6),
             Text(
               label,
-              style: GoogleFonts.outfit(
+              style: AppTextStyles.studioLabel.copyWith(
                 fontSize: 9,
-                fontWeight: FontWeight.w700,
-                color: color.withOpacity(0.8),
+                fontWeight: FontWeight.bold,
+                color: color,
               ),
             ),
           ],
@@ -473,11 +464,3 @@ class _CompletedTaskCard extends StatelessWidget {
     );
   }
 }
-
-
-
-
-
-
-
-

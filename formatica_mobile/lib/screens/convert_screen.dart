@@ -1,17 +1,16 @@
-import 'package:file_picker/file_picker.dart';
 import 'package:flutter/material.dart';
-import 'package:provider/provider.dart';
-import 'package:google_fonts/google_fonts.dart';
 import 'dart:ui';
-
+import 'package:file_picker/file_picker.dart';
+import 'package:provider/provider.dart';
 import '../core/constants.dart';
 import '../core/theme.dart';
 import '../providers/task_provider.dart';
 import '../services/convert_service.dart';
 import '../services/file_service.dart';
-import '../widgets/success_card.dart';
 import '../widgets/liquid_glass.dart';
 import '../widgets/media_pill_button.dart';
+import '../widgets/top_bar.dart';
+import '../widgets/labels.dart';
 
 class ConvertScreen extends StatefulWidget {
   const ConvertScreen({super.key});
@@ -29,115 +28,73 @@ class _ConvertScreenState extends State<ConvertScreen> {
   double _progress = 0.0;
   String? _errorMessage;
   String? _outputPath;
-  String? _currentTaskId; // Tracks the running task for cancellation
+  String? _currentTaskId; 
   String _progressLabel = 'Preparing document...';
 
   @override
   Widget build(BuildContext context) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    
     return MeshBackground(
       child: Scaffold(
         backgroundColor: Colors.transparent,
+        appBar: StudioTopBar(
+          title: 'Lexicon',
+          onBack: () => Navigator.pop(context),
+        ),
         body: SafeArea(
-          child: CustomScrollView(
+          child: SingleChildScrollView(
             physics: const BouncingScrollPhysics(),
-            slivers: [
-              _buildHeader(context),
-              SliverPadding(
-                padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 20),
-                sliver: SliverList(
-                  delegate: SliverChildListDelegate([
-                    _privacyBadge(context),
-                    const SizedBox(height: 32),
-                    
-                    Text(
-                      'LEXICON ENGINE',
-                      style: GoogleFonts.outfit(
-                        fontSize: 12,
-                        letterSpacing: 2.5,
-                        fontWeight: FontWeight.w600,
-                        color: AppColors.primaryIndigo.withOpacity(0.8),
-                      ),
-                    ),
-                    const SizedBox(height: 16),
-                    
-                    _fileDropZone(context),
-                    
-                    if (_filePath != null) ...[
-                      const SizedBox(height: 40),
-                      Text(
-                        'EXPORT DIMENSIONS',
-                        style: GoogleFonts.outfit(
-                          fontSize: 12,
-                          letterSpacing: 2,
-                          fontWeight: FontWeight.w600,
-                          color: Colors.white.withOpacity(0.4),
-                        ),
-                      ),
-                      const SizedBox(height: 16),
-                      _formatGrid(),
-                    ],
-                    
-                    if (_isConverting) _progressSection(),
-                    if (_errorMessage != null) _buildErrorCard(),
-                    if (_outputPath != null && !_isConverting) ...[
-                      const SizedBox(height: 24),
-                      _buildSuccessCard(),
-                    ],
-                    if (_filePath != null && !_isConverting) _buildOutputLocation(context),
-                    
-                    const SizedBox(height: 48),
-                    _convertButton(),
-                    const SizedBox(height: 100), // Navigation Buffer
-                  ]),
+            padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 8),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                const OnDeviceBadge(),
+                const SizedBox(height: 32),
+                
+                Text(
+                  'LEXICON ENGINE',
+                  style: AppTextStyles.studioLabel.copyWith(
+                    color: AppColors.docIndigo.withOpacity(0.8),
+                  ),
                 ),
-              ),
-            ],
-          ),
-        ),
-      ),
-    );
-  }
-
-  Widget _buildHeader(BuildContext context) {
-    return SliverAppBar(
-      backgroundColor: Colors.transparent,
-      elevation: 0,
-      leading: IconButton(
-        icon: const Icon(Icons.arrow_back_ios_new, color: Colors.white, size: 20),
-        onPressed: () => Navigator.pop(context),
-      ),
-      expandedHeight: 120,
-      pinned: true,
-      flexibleSpace: FlexibleSpaceBar(
-        centerTitle: false,
-        titlePadding: const EdgeInsets.only(left: 64, bottom: 16),
-        title: Text(
-          'Transcript',
-          style: GoogleFonts.outfit(
-            fontWeight: FontWeight.w300,
-            fontSize: 28,
-            color: Colors.white,
-            letterSpacing: -0.5,
-          ),
-        ),
-        background: Stack(
-          children: [
-            Positioned(
-              left: 64,
-              bottom: 45,
-              child: Container(
-                width: 40,
-                height: 1,
-                color: AppColors.primaryIndigo.withOpacity(0.5),
-              ),
+                const SizedBox(height: 16),
+                
+                _fileDropZone(context, isDark),
+                
+                if (_filePath != null && !_isConverting) ...[
+                  const SizedBox(height: 40),
+                  Text(
+                    'OUTPUT FORMAT',
+                    style: AppTextStyles.studioLabel.copyWith(
+                      fontSize: 10,
+                      color: isDark ? Colors.white30 : Colors.black38,
+                    ),
+                  ),
+                  const SizedBox(height: 16),
+                  _formatGrid(isDark),
+                ],
+                
+                if (_isConverting) _progressSection(),
+                if (_errorMessage != null) _buildErrorCard(),
+                if (_outputPath != null && !_isConverting) ...[
+                  const SizedBox(height: 24),
+                  _buildSuccessModule(),
+                ],
+                if (_filePath != null && !_isConverting) _buildOutputLocation(context, isDark),
+                
+                const SizedBox(height: 48),
+                _actionButton(),
+                const SizedBox(height: 120),
+              ],
             ),
-          ],
+          ),
         ),
       ),
     );
   }
 
-  Widget _buildOutputLocation(BuildContext context) {
+  Widget _buildOutputLocation(BuildContext context, bool isDark) {
     return FutureBuilder<String>(
       future: FileService.getOutputDirectoryForCategory(_selectedOutputCategory()),
       builder: (ctx, snap) {
@@ -148,27 +105,26 @@ class _ConvertScreenState extends State<ConvertScreen> {
             const SizedBox(height: 32),
             Text(
               'VAULT PATH',
-              style: GoogleFonts.outfit(
-                fontSize: 12,
-                letterSpacing: 2,
-                fontWeight: FontWeight.w600,
-                color: Colors.white.withOpacity(0.4),
+              style: AppTextStyles.studioLabel.copyWith(
+                fontSize: 10,
+                color: isDark ? Colors.white.withOpacity(0.4) : Colors.black.withOpacity(0.4),
               ),
             ),
             const SizedBox(height: 12),
             LiquidGlassContainer(
               padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
               blur: 15,
+              color: isDark ? Colors.white.withOpacity(0.03) : Colors.black.withOpacity(0.01),
               child: Row(
                 children: [
-                  const Icon(Icons.folder_open, size: 18, color: AppColors.primaryIndigo),
+                  const Icon(Icons.folder_open, size: 18, color: AppColors.docIndigo),
                   const SizedBox(width: 12),
                   Expanded(
                     child: Text(
                       FileService.getDisplayPath(snap.data!),
-                      style: GoogleFonts.outfit(
+                      style: AppTextStyles.bodyMedium.copyWith(
                         fontSize: 13,
-                        color: Colors.white70,
+                        color: isDark ? Colors.white70 : Colors.black87,
                       ),
                       overflow: TextOverflow.ellipsis,
                     ),
@@ -182,66 +138,36 @@ class _ConvertScreenState extends State<ConvertScreen> {
     );
   }
 
-  Widget _privacyBadge(BuildContext context) {
-    return LiquidGlassContainer(
-      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
-      blur: 10,
-      color: Colors.white.withOpacity(0.03),
-      child: Row(
-        children: [
-          const Icon(Icons.cloud_queue, size: 16, color: AppColors.primaryIndigo),
-          const SizedBox(width: 12),
-          Expanded(
-            child: Text(
-              'PROFESSIONAL SERVER · SECURE ENCRYPTION',
-              style: GoogleFonts.outfit(
-                fontSize: 10,
-                letterSpacing: 1.5,
-                fontWeight: FontWeight.w500,
-                color: Colors.white.withOpacity(0.5),
-              ),
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-
-  Widget _fileDropZone(BuildContext context) {
+  Widget _fileDropZone(BuildContext context, bool isDark) {
     return GestureDetector(
       onTap: _isConverting ? null : _pickFile,
       child: LiquidGlassContainer(
-        height: 160,
+        height: 140,
         blur: 35,
+        color: isDark ? Colors.white.withOpacity(0.03) : Colors.black.withOpacity(0.02),
         child: _filePath == null
             ? Center(
                 child: Column(
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: [
                     Container(
-                      padding: const EdgeInsets.all(16),
+                      padding: const EdgeInsets.all(12),
                       decoration: BoxDecoration(
                         shape: BoxShape.circle,
-                        color: Colors.white.withOpacity(0.05),
+                        color: isDark ? Colors.white.withOpacity(0.05) : Colors.black.withOpacity(0.05),
                       ),
-                      child: const Icon(Icons.auto_stories_outlined, size: 32, color: Colors.white54),
-                    ),
-                    const SizedBox(height: 16),
-                    Text(
-                      'SELECT SOURCE DOCUMENT',
-                      style: GoogleFonts.outfit(
-                        fontSize: 13,
-                        letterSpacing: 1,
-                        color: Colors.white70,
+                      child: Icon(
+                        Icons.auto_stories_rounded, 
+                        size: 24, 
+                        color: isDark ? Colors.white54 : Colors.black45,
                       ),
                     ),
-                    const SizedBox(height: 4),
+                    const SizedBox(height: 12),
                     Text(
-                      'DOCX · PPTX · XLSX · PDF · MD',
-                      style: GoogleFonts.outfit(
-                        fontSize: 10,
-                        letterSpacing: 1.5,
-                        color: Colors.white30,
+                      'IMPORT SOURCE DOCUMENT',
+                      style: AppTextStyles.studioLabel.copyWith(
+                        fontSize: 12,
+                        color: isDark ? Colors.white70 : Colors.black54,
                       ),
                     ),
                   ],
@@ -249,37 +175,39 @@ class _ConvertScreenState extends State<ConvertScreen> {
               )
             : Container(
                 padding: const EdgeInsets.all(24),
-                child: Column(
-                  mainAxisAlignment: MainAxisAlignment.center,
+                child: Row(
                   children: [
-                    const Icon(Icons.description, color: AppColors.primaryIndigo, size: 32),
-                    const SizedBox(height: 16),
-                    Text(
-                      _fileName!,
-                      textAlign: TextAlign.center,
-                      overflow: TextOverflow.ellipsis,
-                      style: GoogleFonts.outfit(
-                        fontSize: 16,
-                        fontWeight: FontWeight.w500,
-                        color: Colors.white,
+                    const Icon(Icons.description_rounded, color: AppColors.docIndigo, size: 32),
+                    const SizedBox(width: 20),
+                    Expanded(
+                      child: Column(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(
+                            _fileName!,
+                            overflow: TextOverflow.ellipsis,
+                            style: AppTextStyles.bodyMedium.copyWith(
+                              fontSize: 15,
+                              fontWeight: FontWeight.w600,
+                              color: isDark ? Colors.white : Colors.black87,
+                            ),
+                          ),
+                          const SizedBox(height: 4),
+                          Text(
+                            FileService.formatFileSize(_fileSizeBytes!),
+                            style: AppTextStyles.bodyMedium.copyWith(
+                              fontSize: 11,
+                              color: isDark ? Colors.white30 : Colors.black38,
+                            ),
+                          ),
+                        ],
                       ),
                     ),
-                    const SizedBox(height: 8),
-                    Text(
-                      FileService.formatFileSize(_fileSizeBytes!),
-                      style: GoogleFonts.outfit(
-                        fontSize: 12,
-                        color: Colors.white30,
-                      ),
-                    ),
-                    const SizedBox(height: 12),
-                    Text(
-                      'TAP TO SWAP',
-                      style: GoogleFonts.outfit(
-                        fontSize: 10,
-                        letterSpacing: 1,
-                        color: AppColors.primaryIndigo.withOpacity(0.6),
-                      ),
+                    Icon(
+                      Icons.refresh_rounded, 
+                      color: isDark ? Colors.white24 : Colors.black26, 
+                      size: 18,
                     ),
                   ],
                 ),
@@ -288,39 +216,21 @@ class _ConvertScreenState extends State<ConvertScreen> {
     );
   }
 
-  Widget _formatGrid() {
-    List<String> formats = const [
-      'pdf',
-      'docx',
-      'odt',
-      'html',
-      'txt',
-      'rtf',
-      'epub',
-      'md'
-    ];
+  Widget _formatGrid(bool isDark) {
+    List<String> formats = const ['pdf', 'docx', 'odt', 'html', 'txt', 'rtf', 'epub', 'md'];
     if (_filePath != null) {
       final ext = _normalizedInputExtension(_filePath!);
       final allowed = AppConstants.documentOutputFormats[ext];
-      if (allowed != null) {
-        formats = allowed;
-      }
+      if (allowed != null) formats = allowed;
     }
     
-    // Ensure PDF is always an option if the input isn't already a PDF
-    if (_filePath != null && _normalizedInputExtension(_filePath!) != 'pdf') {
-      if (!formats.contains('pdf')) {
-        formats = ['pdf', ...formats];
-      }
-    }
-
     return GridView.builder(
       shrinkWrap: true,
       physics: const NeverScrollableScrollPhysics(),
       gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
         crossAxisCount: 3,
-        mainAxisSpacing: 12,
-        crossAxisSpacing: 12,
+        mainAxisSpacing: 10,
+        crossAxisSpacing: 10,
         childAspectRatio: 2.2,
       ),
       itemCount: formats.length,
@@ -328,21 +238,25 @@ class _ConvertScreenState extends State<ConvertScreen> {
         final format = formats[index];
         final isSelected = _selectedFormat == format;
         return GestureDetector(
-          onTap: _isConverting
-              ? null
-              : () => setState(() => _selectedFormat = format),
+          onTap: _isConverting ? null : () => setState(() => _selectedFormat = format),
           child: LiquidGlassContainer(
-            blur: 10,
-            color: isSelected ? AppColors.primaryIndigo.withOpacity(0.3) : Colors.white.withOpacity(0.05),
-            specularOpacity: isSelected ? 0.4 : 0.1,
+            blur: isSelected ? 20 : 5,
+            padding: EdgeInsets.zero,
+            color: isSelected 
+                ? AppColors.docIndigo.withOpacity(0.15) 
+                : isDark ? Colors.white.withOpacity(0.04) : Colors.black.withOpacity(0.02),
+            borderColor: isSelected 
+                ? AppColors.docIndigo.withOpacity(0.4) 
+                : Colors.white.withOpacity(0.05),
             child: Center(
               child: Text(
                 format.toUpperCase(),
-                style: GoogleFonts.outfit(
-                  fontSize: 12,
-                  fontWeight: isSelected ? FontWeight.w600 : FontWeight.w400,
-                  letterSpacing: 1,
-                  color: isSelected ? Colors.white : Colors.white54,
+                style: AppTextStyles.studioLabel.copyWith(
+                  fontSize: 11,
+                  fontWeight: isSelected ? FontWeight.bold : FontWeight.w500,
+                  color: isSelected 
+                      ? (isDark ? Colors.white : AppColors.docIndigo) 
+                      : (isDark ? Colors.white38 : Colors.black38),
                 ),
               ),
             ),
@@ -361,16 +275,20 @@ class _ConvertScreenState extends State<ConvertScreen> {
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
-              Expanded(
-                child: Text(
-                  _progressLabel.toUpperCase(),
-                  style: GoogleFonts.outfit(fontSize: 10, letterSpacing: 1.5, color: Colors.white54),
-                  overflow: TextOverflow.ellipsis,
+              Text(
+                _progressLabel.toUpperCase(),
+                style: AppTextStyles.studioLabel.copyWith(
+                  fontSize: 10,
+                  color: AppColors.docIndigo.withOpacity(0.6),
                 ),
               ),
               Text(
                 '${(_progress * 100).toInt()}%',
-                style: GoogleFonts.outfit(fontSize: 11, fontWeight: FontWeight.bold, color: AppColors.primaryIndigo),
+                style: AppTextStyles.studioLabel.copyWith(
+                  fontSize: 10,
+                  fontWeight: FontWeight.bold,
+                  color: AppColors.docIndigo,
+                ),
               ),
             ],
           ),
@@ -387,13 +305,12 @@ class _ConvertScreenState extends State<ConvertScreen> {
               widthFactor: _progress,
               child: Container(
                 decoration: BoxDecoration(
-                  color: AppColors.primaryIndigo,
+                  color: AppColors.docIndigo,
                   borderRadius: BorderRadius.circular(2),
                   boxShadow: [
                     BoxShadow(
-                      color: AppColors.primaryIndigo.withOpacity(0.5),
+                      color: AppColors.docIndigo.withOpacity(0.3),
                       blurRadius: 10,
-                      spreadRadius: 1,
                     ),
                   ],
                 ),
@@ -410,16 +327,19 @@ class _ConvertScreenState extends State<ConvertScreen> {
       padding: const EdgeInsets.only(top: 24),
       child: LiquidGlassContainer(
         padding: const EdgeInsets.all(16),
-        color: Colors.red.withOpacity(0.1),
+        color: AppColors.audioRose.withOpacity(0.1),
         blur: 10,
         child: Row(
           children: [
-            const Icon(Icons.error_outline, color: Colors.redAccent, size: 20),
+            const Icon(Icons.error_outline_rounded, color: AppColors.audioRose, size: 20),
             const SizedBox(width: 12),
             Expanded(
               child: Text(
                 _errorMessage!,
-                style: GoogleFonts.outfit(color: Colors.redAccent, fontSize: 13),
+                style: AppTextStyles.bodyMedium.copyWith(
+                  color: AppColors.audioRose,
+                  fontSize: 13,
+                ),
               ),
             ),
           ],
@@ -428,34 +348,70 @@ class _ConvertScreenState extends State<ConvertScreen> {
     );
   }
 
-  Widget _buildSuccessCard() {
-    return SuccessCard(
-      outputPath: _outputPath!,
-      label: 'Transcription complete.',
-      onConvertAnother: _resetForm,
+  Widget _buildSuccessModule() {
+    return LiquidGlassContainer(
+      padding: const EdgeInsets.all(24),
+      color: AppColors.docIndigo.withOpacity(0.05),
+      child: Column(
+        children: [
+          const Icon(Icons.check_circle_rounded, color: AppColors.docIndigo, size: 44),
+          const SizedBox(height: 16),
+          Text(
+            'ENCODING COMPLETE',
+            style: AppTextStyles.headlineSmall.copyWith(fontSize: 16, fontWeight: FontWeight.w900),
+          ),
+          const SizedBox(height: 8),
+          Text(
+            'The document stream has been successfully re-indexed to the target format.',
+            textAlign: TextAlign.center,
+            style: AppTextStyles.bodyMedium.copyWith(fontSize: 13, color: AppColors.onSurfaceVar),
+          ),
+          const SizedBox(height: 24),
+          Row(
+            children: [
+              Expanded(
+                child: MediaPillButton(
+                  label: 'PREVIEW',
+                  onTap: () => FileService.openFile(_outputPath!),
+                  accentColor: AppColors.docIndigo,
+                ),
+              ),
+              const SizedBox(width: 12),
+              Expanded(
+                child: MediaPillButton(
+                  label: 'ANOTHER',
+                  onTap: _resetForm,
+                  accentColor: AppColors.docIndigo.withOpacity(0.4),
+                ),
+              ),
+            ],
+          ),
+        ],
+      ),
     );
   }
 
-  Widget _convertButton() {
+  Widget _actionButton() {
     final canConvert = _filePath != null && _selectedFormat != null && !_isConverting;
-
+    
     if (_isConverting) {
       return MediaPillButton(
-        label: 'HALT PROCESS',
+        label: 'STOP PROCESSING',
         onTap: () {
           if (_currentTaskId != null) {
             _showCancelDialog(context, _currentTaskId!);
           }
         },
-        accentColor: Colors.redAccent.withOpacity(0.3),
+        accentColor: AppColors.audioRose.withOpacity(0.3),
       );
     }
 
     return Opacity(
       opacity: canConvert ? 1.0 : 0.3,
       child: MediaPillButton(
-        label: 'ENGAGE ANALYSIS',
+        label: 'ENGAGE CONVERSION',
         onTap: canConvert ? () => _onConvert() : () => {},
+        accentColor: AppColors.docIndigo,
       ),
     );
   }
@@ -463,26 +419,53 @@ class _ConvertScreenState extends State<ConvertScreen> {
   void _showCancelDialog(BuildContext context, String taskId) {
     showDialog(
       context: context,
+      barrierColor: Colors.black54,
       builder: (ctx) => BackdropFilter(
-        filter: ImageFilter.blur(sigmaX: 10, sigmaY: 10),
+        filter: ImageFilter.blur(sigmaX: 15, sigmaY: 15),
         child: AlertDialog(
-          backgroundColor: Colors.black.withOpacity(0.8),
-          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(24), side: BorderSide(color: Colors.white.withOpacity(0.1))),
-          title: Text('Termination', style: GoogleFonts.outfit(color: Colors.white)),
-          content: Text('Abort active server-side analysis?', style: GoogleFonts.outfit(color: Colors.white70)),
+          backgroundColor: Colors.black.withOpacity(0.85),
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(28),
+            side: BorderSide(color: Colors.white.withOpacity(0.1), width: 1),
+          ),
+          title: Text(
+            'TERMINATION',
+            style: AppTextStyles.studioLabel.copyWith(
+              color: Colors.white,
+              fontSize: 18,
+            ),
+            textAlign: TextAlign.center,
+          ),
+          content: Text(
+            'ABORT THE ACTIVE LEXICON ANALYSIS & CONVERSION PROCESS?',
+            style: AppTextStyles.studioLabel.copyWith(
+              color: Colors.white70,
+              fontSize: 12,
+              height: 1.5,
+            ),
+            textAlign: TextAlign.center,
+          ),
+          actionsAlignment: MainAxisAlignment.center,
           actions: [
             TextButton(
               onPressed: () => Navigator.pop(ctx),
-              child: Text('REMAIN', style: GoogleFonts.outfit(color: Colors.white30)),
+              child: Text(
+                'RESUME',
+                style: AppTextStyles.studioLabel.copyWith(color: Colors.white30),
+              ),
             ),
+            const SizedBox(width: 8),
             TextButton(
               onPressed: () {
                 final provider = Provider.of<TaskProvider>(context, listen: false);
                 provider.cancelTask(taskId);
                 Navigator.pop(ctx);
-                _resetForm(); // Locally reset when cancelling
+                _resetForm();
               },
-              child: Text('ABORT', style: GoogleFonts.outfit(color: Colors.redAccent)),
+              child: Text(
+                'ABORT',
+                style: AppTextStyles.studioLabel.copyWith(color: AppColors.audioRose),
+              ),
             ),
           ],
         ),
@@ -500,8 +483,7 @@ class _ConvertScreenState extends State<ConvertScreen> {
       final extension = _normalizedInputExtension(path);
       if (!AppConstants.documentOutputFormats.containsKey(extension)) {
         setState(() {
-          _errorMessage =
-              'This document format is not supported yet.';
+          _errorMessage = 'This document format is not supported yet.';
         });
         return;
       }
@@ -542,7 +524,6 @@ class _ConvertScreenState extends State<ConvertScreen> {
           if (!mounted) {
             return;
           }
-          // Update progress label based on progress percentage
           String stage;
           if (progress < 0.1) {
             stage = 'Connecting to server...';
@@ -572,7 +553,7 @@ class _ConvertScreenState extends State<ConvertScreen> {
         });
       }
     } catch (error) {
-      if (error.toString().contains('cancelled')) return; // handled by _resetForm
+      if (error.toString().contains('cancelled')) return;
       provider.failTask(taskId, error.toString());
       if (mounted) {
         setState(() {

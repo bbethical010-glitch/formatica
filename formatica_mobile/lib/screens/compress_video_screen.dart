@@ -1,13 +1,15 @@
 import 'package:flutter/material.dart';
+import 'dart:ui';
 import 'package:file_picker/file_picker.dart';
 import 'package:provider/provider.dart';
 import '../core/theme.dart';
 import '../services/video_service.dart';
 import '../services/file_service.dart';
 import '../providers/task_provider.dart';
-import '../widgets/success_card.dart';
 import '../widgets/liquid_glass.dart';
 import '../widgets/media_pill_button.dart';
+import '../widgets/top_bar.dart';
+import '../widgets/labels.dart';
 
 class CompressVideoScreen extends StatefulWidget {
   const CompressVideoScreen({super.key});
@@ -33,124 +35,81 @@ class _CompressVideoScreenState extends State<CompressVideoScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+
     return MeshBackground(
       child: Scaffold(
         backgroundColor: Colors.transparent,
-        appBar: AppBar(
-          leading: IconButton(
-            icon: const Icon(Icons.arrow_back_ios_new_rounded, size: 20),
-            onPressed: () => Navigator.pop(context),
-          ),
-          title: Text('COMPRESSION LAB', style: AppTextStyles.studioLabel.copyWith(color: Colors.white)),
+        appBar: StudioTopBar(
+          title: 'Compress',
+          onBack: () => Navigator.pop(context),
         ),
         body: SafeArea(
           child: SingleChildScrollView(
-            padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 20),
+            physics: const BouncingScrollPhysics(),
+            padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 8),
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                // Editorial Title
-                Text('Shrink', style: AppTextStyles.studioLabel),
-                const SizedBox(height: 8),
-                Text(
-                  'Media Voids',
-                  style: AppTextStyles.displayLarge.copyWith(
-                    color: AppColors.darkTextPrimary,
-                    fontSize: 42,
-                    height: 1.0,
-                  ),
-                ),
-                const SizedBox(height: 12),
-                Text(
-                  'High-efficiency bitrate reduction.',
-                  style: AppTextStyles.bodyMedium.copyWith(color: AppColors.darkTextSecondary),
-                ),
-
+                const OnDeviceBadge(),
                 const SizedBox(height: 32),
 
-                // File Selection Zone
-                GestureDetector(
-                  onTap: _isConverting ? null : _pickFile,
-                  child: LiquidGlassContainer(
-                    height: 160,
-                    width: double.infinity,
-                    color: _filePath == null ? Colors.white.withOpacity(0.03) : AppColors.videoPurple.withOpacity(0.1),
-                    child: Center(
-                      child: _filePath == null
-                          ? Column(
-                              mainAxisAlignment: MainAxisAlignment.center,
-                              children: [
-                                Icon(Icons.compress_rounded, size: 40, color: AppColors.darkTextSecondary.withOpacity(0.5)),
-                                const SizedBox(height: 12),
-                                Text('TAP TO IMPORT MEDIA', style: AppTextStyles.studioLabel.copyWith(color: AppColors.darkTextSecondary)),
-                              ],
-                            )
-                          : Padding(
-                              padding: const EdgeInsets.all(20),
-                              child: Row(
-                                children: [
-                                  const Icon(Icons.layers_rounded, color: AppColors.videoPurple, size: 32),
-                                  const SizedBox(width: 16),
-                                  Expanded(
-                                    child: Column(
-                                      mainAxisAlignment: MainAxisAlignment.center,
-                                      crossAxisAlignment: CrossAxisAlignment.start,
-                                      children: [
-                                        Text(_fileName!, style: AppTextStyles.headlineSmall.copyWith(fontSize: 16), overflow: TextOverflow.ellipsis),
-                                        Text(FileService.formatFileSize(_fileSizeBytes!), style: AppTextStyles.bodyMedium.copyWith(color: AppColors.darkTextSecondary)),
-                                      ],
-                                    ),
-                                  ),
-                                  Icon(Icons.refresh_rounded, color: AppColors.darkTextSecondary.withOpacity(0.5), size: 20),
-                                ],
-                              ),
-                            ),
-                    ),
+                Text(
+                  'COMPRESSION: QUANTUM',
+                  style: AppTextStyles.studioLabel.copyWith(
+                    color: AppColors.videoPurple.withOpacity(0.8),
                   ),
                 ),
+                const SizedBox(height: 16),
+
+                _fileDropZone(context, isDark),
 
                 if (_filePath != null && !_isConverting) ...[
                   const SizedBox(height: 32),
-                  Text('BITRATE INTENSITY (CRF)', style: AppTextStyles.studioLabel),
+                  Text(
+                    'BITRATE INTENSITY (CRF)',
+                    style: AppTextStyles.studioLabel.copyWith(
+                      fontSize: 10,
+                      color: isDark ? Colors.white30 : Colors.black38,
+                    ),
+                  ),
                   const SizedBox(height: 16),
-                  _crfSlider(),
+                  _crfSlider(isDark),
                   
                   const SizedBox(height: 32),
-                  Text('EFFICIENCY PRESET', style: AppTextStyles.studioLabel),
+                  Text(
+                    'EFFICIENCY PRESET',
+                    style: AppTextStyles.studioLabel.copyWith(
+                      fontSize: 10,
+                      color: isDark ? Colors.white30 : Colors.black38,
+                    ),
+                  ),
                   const SizedBox(height: 16),
-                  _presetSelector(),
+                  _presetSelector(isDark),
                   
                   const SizedBox(height: 32),
-                  Text('RESOLUTION SCALING', style: AppTextStyles.studioLabel),
+                  Text(
+                    'RESOLUTION SCALING',
+                    style: AppTextStyles.studioLabel.copyWith(
+                      fontSize: 10,
+                      color: isDark ? Colors.white30 : Colors.black38,
+                    ),
+                  ),
                   const SizedBox(height: 16),
-                  _resolutionGrid(),
+                  _resolutionGrid(isDark),
                 ],
 
                 if (_isConverting) _progressSection(),
                 if (_errorMessage != null) _buildErrorCard(),
-                if (_outputPath != null && !_isConverting) _buildSuccessCard(),
+                if (_outputPath != null && !_isConverting) ...[
+                  const SizedBox(height: 24),
+                  _buildSuccessModule(),
+                ],
+                if (_filePath != null && !_isConverting) _buildOutputLocation(context, isDark),
 
                 const SizedBox(height: 48),
-
-                // Action Area
-                Center(
-                  child: _isConverting
-                    ? MediaPillButton(
-                        label: 'Cancel Operation',
-                        accentColor: AppColors.audioRose,
-                        onTap: () {
-                          if (_currentTaskId != null) {
-                            _showCancelDialog(context, _currentTaskId!);
-                          }
-                        },
-                      )
-                    : MediaPillButton(
-                        label: 'Execute Compression',
-                        accentColor: AppColors.videoPurple,
-                        onTap: _filePath != null ? () => _onConvert() : () => {},
-                        icon: Icons.auto_awesome_motion_rounded,
-                      ),
-                ),
+                _actionButton(),
+                const SizedBox(height: 120),
               ],
             ),
           ),
@@ -159,26 +118,125 @@ class _CompressVideoScreenState extends State<CompressVideoScreen> {
     );
   }
 
-  Widget _crfSlider() {
+  Widget _fileDropZone(BuildContext context, bool isDark) {
+    return GestureDetector(
+      onTap: _isConverting ? null : _pickFile,
+      child: LiquidGlassContainer(
+        height: 140,
+        blur: 35,
+        color: isDark ? Colors.white.withOpacity(0.03) : Colors.black.withOpacity(0.02),
+        child: _filePath == null
+            ? Center(
+                child: Column(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    Container(
+                      padding: const EdgeInsets.all(12),
+                      decoration: BoxDecoration(
+                        shape: BoxShape.circle,
+                        color: isDark ? Colors.white.withOpacity(0.05) : Colors.black.withOpacity(0.05),
+                      ),
+                      child: Icon(
+                        Icons.compress_rounded, 
+                        size: 24, 
+                        color: isDark ? Colors.white54 : Colors.black45,
+                      ),
+                    ),
+                    const SizedBox(height: 12),
+                    Text(
+                      'IMPORT SOURCE MEDIA',
+                      style: AppTextStyles.studioLabel.copyWith(
+                        fontSize: 12,
+                        color: isDark ? Colors.white70 : Colors.black54,
+                      ),
+                    ),
+                  ],
+                ),
+              )
+            : Container(
+                padding: const EdgeInsets.all(24),
+                child: Row(
+                  children: [
+                    const Icon(Icons.layers_rounded, color: AppColors.videoPurple, size: 32),
+                    const SizedBox(width: 20),
+                    Expanded(
+                      child: Column(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(
+                            _fileName!,
+                            overflow: TextOverflow.ellipsis,
+                            style: AppTextStyles.bodyMedium.copyWith(
+                              fontSize: 15,
+                              fontWeight: FontWeight.w600,
+                              color: isDark ? Colors.white : Colors.black87,
+                            ),
+                          ),
+                          const SizedBox(height: 4),
+                          Text(
+                            FileService.formatFileSize(_fileSizeBytes!),
+                            style: AppTextStyles.bodyMedium.copyWith(
+                              fontSize: 11,
+                              color: isDark ? Colors.white30 : Colors.black38,
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                    Icon(
+                      Icons.refresh_rounded, 
+                      color: isDark ? Colors.white24 : Colors.black26, 
+                      size: 18,
+                    ),
+                  ],
+                ),
+              ),
+      ),
+    );
+  }
+
+  Widget _crfSlider(bool isDark) {
     return LiquidGlassContainer(
-      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 20),
+      padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 20),
+      color: isDark ? Colors.white.withOpacity(0.03) : Colors.black.withOpacity(0.01),
       child: Column(
         children: [
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
-              Text('QUALITY', style: AppTextStyles.studioLabel.copyWith(fontSize: 10, color: AppColors.darkTextSecondary)),
-              Text('${_crf.toInt()}', style: AppTextStyles.headlineSmall.copyWith(color: AppColors.videoPurple, fontSize: 18)),
-              Text('SIZE', style: AppTextStyles.studioLabel.copyWith(fontSize: 10, color: AppColors.darkTextSecondary)),
+              Text(
+                'MAX QUALITY', 
+                style: AppTextStyles.studioLabel.copyWith(
+                  fontSize: 9, 
+                  color: isDark ? Colors.white38 : Colors.black38,
+                ),
+              ),
+              Text(
+                'CRF ${_crf.toInt()}', 
+                style: AppTextStyles.headlineSmall.copyWith(
+                  color: AppColors.videoPurple, 
+                  fontSize: 16,
+                  fontWeight: FontWeight.w900,
+                ),
+              ),
+              Text(
+                'MAX SMALL', 
+                style: AppTextStyles.studioLabel.copyWith(
+                  fontSize: 9, 
+                  color: isDark ? Colors.white38 : Colors.black38,
+                ),
+              ),
             ],
           ),
           SliderTheme(
             data: SliderTheme.of(context).copyWith(
               activeTrackColor: AppColors.videoPurple,
-              inactiveTrackColor: Colors.white.withOpacity(0.05),
+              inactiveTrackColor: isDark ? Colors.white.withOpacity(0.05) : Colors.black.withOpacity(0.05),
               thumbColor: Colors.white,
               overlayColor: AppColors.videoPurple.withOpacity(0.2),
               trackHeight: 2,
+              thumbShape: const RoundSliderThumbShape(enabledThumbRadius: 6),
             ),
             child: Slider(
               value: _crf,
@@ -189,15 +247,18 @@ class _CompressVideoScreenState extends State<CompressVideoScreen> {
             ),
           ),
           Text(
-            _crf < 23 ? 'Visually Lossless' : (_crf > 32 ? 'Hyper Compressed' : 'Balanced Engine'),
-            style: AppTextStyles.bodyMedium.copyWith(color: AppColors.darkTextSecondary, fontSize: 12),
+            _crf < 23 ? 'REDUNDANCY ELIMINATED' : (_crf > 32 ? 'AGGRESSIVE SHRINK' : 'BALANCED PRECISION'),
+            style: AppTextStyles.studioLabel.copyWith(
+              color: AppColors.videoPurple.withOpacity(0.6), 
+              fontSize: 9,
+            ),
           ),
         ],
       ),
     );
   }
 
-  Widget _presetSelector() {
+  Widget _presetSelector(bool isDark) {
     final presets = ['fast', 'medium', 'slow'];
     return Row(
       children: presets.map((p) => Expanded(
@@ -207,14 +268,22 @@ class _CompressVideoScreenState extends State<CompressVideoScreen> {
             onTap: _isConverting ? null : () => setState(() => _preset = p),
             child: LiquidGlassContainer(
               padding: const EdgeInsets.symmetric(vertical: 12),
-              blur: _preset == p ? 15 : 5,
-              color: _preset == p ? AppColors.videoPurple.withOpacity(0.2) : Colors.white.withOpacity(0.05),
-              borderColor: _preset == p ? AppColors.videoPurple.withOpacity(0.5) : Colors.white.withOpacity(0.1),
+              blur: _preset == p ? 20 : 5,
+              color: _preset == p 
+                ? AppColors.videoPurple.withOpacity(0.15) 
+                : isDark ? Colors.white.withOpacity(0.04) : Colors.black.withOpacity(0.02),
+              borderColor: _preset == p 
+                ? AppColors.videoPurple.withOpacity(0.4) 
+                : Colors.white.withOpacity(0.05),
               child: Center(
                 child: Text(
                   p.toUpperCase(),
                   style: AppTextStyles.studioLabel.copyWith(
-                    color: _preset == p ? Colors.white : AppColors.darkTextSecondary,
+                    fontSize: 11,
+                    fontWeight: _preset == p ? FontWeight.bold : FontWeight.w500,
+                    color: _preset == p 
+                      ? (isDark ? Colors.white : AppColors.videoPurple) 
+                      : (isDark ? Colors.white38 : Colors.black38),
                   ),
                 ),
               ),
@@ -225,16 +294,16 @@ class _CompressVideoScreenState extends State<CompressVideoScreen> {
     );
   }
 
-  Widget _resolutionGrid() {
+  Widget _resolutionGrid(bool isDark) {
     final resolutions = ['Original', '1080p', '720p', '480p'];
     return GridView.builder(
       shrinkWrap: true,
       physics: const NeverScrollableScrollPhysics(),
       gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
         crossAxisCount: 2,
-        mainAxisSpacing: 12,
-        crossAxisSpacing: 12,
-        childAspectRatio: 3.5,
+        mainAxisSpacing: 10,
+        crossAxisSpacing: 10,
+        childAspectRatio: 3.8,
       ),
       itemCount: 4,
       itemBuilder: (context, index) {
@@ -243,14 +312,23 @@ class _CompressVideoScreenState extends State<CompressVideoScreen> {
         return GestureDetector(
           onTap: _isConverting ? null : () => setState(() => _resolution = res),
           child: LiquidGlassContainer(
-            blur: isSelected ? 15 : 5,
-            color: isSelected ? AppColors.videoPurple.withOpacity(0.2) : Colors.white.withOpacity(0.05),
-            borderColor: isSelected ? AppColors.videoPurple.withOpacity(0.5) : Colors.white.withOpacity(0.1),
+            blur: isSelected ? 20 : 5,
+            padding: EdgeInsets.zero,
+            color: isSelected 
+              ? AppColors.videoPurple.withOpacity(0.15) 
+              : isDark ? Colors.white.withOpacity(0.04) : Colors.black.withOpacity(0.02),
+            borderColor: isSelected 
+              ? AppColors.videoPurple.withOpacity(0.4) 
+              : Colors.white.withOpacity(0.05),
             child: Center(
               child: Text(
                 res.toUpperCase(),
                 style: AppTextStyles.studioLabel.copyWith(
-                  color: isSelected ? Colors.white : AppColors.darkTextSecondary,
+                  fontSize: 11,
+                  fontWeight: isSelected ? FontWeight.bold : FontWeight.w500,
+                  color: isSelected 
+                    ? (isDark ? Colors.white : AppColors.videoPurple) 
+                    : (isDark ? Colors.white38 : Colors.black38),
                 ),
               ),
             ),
@@ -262,32 +340,51 @@ class _CompressVideoScreenState extends State<CompressVideoScreen> {
 
   Widget _progressSection() {
     return Padding(
-      padding: const EdgeInsets.only(top: 32),
+      padding: const EdgeInsets.only(top: 40),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
-              Text('COMPRESSING STREAMS...', style: AppTextStyles.studioLabel),
-              Text('${(_progress * 100).toInt()}%', style: AppTextStyles.studioLabel),
+              Text(
+                'CRUSHING VOIDS...',
+                style: AppTextStyles.studioLabel.copyWith(
+                  fontSize: 10,
+                  color: AppColors.videoPurple.withOpacity(0.6),
+                ),
+              ),
+              Text(
+                '${(_progress * 100).toInt()}%',
+                style: AppTextStyles.studioLabel.copyWith(
+                  fontSize: 10,
+                  fontWeight: FontWeight.bold,
+                  color: AppColors.videoPurple,
+                ),
+              ),
             ],
           ),
           const SizedBox(height: 12),
-          LiquidGlassContainer(
-            height: 12,
-            borderRadius: 6,
-            blur: 0,
-            color: Colors.white.withOpacity(0.05),
+          Container(
+            height: 4,
+            width: double.infinity,
+            decoration: BoxDecoration(
+              color: Colors.white.withOpacity(0.05),
+              borderRadius: BorderRadius.circular(2),
+            ),
             child: FractionallySizedBox(
               alignment: Alignment.centerLeft,
               widthFactor: _progress,
               child: Container(
                 decoration: BoxDecoration(
-                  borderRadius: BorderRadius.circular(6),
-                  gradient: const LinearGradient(
-                    colors: [AppColors.videoPurple, AppColors.audioRose],
-                  ),
+                  color: AppColors.videoPurple,
+                  borderRadius: BorderRadius.circular(2),
+                  boxShadow: [
+                    BoxShadow(
+                      color: AppColors.videoPurple.withOpacity(0.3),
+                      blurRadius: 10,
+                    ),
+                  ],
                 ),
               ),
             ),
@@ -303,12 +400,19 @@ class _CompressVideoScreenState extends State<CompressVideoScreen> {
       child: LiquidGlassContainer(
         padding: const EdgeInsets.all(16),
         color: AppColors.audioRose.withOpacity(0.1),
+        blur: 10,
         child: Row(
           children: [
             const Icon(Icons.error_outline_rounded, color: AppColors.audioRose, size: 20),
             const SizedBox(width: 12),
             Expanded(
-              child: Text(_errorMessage!, style: AppTextStyles.bodyMedium.copyWith(color: AppColors.audioRose)),
+              child: Text(
+                _errorMessage!,
+                style: AppTextStyles.bodyMedium.copyWith(
+                  color: AppColors.audioRose,
+                  fontSize: 13,
+                ),
+              ),
             ),
           ],
         ),
@@ -316,13 +420,69 @@ class _CompressVideoScreenState extends State<CompressVideoScreen> {
     );
   }
 
-  Widget _buildSuccessCard() {
-    return Padding(
-      padding: const EdgeInsets.only(top: 24),
-      child: SuccessCard(
-        outputPath: _outputPath!,
-        label: 'Video compressed successfully',
-        onConvertAnother: _resetForm,
+  Widget _buildSuccessModule() {
+    return LiquidGlassContainer(
+      padding: const EdgeInsets.all(24),
+      color: AppColors.videoPurple.withOpacity(0.05),
+      child: Column(
+        children: [
+          const Icon(Icons.check_circle_rounded, color: AppColors.imageCyan, size: 44),
+          const SizedBox(height: 16),
+          Text(
+            'SHRINK COMPLETE',
+            style: AppTextStyles.headlineSmall.copyWith(fontSize: 16, fontWeight: FontWeight.w900),
+          ),
+          const SizedBox(height: 8),
+          Text(
+            'The media file has been successfully optimized without perceptable quality loss.',
+            textAlign: TextAlign.center,
+            style: AppTextStyles.bodyMedium.copyWith(fontSize: 13, color: AppColors.onSurfaceVar),
+          ),
+          const SizedBox(height: 24),
+          Row(
+            children: [
+              Expanded(
+                child: MediaPillButton(
+                  label: 'PREVIEW',
+                  onTap: () => FileService.openFile(_outputPath!),
+                  accentColor: AppColors.imageCyan,
+                ),
+              ),
+              const SizedBox(width: 12),
+              Expanded(
+                child: MediaPillButton(
+                  label: 'ANOTHER',
+                  onTap: _resetForm,
+                  accentColor: AppColors.videoPurple.withOpacity(0.5),
+                ),
+              ),
+            ],
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _actionButton() {
+    final canConvert = _filePath != null && !_isConverting;
+    if (_isConverting) {
+      return MediaPillButton(
+        label: 'STOP PROCESSING',
+        onTap: () {
+          if (_currentTaskId != null) {
+            _showCancelDialog(context, _currentTaskId!);
+          }
+        },
+        accentColor: AppColors.audioRose.withOpacity(0.3),
+      );
+    }
+
+    return Opacity(
+      opacity: canConvert ? 1.0 : 0.3,
+      child: MediaPillButton(
+        label: 'EXECUTE COMPRESSION',
+        onTap: canConvert ? () => _onConvert() : () => {},
+        accentColor: AppColors.videoPurple,
       ),
     );
   }
@@ -348,8 +508,7 @@ class _CompressVideoScreenState extends State<CompressVideoScreen> {
     final provider = context.read<TaskProvider>();
     final taskId = provider.addTask('Compress $_fileName', 'compressVideo');
     _currentTaskId = taskId;
-    setState(() { _progress = 0.02; });
-
+    
     String apiRes;
     switch (_resolution) {
       case '1080p': apiRes = '1920:-2'; break;
@@ -393,38 +552,108 @@ class _CompressVideoScreenState extends State<CompressVideoScreen> {
       _crf = 28;
       _preset = 'medium';
       _resolution = 'Original';
+      _errorMessage = null;
+      _progress = 0.0;
     });
+  }
+
+  Widget _buildOutputLocation(BuildContext context, bool isDark) {
+    return FutureBuilder<String>(
+      future: FileService.getOutputDirectoryForCategory(OutputCategory.video),
+      builder: (ctx, snap) {
+        if (!snap.hasData) return const SizedBox.shrink();
+        return Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            const SizedBox(height: 32),
+            Text(
+              'OUTPUT VAULT',
+              style: AppTextStyles.studioLabel.copyWith(
+                fontSize: 10,
+                color: isDark ? Colors.white.withOpacity(0.4) : Colors.black.withOpacity(0.4),
+              ),
+            ),
+            const SizedBox(height: 12),
+            LiquidGlassContainer(
+              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
+              blur: 15,
+              color: isDark ? Colors.white.withOpacity(0.03) : Colors.black.withOpacity(0.01),
+              child: Row(
+                children: [
+                  const Icon(Icons.folder_open, size: 18, color: AppColors.videoPurple),
+                  const SizedBox(width: 12),
+                  Expanded(
+                    child: Text(
+                      FileService.getDisplayPath(snap.data!),
+                      style: AppTextStyles.bodyMedium.copyWith(
+                        fontSize: 13,
+                        color: isDark ? Colors.white70 : Colors.black87,
+                      ),
+                      overflow: TextOverflow.ellipsis,
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ],
+        );
+      },
+    );
   }
 
   void _showCancelDialog(BuildContext context, String taskId) {
     showDialog(
       context: context,
-      builder: (ctx) => AlertDialog(
-        backgroundColor: AppColors.darkSurface,
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
-        title: Text('CANCEL OPERATION', style: AppTextStyles.studioLabel),
-        content: Text('Abort the high-efficiency compression?', style: AppTextStyles.bodyMedium),
-        actions: [
-          TextButton(onPressed: () => Navigator.pop(ctx), child: const Text('KEEP GOING')),
-          TextButton(
-            onPressed: () {
-              final provider = Provider.of<TaskProvider>(context, listen: false);
-              provider.cancelTask(taskId);
-              Navigator.pop(ctx);
-              _resetForm();
-            },
-            child: const Text('ABORT', style: TextStyle(color: AppColors.audioRose)),
+      builder: (ctx) => BackdropFilter(
+        filter: ImageFilter.blur(sigmaX: 15, sigmaY: 15),
+        child: AlertDialog(
+          backgroundColor: Colors.black.withOpacity(0.85),
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(28), 
+            side: BorderSide(color: Colors.white.withOpacity(0.1), width: 1),
           ),
-        ],
+          title: Text(
+            'TERMINATION',
+            style: AppTextStyles.studioLabel.copyWith(
+              color: Colors.white,
+              fontSize: 18,
+            ),
+            textAlign: TextAlign.center,
+          ),
+          content: Text(
+            'ABORT THE ACTIVE HIGH-EFFICIENCY COMPRESSION PROCESS?',
+            style: AppTextStyles.studioLabel.copyWith(
+              color: Colors.white70,
+              fontSize: 12,
+              height: 1.5,
+            ),
+            textAlign: TextAlign.center,
+          ),
+          actionsAlignment: MainAxisAlignment.center,
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.pop(ctx),
+              child: Text(
+                'RESUME', 
+                style: AppTextStyles.studioLabel.copyWith(color: Colors.white30),
+              ),
+            ),
+            TextButton(
+              onPressed: () {
+                final provider = Provider.of<TaskProvider>(context, listen: false);
+                provider.cancelTask(taskId);
+                Navigator.pop(ctx);
+                _resetForm();
+              },
+              child: Text(
+                'ABORT', 
+                style: AppTextStyles.studioLabel.copyWith(color: AppColors.audioRose),
+              ),
+            ),
+          ],
+        ),
       ),
     );
   }
 }
-
-
-
-
-
-
-
 

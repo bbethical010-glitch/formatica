@@ -10,7 +10,9 @@ import '../core/theme.dart';
 import '../services/file_service.dart';
 import '../providers/task_provider.dart';
 import '../widgets/liquid_glass.dart';
-import '../widgets/success_card.dart';
+import '../widgets/media_pill_button.dart';
+import '../widgets/top_bar.dart';
+import '../widgets/labels.dart';
 
 class ImagesToPdfScreen extends StatefulWidget {
   const ImagesToPdfScreen({super.key});
@@ -23,214 +25,263 @@ class _ImagesToPdfScreenState extends State<ImagesToPdfScreen> {
   final List<String> _selectedImagePaths = [];
   bool _isLoading = false;
   String? _errorMessage;
+  String? _currentTaskId;
   String? _outputPath;
 
   @override
   Widget build(BuildContext context) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    
     return MeshBackground(
       child: Scaffold(
         backgroundColor: Colors.transparent,
-        appBar: AppBar(
-          leading: IconButton(
-            icon: const Icon(Icons.arrow_back_ios_new, size: 20),
-            onPressed: () => Navigator.pop(context),
-          ),
-          actions: [
-            Container(
-              margin: const EdgeInsets.only(right: 16),
-              padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
-              decoration: BoxDecoration(
-                color: Colors.greenAccent.withOpacity(0.1),
-                borderRadius: BorderRadius.circular(20),
-                border: Border.all(color: Colors.greenAccent.withOpacity(0.2)),
-              ),
-              child: Row(
-                children: [
-                  const Icon(Icons.security, size: 12, color: Colors.greenAccent),
-                  const SizedBox(width: 4),
-                  Text('On-Device', style: AppTextStyles.badge.copyWith(color: Colors.greenAccent, fontSize: 8)),
-                ],
-              ),
-            ),
-          ],
+        appBar: StudioTopBar(
+          title: 'Capture',
+          onBack: () => Navigator.pop(context),
         ),
-        body: Column(
-          children: [
-            Expanded(
-              child: SingleChildScrollView(
-                padding: const EdgeInsets.all(20),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text('Capture', style: AppTextStyles.displayLarge.copyWith(fontSize: 32)),
-                    Text(
-                      'IMAGE TO PDF ENGINE',
-                      style: AppTextStyles.studioLabel.copyWith(color: AppColors.docIndigo),
-                    ),
-                    const SizedBox(height: 32),
-
-                    // Preview Zone
-                    GestureDetector(
-                      onTap: _isLoading ? null : _addImages,
-                      child: AspectRatio(
-                        aspectRatio: 16 / 9,
-                        child: LiquidGlassContainer(
-                          padding: EdgeInsets.zero,
-                          borderRadius: 24,
-                          child: Stack(
-                            fit: StackFit.expand,
-                            children: [
-                              Image.asset(
-                                'assets/images/doc_hero.png',
-                                fit: BoxFit.cover,
-                              ),
-                              Container(color: Colors.black.withOpacity(0.4)),
-                              const Center(
-                                child: Column(
-                                  mainAxisAlignment: MainAxisAlignment.center,
-                                  children: [
-                                    Icon(Icons.add_photo_alternate_outlined, size: 48, color: Colors.white54),
-                                    SizedBox(height: 12),
-                                    Text('ADD IMAGES TO FUSE', style: TextStyle(color: Colors.white54, letterSpacing: 1)),
-                                  ],
-                                ),
-                              ),
-                            ],
-                          ),
-                        ),
-                      ),
-                    ),
-
-                    const SizedBox(height: 40),
-                    _buildSectionTitle('SELECTED ASSETS'),
-                    const SizedBox(height: 16),
-                    _buildImageGrid(),
-                    
-                    if (_errorMessage != null)
-                      _buildErrorCard(),
-                    
-                    if (_outputPath != null && !_isLoading)
-                      SuccessCard(
-                        outputPath: _outputPath!,
-                        label: 'Fusion complete.',
-                        onConvertAnother: _resetForm,
-                      ),
-                    
-                    const SizedBox(height: 100),
-                  ],
+        body: SafeArea(
+          child: SingleChildScrollView(
+            physics: const BouncingScrollPhysics(),
+            padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 8),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                const OnDeviceBadge(),
+                const SizedBox(height: 32),
+                
+                Text(
+                  'PRISM CAPTURE',
+                  style: AppTextStyles.studioLabel.copyWith(
+                    color: AppColors.docIndigo.withOpacity(0.8),
+                  ),
                 ),
-              ),
+                const SizedBox(height: 16),
+                
+                _imageGrid(context, isDark),
+                
+                if (_isLoading) _progressSection(),
+                if (_errorMessage != null) _buildErrorCard(),
+                if (_outputPath != null && !_isLoading) ...[
+                  const SizedBox(height: 24),
+                  _buildSuccessModule(),
+                ],
+                
+                const SizedBox(height: 48),
+                _createButton(),
+                const SizedBox(height: 120),
+              ],
             ),
-            
-            // Sticky Bar
-            _buildStickyBar(),
-          ],
+          ),
         ),
       ),
     );
   }
 
-  Widget _buildSectionTitle(String title) {
-    return Text(
-      title,
-      style: AppTextStyles.badge.copyWith(
-        color: Colors.white.withOpacity(0.4),
-        letterSpacing: 2,
-      ),
-    );
-  }
-
-  Widget _buildImageGrid() {
+  Widget _imageGrid(BuildContext context, bool isDark) {
     return Wrap(
       spacing: 12,
       runSpacing: 12,
-      children: _selectedImagePaths.asMap().entries.map((entry) {
-        final index = entry.key;
-        final path = entry.value;
-        return Stack(
-          children: [
-            LiquidGlassContainer(
-              width: 80,
-              height: 80,
-              padding: EdgeInsets.zero,
-              borderRadius: 12,
-              child: ClipRRect(
-                borderRadius: BorderRadius.circular(12),
-                child: Image.file(File(path), fit: BoxFit.cover),
-              ),
-            ),
-            Positioned(
-              top: 2,
-              right: 2,
-              child: GestureDetector(
-                onTap: () => setState(() => _selectedImagePaths.removeAt(index)),
-                child: Container(
-                  padding: const EdgeInsets.all(2),
-                  decoration: const BoxDecoration(color: Colors.black54, shape: BoxShape.circle),
-                  child: const Icon(Icons.close, size: 12, color: Colors.white),
+      children: [
+        ..._selectedImagePaths.asMap().entries.map((entry) {
+          final index = entry.key;
+          final imgPath = entry.value;
+          return Stack(
+            clipBehavior: Clip.none,
+            children: [
+              LiquidGlassContainer(
+                width: 100,
+                height: 100,
+                padding: EdgeInsets.zero,
+                blur: 15,
+                color: isDark ? Colors.white.withOpacity(0.05) : Colors.white.withOpacity(0.7),
+                child: ClipRRect(
+                  borderRadius: BorderRadius.circular(20),
+                  child: Image.file(File(imgPath), fit: BoxFit.cover),
                 ),
               ),
+              Positioned(
+                top: -6,
+                right: -6,
+                child: GestureDetector(
+                  onTap: () => setState(() => _selectedImagePaths.removeAt(index)),
+                  child: Container(
+                    padding: const EdgeInsets.all(4),
+                    decoration: BoxDecoration(
+                      color: Colors.black.withOpacity(0.4),
+                      shape: BoxShape.circle,
+                      border: Border.all(color: Colors.white10),
+                    ),
+                    child: BackdropFilter(
+                      filter: ImageFilter.blur(sigmaX: 5, sigmaY: 5),
+                      child: const Icon(Icons.close_rounded, size: 14, color: Colors.white70),
+                    ),
+                  ),
+                ),
+              ),
+              Positioned(
+                bottom: 8,
+                left: 8,
+                child: Container(
+                  padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
+                  decoration: BoxDecoration(
+                    color: Colors.black.withOpacity(0.3),
+                    borderRadius: BorderRadius.circular(6),
+                    border: Border.all(color: Colors.white10),
+                  ),
+                  child: Text(
+                    '${index + 1}',
+                    style: AppTextStyles.studioLabel.copyWith(
+                      color: Colors.white,
+                      fontSize: 10,
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
+                ),
+              ),
+            ],
+          );
+        }),
+        GestureDetector(
+          onTap: _isLoading ? null : _addImages,
+          child: LiquidGlassContainer(
+            width: 100,
+            height: 100,
+            blur: 25,
+            color: isDark ? Colors.white.withOpacity(0.03) : Colors.black.withOpacity(0.02),
+            child: Center(
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  Icon(
+                    Icons.add_photo_alternate_outlined,
+                    color: isDark ? Colors.white30 : Colors.black26,
+                    size: 24,
+                  ),
+                  const SizedBox(height: 8),
+                  Text(
+                    'ADD',
+                    style: AppTextStyles.studioLabel.copyWith(
+                      fontSize: 10,
+                      color: isDark ? Colors.white30 : Colors.black26,
+                    ),
+                  ),
+                ],
+              ),
             ),
-          ],
-        );
-      }).toList(),
+          ),
+        ),
+      ],
     );
   }
 
-  Widget _buildStickyBar() {
-    final canCreate = _selectedImagePaths.isNotEmpty && !_isLoading;
-    
-    return Container(
-      padding: const EdgeInsets.fromLTRB(20, 0, 20, 40),
-      child: LiquidGlassContainer(
-        borderRadius: 24,
-        padding: const EdgeInsets.all(12),
-        color: AppColors.darkSurfaceHigh,
-        child: _isLoading
-            ? Column(
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  const Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                    children: [
-                      Text('FUSING PAGES...', style: TextStyle(fontSize: 10, fontWeight: FontWeight.bold)),
-                      Text('RUNNING', style: TextStyle(fontSize: 10, color: AppColors.docIndigo)),
-                    ],
-                  ),
-                  const SizedBox(height: 8),
-                  LinearProgressIndicator(
-                    backgroundColor: Colors.white.withOpacity(0.05),
-                    color: AppColors.docIndigo,
-                    minHeight: 4,
-                  ),
-                ],
-              )
-            : ElevatedButton(
-                onPressed: canCreate ? _onCreatePdf : null,
-                style: ElevatedButton.styleFrom(
-                  backgroundColor: AppColors.docIndigo,
-                  foregroundColor: Colors.white,
-                  minimumSize: const Size(double.infinity, 56),
-                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
-                  elevation: 0,
-                ),
-                child: const Text('GENERATE PDF', style: TextStyle(fontWeight: FontWeight.w800, letterSpacing: 1)),
-              ),
+  Widget _progressSection() {
+    return Padding(
+      padding: const EdgeInsets.only(top: 40),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text(
+            'SYNCHRONIZING PRISMS...',
+            style: AppTextStyles.studioLabel.copyWith(
+              fontSize: 10,
+              color: AppColors.docIndigo.withOpacity(0.6),
+            ),
+          ),
+          const SizedBox(height: 12),
+          Container(
+            height: 4,
+            width: double.infinity,
+            decoration: BoxDecoration(
+              color: Colors.white.withOpacity(0.05),
+              borderRadius: BorderRadius.circular(2),
+            ),
+            child: LinearProgressIndicator(
+              backgroundColor: Colors.transparent,
+              color: AppColors.docIndigo,
+            ),
+          ),
+        ],
       ),
     );
   }
 
   Widget _buildErrorCard() {
+    return Padding(
+      padding: const EdgeInsets.only(top: 24),
+      child: LiquidGlassContainer(
+        padding: const EdgeInsets.all(16),
+        color: AppColors.audioRose.withOpacity(0.1),
+        blur: 10,
+        child: Row(
+          children: [
+            const Icon(Icons.error_outline, color: AppColors.audioRose, size: 20),
+            const SizedBox(width: 12),
+            Expanded(
+              child: Text(
+                _errorMessage!,
+                style: AppTextStyles.bodyMedium.copyWith(
+                  color: AppColors.audioRose,
+                  fontSize: 13,
+                ),
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _buildSuccessModule() {
     return LiquidGlassContainer(
-      padding: const EdgeInsets.all(16),
-      color: AppColors.audioRose.withOpacity(0.1),
-      margin: const EdgeInsets.only(top: 24),
-      child: Row(
+      padding: const EdgeInsets.all(24),
+      color: AppColors.docIndigo.withOpacity(0.05),
+      child: Column(
         children: [
-          const Icon(Icons.error_outline, color: AppColors.audioRose, size: 20),
-          const SizedBox(width: 12),
-          Expanded(child: Text(_errorMessage!, style: const TextStyle(color: AppColors.audioRose, fontSize: 13))),
+          const Icon(Icons.check_circle_rounded, color: AppColors.imageCyan, size: 44),
+          const SizedBox(height: 16),
+          Text(
+            'CAPTURE COMPLETE',
+            style: AppTextStyles.headlineSmall.copyWith(fontSize: 16, fontWeight: FontWeight.w900),
+          ),
+          const SizedBox(height: 8),
+          Text(
+            'The document has been securely stored in your vault.',
+            textAlign: TextAlign.center,
+            style: AppTextStyles.bodyMedium.copyWith(fontSize: 13, color: AppColors.onSurfaceVar),
+          ),
+          const SizedBox(height: 24),
+          Row(
+            children: [
+              Expanded(
+                child: MediaPillButton(
+                  label: 'OPEN FILE',
+                  onTap: () => FileService.openFile(_outputPath!),
+                  accentColor: AppColors.imageCyan,
+                ),
+              ),
+              const SizedBox(width: 12),
+              Expanded(
+                child: MediaPillButton(
+                  label: 'ANOTHER',
+                  onTap: _resetForm,
+                  accentColor: AppColors.docIndigo.withOpacity(0.5),
+                ),
+              ),
+            ],
+          ),
         ],
+      ),
+    );
+  }
+
+  Widget _createButton() {
+    final canCreate = _selectedImagePaths.isNotEmpty && !_isLoading;
+    return Opacity(
+      opacity: canCreate ? 1.0 : 0.3,
+      child: MediaPillButton(
+        label: _isLoading ? 'PROCESSING...' : 'INITIATE CAPTURE',
+        onTap: canCreate ? () => _onCreatePdf() : () => {},
+        accentColor: AppColors.docIndigo,
       ),
     );
   }
@@ -239,9 +290,9 @@ class _ImagesToPdfScreenState extends State<ImagesToPdfScreen> {
     final result = await FilePicker.platform.pickFiles(type: FileType.image, allowMultiple: true);
     if (result != null) {
       setState(() {
-        for (var path in result.paths) {
-          if (path != null && !_selectedImagePaths.contains(path)) {
-            _selectedImagePaths.add(path);
+        for (var imgPath in result.paths) {
+          if (imgPath != null && !_selectedImagePaths.contains(imgPath)) {
+            _selectedImagePaths.add(imgPath);
           }
         }
         _errorMessage = null;
@@ -251,22 +302,47 @@ class _ImagesToPdfScreenState extends State<ImagesToPdfScreen> {
   }
 
   Future<void> _onCreatePdf() async {
-    setState(() { _isLoading = true; _errorMessage = null; });
+    if (_selectedImagePaths.isEmpty) return;
+    setState(() {
+      _isLoading = true;
+      _errorMessage = null;
+      _outputPath = null;
+    });
     final provider = context.read<TaskProvider>();
     final taskId = provider.addTask('${_selectedImagePaths.length} images → PDF', 'imagesToPdf');
+    _currentTaskId = taskId;
+    provider.updateProgress(taskId, 0.1);
 
     try {
       final List<Uint8List> imageBytesList = [];
-      for (final path in _selectedImagePaths) {
-        imageBytesList.add(await File(path).readAsBytes());
+      for (final imgPath in _selectedImagePaths) {
+        final bytes = await File(imgPath).readAsBytes();
+        imageBytesList.add(bytes);
       }
+      provider.updateProgress(taskId, 0.3);
+
       final pdfBytes = await compute(_buildPdf, imageBytesList);
+      provider.updateProgress(taskId, 0.9);
+
       final filename = "formatica_${DateTime.now().millisecondsSinceEpoch}.pdf";
-      final outPath = await FileService.saveToCategory(pdfBytes, filename, OutputCategory.pdfs);
+      final outPath = await FileService.saveToCategory(
+        pdfBytes, filename, OutputCategory.pdfs);
       provider.completeTask(taskId, outPath);
-      if (mounted) setState(() { _outputPath = outPath; _isLoading = false; });
+
+      if (mounted) {
+        setState(() {
+          _outputPath = outPath;
+          _isLoading = false;
+        });
+      }
     } catch (e) {
-      if (mounted) setState(() { _errorMessage = e.toString(); _isLoading = false; });
+      provider.failTask(taskId, e.toString());
+      if (mounted) {
+        setState(() {
+          _errorMessage = e.toString();
+          _isLoading = false;
+        });
+      }
     }
   }
 
@@ -278,6 +354,69 @@ class _ImagesToPdfScreenState extends State<ImagesToPdfScreen> {
       _isLoading = false;
     });
   }
+  void _showCancelDialog(BuildContext context, String taskId) {
+    showDialog(
+      context: context,
+      builder: (ctx) => BackdropFilter(
+        filter: ImageFilter.blur(sigmaX: 15, sigmaY: 15),
+        child: AlertDialog(
+          backgroundColor: Colors.black.withOpacity(0.85),
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(28),
+            side: BorderSide(color: Colors.white.withOpacity(0.08)),
+          ),
+          title: Text(
+            'TERMINATION',
+            style: AppTextStyles.studioLabel.copyWith(
+              color: Colors.white,
+              fontSize: 16,
+              fontWeight: FontWeight.w900,
+              letterSpacing: 2,
+            ),
+          ),
+          content: Text(
+            'ABORT ACTIVE CAPTURE SEQUENCE?',
+            textAlign: TextAlign.center,
+            style: AppTextStyles.bodyMedium.copyWith(
+              color: Colors.white60,
+              fontSize: 11,
+              letterSpacing: 1,
+            ),
+          ),
+          actionsAlignment: MainAxisAlignment.spaceEvenly,
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.pop(ctx),
+              child: Text(
+                'REMAIN',
+                style: AppTextStyles.studioLabel.copyWith(
+                  color: Colors.white24,
+                  fontSize: 10,
+                  fontWeight: FontWeight.bold,
+                ),
+              ),
+            ),
+            TextButton(
+              onPressed: () {
+                final provider = Provider.of<TaskProvider>(context, listen: false);
+                provider.cancelTask(taskId);
+                Navigator.pop(ctx);
+                _resetForm();
+              },
+              child: Text(
+                'ABORT',
+                style: AppTextStyles.studioLabel.copyWith(
+                  color: AppColors.audioRose,
+                  fontSize: 10,
+                  fontWeight: FontWeight.bold,
+                ),
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
 }
 
 Future<Uint8List> _buildPdf(List<Uint8List> imageBytesList) async {
@@ -287,8 +426,17 @@ Future<Uint8List> _buildPdf(List<Uint8List> imageBytesList) async {
     doc.addPage(pw.Page(
       pageFormat: PdfPageFormat.a4,
       margin: pw.EdgeInsets.zero,
-      build: (ctx) => pw.Center(child: pw.Image(image, fit: pw.BoxFit.contain)),
+      build: (ctx) => pw.Center(
+        child: pw.Image(image, fit: pw.BoxFit.contain),
+      ),
     ));
   }
   return await doc.save();
 }
+
+
+
+
+
+
+
