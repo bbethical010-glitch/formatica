@@ -1,0 +1,221 @@
+<!DOCTYPE html>
+
+<html class="dark" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Formatica Settings</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;700;800&amp;family=Inter:wght@400;500;600&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    "colors": {
+                        "primary-dim": "#695ef6",
+                        "inverse-on-surface": "#55545b",
+                        "on-background": "#f9f5fd",
+                        "tertiary-fixed": "#c39fff",
+                        "primary-fixed-dim": "#8b84ff",
+                        "error-container": "#a70138",
+                        "background": "#0e0e13",
+                        "surface-container-high": "#1f1f26",
+                        "on-primary-fixed": "#000000",
+                        "tertiary-dim": "#8d51ea",
+                        "surface-container-lowest": "#000000",
+                        "on-error": "#490013",
+                        "surface-variant": "#25252d",
+                        "inverse-surface": "#fcf8ff",
+                        "secondary-fixed-dim": "#5debc4",
+                        "error-dim": "#d73357",
+                        "inverse-primary": "#5245df",
+                        "surface": "#0e0e13",
+                        "on-secondary-container": "#defff1",
+                        "on-surface": "#f9f5fd",
+                        "on-secondary": "#005d4a",
+                        "secondary-container": "#006b55",
+                        "primary": "#a9a4ff",
+                        "tertiary-container": "#9d62fb",
+                        "surface-container-low": "#131319",
+                        "on-secondary-fixed": "#004939",
+                        "surface-tint": "#a9a4ff",
+                        "secondary-dim": "#5debc4",
+                        "surface-bright": "#2c2b33",
+                        "on-surface-variant": "#acaab1",
+                        "on-primary-fixed-variant": "#1f0097",
+                        "on-primary": "#20009e",
+                        "error": "#ff6e84",
+                        "primary-fixed": "#9a94ff",
+                        "on-tertiary-container": "#000000",
+                        "tertiary": "#b486ff",
+                        "on-primary-container": "#17007c",
+                        "surface-container": "#19191f",
+                        "secondary-fixed": "#6dfad2",
+                        "outline": "#76747b",
+                        "on-tertiary": "#2d0062",
+                        "secondary": "#6dfad2",
+                        "surface-container-highest": "#25252d",
+                        "on-tertiary-fixed-variant": "#4d00a0",
+                        "on-secondary-fixed-variant": "#006853",
+                        "on-tertiary-fixed": "#22004e",
+                        "on-error-container": "#ffb2b9",
+                        "surface-dim": "#0e0e13",
+                        "primary-container": "#9a94ff",
+                        "tertiary-fixed-dim": "#b88dff",
+                        "outline-variant": "#48474d"
+                    },
+                    "borderRadius": {
+                        "DEFAULT": "0.25rem",
+                        "lg": "1.0rem",
+                        "xl": "1.25rem",
+                        "full": "9999px"
+                    },
+                    "fontFamily": {
+                        "headline": ["Manrope"],
+                        "body": ["Inter"],
+                        "label": ["Inter"]
+                    }
+                },
+            },
+        }
+    </script>
+<style>
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+        }
+        .liquid-glass {
+            background: rgba(37, 37, 45, 0.6);
+            backdrop-filter: blur(24px) saturate(160%);
+            outline: 1px solid rgba(72, 71, 77, 0.15);
+        }
+    </style>
+<style>
+    body {
+      min-height: max(884px, 100dvh);
+    }
+  </style>
+  </head>
+<body class="bg-surface text-on-surface font-body selection:bg-primary/30">
+<!-- Top Navigation Bar (Shared Component) -->
+<header class="bg-[#0e0e13]/80 backdrop-blur-xl docked full-width top-0 z-40 fixed">
+<div class="flex justify-between items-center px-6 h-16 w-full max-w-7xl mx-auto">
+<div class="flex items-center gap-4">
+<button class="text-[#a9a4ff] hover:bg-[#1f1f26] transition-colors p-2 rounded-full active:scale-95">
+<span class="material-symbols-outlined">arrow_back</span>
+</button>
+<span class="font-['Manrope'] font-black tracking-tighter text-2xl text-[#a9a4ff]">Formatica</span>
+</div>
+<div class="flex items-center gap-4">
+<button class="text-[#a9a4ff] hover:bg-[#1f1f26] transition-colors p-2 rounded-full active:scale-95">
+<span class="material-symbols-outlined">lock</span>
+</button>
+</div>
+</div>
+</header>
+<main class="pt-24 pb-32 px-6 max-w-2xl mx-auto">
+<!-- Editorial Header -->
+<section class="mb-12">
+<h1 class="font-headline font-extrabold text-5xl tracking-tight mb-2 text-on-surface">Settings</h1>
+<p class="text-on-surface-variant font-medium tracking-wide">Configure your digital workspace and AI processing preferences.</p>
+</section>
+<!-- Appearance Section -->
+<section class="mb-10">
+<h2 class="font-headline font-bold text-lg mb-4 text-primary tracking-tight px-1">Appearance</h2>
+<div class="surface-container-high rounded-xl p-6 flex items-center justify-between transition-all hover:bg-surface-container-highest">
+<div class="flex items-center gap-4">
+<div class="w-12 h-12 rounded-full bg-surface-container flex items-center justify-center text-primary">
+<span class="material-symbols-outlined">dark_mode</span>
+</div>
+<div>
+<p class="font-headline font-bold text-on-surface">Dark Mode</p>
+<p class="text-sm text-on-surface-variant">Switch between light and dark themes</p>
+</div>
+</div>
+<!-- Custom Special Toggle -->
+<button class="relative w-16 h-8 rounded-full bg-gradient-to-br from-[#695ef6] to-[#a9a4ff] p-1 flex items-center shadow-inner group">
+<div class="w-6 h-6 rounded-full bg-surface flex items-center justify-center translate-x-8 transition-transform duration-300">
+<span class="material-symbols-outlined text-[14px] text-primary" style="font-variation-settings: 'FILL' 1;">nightlight</span>
+</div>
+</button>
+</div>
+</section>
+<!-- Backend Status Card -->
+<section class="mb-10">
+<h2 class="font-headline font-bold text-lg mb-4 text-primary tracking-tight px-1">Processing Engine</h2>
+<div class="relative overflow-hidden rounded-xl bg-surface-container-low p-6 border-l-4 border-secondary">
+<div class="absolute top-0 right-0 p-4 opacity-10">
+<span class="material-symbols-outlined text-7xl">memory</span>
+</div>
+<div class="flex flex-col gap-4">
+<div class="flex items-center justify-between">
+<div class="flex items-center gap-3">
+<span class="material-symbols-outlined text-secondary" style="font-variation-settings: 'FILL' 1;">cloud_done</span>
+<span class="font-headline font-bold text-on-surface">Status: Connected</span>
+</div>
+<div class="px-3 py-1 rounded-full bg-secondary/10 text-secondary text-xs font-bold uppercase tracking-widest">Live</div>
+</div>
+<div class="bg-surface-container-lowest/50 rounded-lg p-4">
+<p class="text-xs font-mono text-secondary-dim mb-1">ENDPOINT</p>
+<p class="text-on-surface font-medium">hf.space/v1/formatica-engine-main</p>
+</div>
+<p class="text-sm text-on-surface-variant">High-performance document synthesis is currently active and processing requests via Hugging Face Inference Endpoints.</p>
+</div>
+</div>
+</section>
+<!-- Output Folders Section -->
+<section class="mb-10">
+<h2 class="font-headline font-bold text-lg mb-4 text-primary tracking-tight px-1">Output Directories</h2>
+<div class="flex flex-col gap-2">
+<!-- Folder Item -->
+<div class="h-[72px] flex items-center px-5 rounded-xl surface-container-high hover:bg-surface-container-highest transition-all group">
+<span class="material-symbols-outlined text-on-surface-variant group-hover:text-primary transition-colors mr-4">description</span>
+<div class="flex-1">
+<p class="font-headline font-bold text-on-surface text-sm">Documents</p>
+<p class="text-xs text-on-surface-variant font-mono">/user/formatica/exports/docs</p>
+</div>
+<span class="material-symbols-outlined text-on-surface-variant">chevron_right</span>
+</div>
+<!-- Folder Item -->
+<div class="h-[72px] flex items-center px-5 rounded-xl surface-container-high hover:bg-surface-container-highest transition-all group">
+<span class="material-symbols-outlined text-on-surface-variant group-hover:text-primary transition-colors mr-4">movie</span>
+<div class="flex-1">
+<p class="font-headline font-bold text-on-surface text-sm">Videos</p>
+<p class="text-xs text-on-surface-variant font-mono">/user/formatica/exports/media/vids</p>
+</div>
+<span class="material-symbols-outlined text-on-surface-variant">chevron_right</span>
+</div>
+<!-- Folder Item -->
+<div class="h-[72px] flex items-center px-5 rounded-xl surface-container-high hover:bg-surface-container-highest transition-all group">
+<span class="material-symbols-outlined text-on-surface-variant group-hover:text-primary transition-colors mr-4">image</span>
+<div class="flex-1">
+<p class="font-headline font-bold text-on-surface text-sm">Snapshots</p>
+<p class="text-xs text-on-surface-variant font-mono">/user/formatica/exports/images</p>
+</div>
+<span class="material-symbols-outlined text-on-surface-variant">chevron_right</span>
+</div>
+</div>
+</section>
+<!-- App Metadata -->
+<div class="text-center mt-12 py-8 opacity-40">
+<p class="text-sm font-headline font-bold tracking-tight">Formatica Studio v4.2.0</p>
+<p class="text-xs uppercase tracking-[0.2em] mt-1">Liquid Glass Interface</p>
+</div>
+</main>
+<!-- Bottom Dock (Shared Component) -->
+<nav class="fixed bottom-4 left-0 right-0 z-50 flex justify-around items-center px-4 h-[72px] w-[calc(100%-32px)] max-w-md mx-auto rounded-full bg-[#25252d]/60 backdrop-blur-[24px] border border-white/15 shadow-[0_40px_40px_-10px_rgba(0,0,0,0.4)]">
+<!-- Home Tab -->
+<a class="text-[#acaab1] p-4 hover:text-white transition-all" href="#">
+<span class="material-symbols-outlined">home</span>
+</a>
+<!-- History Tab -->
+<a class="text-[#acaab1] p-4 hover:text-white transition-all" href="#">
+<span class="material-symbols-outlined">history</span>
+</a>
+<!-- Settings Tab (Active) -->
+<a class="bg-gradient-to-br from-[#a9a4ff] to-[#695ef6] text-[#0e0e13] rounded-full p-4 scale-110 transition-transform" href="#">
+<span class="material-symbols-outlined" style="font-variation-settings: 'FILL' 1;">settings</span>
+</a>
+</nav>
+</body></html>

@@ -1,0 +1,219 @@
+<!DOCTYPE html>
+
+<html class="dark" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;700;800&amp;family=Inter:wght@400;500;600&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<script id="tailwind-config">
+      tailwind.config = {
+        darkMode: "class",
+        theme: {
+          extend: {
+            "colors": {
+                    "primary-dim": "#695ef6",
+                    "inverse-on-surface": "#55545b",
+                    "on-background": "#f9f5fd",
+                    "tertiary-fixed": "#c39fff",
+                    "primary-fixed-dim": "#8b84ff",
+                    "error-container": "#a70138",
+                    "background": "#0e0e13",
+                    "surface-container-high": "#1f1f26",
+                    "on-primary-fixed": "#000000",
+                    "tertiary-dim": "#8d51ea",
+                    "surface-container-lowest": "#000000",
+                    "on-error": "#490013",
+                    "surface-variant": "#25252d",
+                    "inverse-surface": "#fcf8ff",
+                    "secondary-fixed-dim": "#5debc4",
+                    "error-dim": "#d73357",
+                    "inverse-primary": "#5245df",
+                    "surface": "#0e0e13",
+                    "on-secondary-container": "#defff1",
+                    "on-surface": "#f9f5fd",
+                    "on-secondary": "#005d4a",
+                    "secondary-container": "#006b55",
+                    "primary": "#a9a4ff",
+                    "tertiary-container": "#9d62fb",
+                    "surface-container-low": "#131319",
+                    "on-secondary-fixed": "#004939",
+                    "surface-tint": "#a9a4ff",
+                    "secondary-dim": "#5debc4",
+                    "surface-bright": "#2c2b33",
+                    "on-surface-variant": "#acaab1",
+                    "on-primary-fixed-variant": "#1f0097",
+                    "on-primary": "#20009e",
+                    "error": "#ff6e84",
+                    "primary-fixed": "#9a94ff",
+                    "on-tertiary-container": "#000000",
+                    "tertiary": "#b486ff",
+                    "on-primary-container": "#17007c",
+                    "surface-container": "#19191f",
+                    "secondary-fixed": "#6dfad2",
+                    "outline": "#76747b",
+                    "on-tertiary": "#2d0062",
+                    "secondary": "#6dfad2",
+                    "surface-container-highest": "#25252d",
+                    "on-tertiary-fixed-variant": "#4d00a0",
+                    "on-secondary-fixed-variant": "#006853",
+                    "on-tertiary-fixed": "#22004e",
+                    "on-error-container": "#ffb2b9",
+                    "surface-dim": "#0e0e13",
+                    "primary-container": "#9a94ff",
+                    "tertiary-fixed-dim": "#b88dff",
+                    "outline-variant": "#48474d"
+            },
+            "borderRadius": {
+                    "DEFAULT": "0.25rem",
+                    "lg": "1.0rem",
+                    "xl": "1.25rem",
+                    "full": "9999px"
+            },
+            "fontFamily": {
+                    "headline": ["Manrope"],
+                    "body": ["Inter"],
+                    "label": ["Inter"]
+            }
+          },
+        },
+      }
+    </script>
+<style>
+        .glass-panel {
+            background: rgba(37, 37, 45, 0.6);
+            backdrop-filter: blur(24px) saturate(160%);
+            outline: 1px solid rgba(72, 71, 77, 0.15);
+        }
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+        }
+        .liquid-shadow {
+            shadow-[0_40px_40px_-10px_rgba(0,0,0,0.4)];
+        }
+    </style>
+<style>
+    body {
+      min-height: max(884px, 100dvh);
+    }
+  </style>
+  </head>
+<body class="bg-background text-on-surface font-body min-h-screen selection:bg-primary/30">
+<!-- TopAppBar -->
+<nav class="fixed top-0 left-0 right-0 z-50 flex justify-between items-center px-6 h-16 w-full bg-[#0e0e13]/80 backdrop-blur-xl">
+<div class="flex items-center gap-4">
+<button class="text-[#a9a4ff] hover:bg-[#1f1f26] transition-colors p-2 rounded-full active:scale-95">
+<span class="material-symbols-outlined">arrow_back</span>
+</button>
+<h1 class="font-headline font-bold tracking-tight text-xl text-on-surface">Download Media</h1>
+</div>
+<div class="flex items-center gap-2">
+<span class="font-headline font-black tracking-tighter text-2xl text-[#a9a4ff]">Formatica</span>
+<button class="text-[#a9a4ff] hover:bg-[#1f1f26] transition-colors p-2 rounded-full active:scale-95">
+<span class="material-symbols-outlined">lock</span>
+</button>
+</div>
+</nav>
+<main class="pt-24 pb-32 px-6 max-w-2xl mx-auto space-y-8">
+<!-- Legal Banner -->
+<div class="border-l-4 border-amber-500 bg-surface-container-low p-4 rounded-r-xl">
+<div class="flex gap-3">
+<span class="material-symbols-outlined text-amber-500">gavel</span>
+<p class="text-sm text-on-surface-variant font-medium leading-relaxed">
+                    Only download content you have the legal right to use. Formatica does not support the unauthorized distribution of copyrighted material.
+                </p>
+</div>
+</div>
+<!-- URL Input Section -->
+<section class="space-y-4">
+<div class="relative group">
+<div class="absolute inset-y-0 left-4 flex items-center pointer-events-none">
+<span class="material-symbols-outlined text-outline">link</span>
+</div>
+<input class="w-full h-14 pl-12 pr-12 bg-surface-container-high border-none rounded-xl text-on-surface placeholder:text-outline focus:ring-2 focus:ring-primary/50 transition-all font-medium" placeholder="https://vimeo.com/76979871" type="text" value="https://vimeo.com/76979871"/>
+<div class="absolute inset-y-0 right-4 flex items-center">
+<button class="text-outline hover:text-on-surface transition-colors">
+<span class="material-symbols-outlined">cancel</span>
+</button>
+</div>
+<div class="absolute -bottom-0.5 left-0 right-0 h-0.5 bg-primary rounded-full"></div>
+</div>
+<!-- URL Validation Chip -->
+<div class="flex animate-in fade-in slide-in-from-top-1">
+<div class="flex items-center gap-2 px-3 py-1.5 bg-secondary-container/20 text-secondary border border-secondary/20 rounded-full">
+<span class="material-symbols-outlined text-sm" style="font-variation-settings: 'FILL' 1;">check_circle</span>
+<span class="text-xs font-semibold tracking-wide uppercase">Valid URL</span>
+</div>
+</div>
+</section>
+<!-- Media Preview Bento (Visual Enhancement) -->
+<div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+<div class="md:col-span-2 aspect-video rounded-xl overflow-hidden glass-panel relative group">
+<img class="w-full h-full object-cover" data-alt="Cinematic frame of a high-speed car chase through a neon-lit cyberpunk city at night with motion blur" src="https://lh3.googleusercontent.com/aida-public/AB6AXuC3RiceGrr45oYGXrsaRLrIzdJgalfBqGouvN3UTifu-W3xTsjQK1VU5otB40eL8ecjKk2UPcy5dXMG7L7KsrZ0ztoslaaM3SpEtyt-Ppu1BDkGx00sjBG-N5NQYdWv8OeXwmQcWQMWA1fRaFiPTG5KeOMJGWvtJqrMyJ8zvyraV_Kvu6xUoOK1HocKIgs-uwbnycXpBAXj0wmIpwjAbsDkYqENgAjZudzzmGBIwys2USwU7y-pGJMMdkL3s8eAmFZ0PS3rnlx4-1o"/>
+<div class="absolute inset-0 bg-gradient-to-t from-black/80 via-transparent to-transparent flex items-end p-4">
+<div>
+<p class="text-xs font-bold text-primary tracking-widest uppercase mb-1">Preview</p>
+<h3 class="font-headline font-bold text-lg leading-tight">Neon Pulse: The Underworld Chase</h3>
+</div>
+</div>
+</div>
+<div class="bg-surface-container-low rounded-xl p-4 flex flex-col justify-center space-y-4">
+<div class="space-y-1">
+<p class="text-[10px] uppercase tracking-widest text-on-surface-variant font-bold">Duration</p>
+<p class="font-headline font-bold text-xl tracking-tight">04:22</p>
+</div>
+<div class="space-y-1">
+<p class="text-[10px] uppercase tracking-widest text-on-surface-variant font-bold">Size</p>
+<p class="font-headline font-bold text-xl tracking-tight">142 MB</p>
+</div>
+</div>
+</div>
+<!-- Format Selection -->
+<section class="space-y-4">
+<h2 class="text-xs font-bold uppercase tracking-widest text-on-surface-variant px-1">Select Output Format</h2>
+<div class="flex flex-wrap gap-3">
+<!-- Selected Chip -->
+<button class="h-10 px-6 rounded-xl flex items-center gap-2 bg-gradient-to-br from-primary to-primary-dim text-on-primary font-bold shadow-lg shadow-primary/20 transition-transform active:scale-95">
+<span class="material-symbols-outlined text-[20px]">hd</span>
+                    1080p
+                </button>
+<button class="h-10 px-6 rounded-xl flex items-center gap-2 bg-surface-container-high text-on-surface-variant font-semibold hover:bg-surface-container-highest transition-all active:scale-95">
+                    720p
+                </button>
+<button class="h-10 px-6 rounded-xl flex items-center gap-2 bg-surface-container-high text-on-surface-variant font-semibold hover:bg-surface-container-highest transition-all active:scale-95">
+                    480p
+                </button>
+<!-- Audio (Rose) -->
+<button class="h-10 px-6 rounded-xl flex items-center gap-2 bg-error-container/20 text-error border border-error/20 font-semibold hover:bg-error-container/30 transition-all active:scale-95">
+<span class="material-symbols-outlined text-[20px]">music_note</span>
+                    Audio
+                </button>
+</div>
+</section>
+<!-- Main Action Button -->
+<div class="pt-6">
+<button class="w-full h-14 rounded-xl bg-gradient-to-r from-sky-400 to-blue-600 text-white font-headline font-extrabold text-lg flex items-center justify-center gap-3 shadow-xl shadow-sky-500/10 hover:brightness-110 transition-all active:scale-[0.98]">
+<span class="material-symbols-outlined">download</span>
+                Start Download
+            </button>
+</div>
+</main>
+<!-- BottomNavBar -->
+<nav class="fixed bottom-4 left-0 right-0 z-50 flex justify-around items-center px-4">
+<div class="bg-[#25252d]/60 backdrop-blur-[24px] fixed bottom-4 left-1/2 -translate-x-1/2 w-[calc(100%-32px)] max-w-md h-[72px] rounded-full border border-white/15 shadow-[0_40px_40px_-10px_rgba(0,0,0,0.4)] flex justify-around items-center px-4">
+<!-- Home (Active) -->
+<button class="bg-gradient-to-br from-[#a9a4ff] to-[#695ef6] text-[#0e0e13] rounded-full p-4 scale-110 transition-transform flex items-center justify-center">
+<span class="material-symbols-outlined" style="font-variation-settings: 'FILL' 1;">home</span>
+</button>
+<!-- History -->
+<button class="text-[#acaab1] p-4 hover:text-white transition-all flex items-center justify-center">
+<span class="material-symbols-outlined">history</span>
+</button>
+<!-- Settings -->
+<button class="text-[#acaab1] p-4 hover:text-white transition-all flex items-center justify-center">
+<span class="material-symbols-outlined">settings</span>
+</button>
+</div>
+</nav>
+</body></html>

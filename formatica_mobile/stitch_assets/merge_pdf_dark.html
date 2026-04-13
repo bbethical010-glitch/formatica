@@ -1,0 +1,211 @@
+<!DOCTYPE html>
+
+<html class="dark" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Merge PDF - Formatica</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;700;800&amp;family=Inter:wght@400;500;600&amp;family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+      tailwind.config = {
+        darkMode: "class",
+        theme: {
+          extend: {
+            "colors": {
+                    "primary-dim": "#695ef6",
+                    "inverse-on-surface": "#55545b",
+                    "on-background": "#f9f5fd",
+                    "tertiary-fixed": "#c39fff",
+                    "primary-fixed-dim": "#8b84ff",
+                    "error-container": "#a70138",
+                    "background": "#0e0e13",
+                    "surface-container-high": "#1f1f26",
+                    "on-primary-fixed": "#000000",
+                    "tertiary-dim": "#8d51ea",
+                    "surface-container-lowest": "#000000",
+                    "on-error": "#490013",
+                    "surface-variant": "#25252d",
+                    "inverse-surface": "#fcf8ff",
+                    "secondary-fixed-dim": "#5debc4",
+                    "error-dim": "#d73357",
+                    "inverse-primary": "#5245df",
+                    "surface": "#0e0e13",
+                    "on-secondary-container": "#defff1",
+                    "on-surface": "#f9f5fd",
+                    "on-secondary": "#005d4a",
+                    "secondary-container": "#006b55",
+                    "primary": "#a9a4ff",
+                    "tertiary-container": "#9d62fb",
+                    "surface-container-low": "#131319",
+                    "on-secondary-fixed": "#004939",
+                    "surface-tint": "#a9a4ff",
+                    "secondary-dim": "#5debc4",
+                    "surface-bright": "#2c2b33",
+                    "on-surface-variant": "#acaab1",
+                    "on-primary-fixed-variant": "#1f0097",
+                    "on-primary": "#20009e",
+                    "error": "#ff6e84",
+                    "primary-fixed": "#9a94ff",
+                    "on-tertiary-container": "#000000",
+                    "tertiary": "#b486ff",
+                    "on-primary-container": "#17007c",
+                    "surface-container": "#19191f",
+                    "secondary-fixed": "#6dfad2",
+                    "outline": "#76747b",
+                    "on-tertiary": "#2d0062",
+                    "secondary": "#6dfad2",
+                    "surface-container-highest": "#25252d",
+                    "on-tertiary-fixed-variant": "#4d00a0",
+                    "on-secondary-fixed-variant": "#006853",
+                    "on-tertiary-fixed": "#22004e",
+                    "on-error-container": "#ffb2b9",
+                    "surface-dim": "#0e0e13",
+                    "primary-container": "#9a94ff",
+                    "tertiary-fixed-dim": "#b88dff",
+                    "outline-variant": "#48474d"
+            },
+            "borderRadius": {
+                    "DEFAULT": "0.25rem",
+                    "lg": "1.0rem",
+                    "xl": "1.25rem",
+                    "full": "9999px"
+            },
+            "fontFamily": {
+                    "headline": ["Manrope"],
+                    "body": ["Inter"],
+                    "label": ["Inter"]
+            }
+          },
+        },
+      }
+    </script>
+<style>
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+        }
+        .glass-panel {
+            background: rgba(37, 37, 45, 0.6);
+            backdrop-filter: blur(24px) saturate(160%);
+        }
+        .ghost-border {
+            outline: 1px solid rgba(72, 71, 77, 0.15);
+        }
+    </style>
+<style>
+    body {
+      min-height: max(884px, 100dvh);
+    }
+  </style>
+  </head>
+<body class="bg-surface text-on-surface font-body min-h-screen flex flex-col items-center">
+<!-- TopAppBar -->
+<header class="fixed top-0 z-50 flex justify-between items-center px-6 h-16 w-full bg-[#0e0e13]/80 backdrop-blur-xl">
+<div class="flex items-center gap-4">
+<span class="material-symbols-outlined text-[#a9a4ff] cursor-pointer">arrow_back</span>
+<h1 class="font-headline font-bold tracking-tight text-xl text-[#a9a4ff]">Merge PDF</h1>
+</div>
+<div class="flex items-center gap-4">
+<div class="flex items-center gap-1.5 bg-secondary-container/20 px-3 py-1 rounded-full">
+<span class="material-symbols-outlined text-secondary text-[16px]" style="font-variation-settings: 'FILL' 1;">shield</span>
+<span class="text-secondary font-label text-[12px] font-semibold tracking-wide">On-Device</span>
+</div>
+<span class="material-symbols-outlined text-[#acaab1] cursor-pointer">lock</span>
+</div>
+</header>
+<main class="w-full max-w-2xl px-6 pt-24 pb-32 flex-grow">
+<!-- Header Section with Asymmetry -->
+<div class="mb-10">
+<h2 class="font-headline font-extrabold text-4xl tracking-tighter mb-2 leading-none">
+                Combine your <br/> <span class="text-secondary">documents.</span>
+</h2>
+<p class="text-on-surface-variant font-body text-sm max-w-[280px]">
+                Files are processed locally on your device for maximum privacy and speed.
+            </p>
+</div>
+<!-- Add PDFs Button (Dashed) -->
+<button class="w-full h-32 mb-8 rounded-xl border-2 border-dashed border-secondary/30 bg-secondary/5 flex flex-col items-center justify-center gap-3 transition-all hover:bg-secondary/10 hover:border-secondary group">
+<div class="w-12 h-12 rounded-full bg-secondary/20 flex items-center justify-center group-hover:scale-110 transition-transform">
+<span class="material-symbols-outlined text-secondary text-3xl">add</span>
+</div>
+<span class="font-headline font-bold text-secondary">Add PDFs</span>
+</button>
+<!-- PDF List (Reorderable Aesthetic) -->
+<div class="space-y-3">
+<div class="flex items-center gap-3">
+<span class="text-xs font-label font-bold text-on-surface-variant tracking-widest uppercase">Queue (2)</span>
+<div class="h-[1px] flex-grow bg-outline-variant/10"></div>
+</div>
+<!-- Item 1: report.pdf -->
+<div class="h-[72px] flex items-center justify-between px-4 bg-surface-container-high rounded-lg ghost-border hover:bg-surface-container-highest transition-colors cursor-grab active:cursor-grabbing">
+<div class="flex items-center gap-4">
+<span class="material-symbols-outlined text-on-surface-variant">drag_indicator</span>
+<div class="w-10 h-10 rounded-md bg-primary/10 flex items-center justify-center">
+<span class="material-symbols-outlined text-primary">picture_as_pdf</span>
+</div>
+<div>
+<p class="font-headline font-bold text-on-surface text-sm">report.pdf</p>
+<div class="flex items-center gap-2">
+<span class="text-[11px] font-body text-on-surface-variant">2.4 MB</span>
+<span class="w-1 h-1 rounded-full bg-outline-variant"></span>
+<span class="bg-secondary/10 text-secondary px-2 py-0.5 rounded text-[10px] font-bold">12 pages</span>
+</div>
+</div>
+</div>
+<button class="material-symbols-outlined text-on-surface-variant hover:text-error transition-colors">close</button>
+</div>
+<!-- Item 2: appendix.pdf -->
+<div class="h-[72px] flex items-center justify-between px-4 bg-surface-container-high rounded-lg ghost-border hover:bg-surface-container-highest transition-colors cursor-grab active:cursor-grabbing">
+<div class="flex items-center gap-4">
+<span class="material-symbols-outlined text-on-surface-variant">drag_indicator</span>
+<div class="w-10 h-10 rounded-md bg-primary/10 flex items-center justify-center">
+<span class="material-symbols-outlined text-primary">picture_as_pdf</span>
+</div>
+<div>
+<p class="font-headline font-bold text-on-surface text-sm">appendix.pdf</p>
+<div class="flex items-center gap-2">
+<span class="text-[11px] font-body text-on-surface-variant">840 KB</span>
+<span class="w-1 h-1 rounded-full bg-outline-variant"></span>
+<span class="bg-secondary/10 text-secondary px-2 py-0.5 rounded text-[10px] font-bold">12 pages</span>
+</div>
+</div>
+</div>
+<button class="material-symbols-outlined text-on-surface-variant hover:text-error transition-colors">close</button>
+</div>
+</div>
+<!-- Call to Action -->
+<div class="mt-12 flex flex-col gap-4">
+<button class="w-full h-14 rounded-lg bg-gradient-to-r from-secondary to-secondary-dim text-on-secondary font-headline font-extrabold text-lg flex items-center justify-center gap-2 shadow-lg shadow-secondary/10 active:scale-95 transition-all">
+<span class="material-symbols-outlined">merge_type</span>
+                Merge PDF
+            </button>
+<p class="text-center text-[11px] text-on-surface-variant uppercase tracking-widest font-semibold">
+                Estimated processing time: <span class="text-on-surface">Instant</span>
+</p>
+</div>
+</main>
+<!-- Bottom Dock / BottomNavBar -->
+<nav class="fixed bottom-4 left-0 right-0 z-50 flex justify-around items-center px-4 h-[72px] w-[calc(100%-32px)] max-w-md mx-auto glass-panel rounded-full border border-white/15 shadow-[0_40px_40px_-10px_rgba(0,0,0,0.4)]">
+<!-- Home (Active) -->
+<div class="flex flex-col items-center justify-center gap-1 group">
+<div class="bg-gradient-to-br from-[#a9a4ff] to-[#695ef6] text-[#0e0e13] rounded-full p-4 scale-110 transition-transform cursor-pointer">
+<span class="material-symbols-outlined" style="font-variation-settings: 'FILL' 1;">home</span>
+</div>
+</div>
+<!-- History -->
+<div class="flex flex-col items-center justify-center gap-1 group">
+<div class="text-[#acaab1] p-4 hover:text-white transition-all cursor-pointer">
+<span class="material-symbols-outlined">history</span>
+</div>
+</div>
+<!-- Settings -->
+<div class="flex flex-col items-center justify-center gap-1 group">
+<div class="text-[#acaab1] p-4 hover:text-white transition-all cursor-pointer">
+<span class="material-symbols-outlined">settings</span>
+</div>
+</div>
+</nav>
+<!-- Visual Decoration (Abstract Glass Element) -->
+<div class="fixed top-1/4 -right-20 w-64 h-64 bg-primary/5 rounded-full blur-[100px] pointer-events-none"></div>
+<div class="fixed bottom-1/4 -left-20 w-64 h-64 bg-secondary/5 rounded-full blur-[100px] pointer-events-none"></div>
+</body></html>

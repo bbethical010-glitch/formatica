@@ -1,0 +1,224 @@
+<!DOCTYPE html>
+
+<html class="dark" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Images to PDF - Formatica</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;700;800&amp;family=Inter:wght@400;500;600&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    "colors": {
+                        "primary-dim": "#695ef6",
+                        "inverse-on-surface": "#55545b",
+                        "on-background": "#f9f5fd",
+                        "tertiary-fixed": "#c39fff",
+                        "primary-fixed-dim": "#8b84ff",
+                        "error-container": "#a70138",
+                        "background": "#0e0e13",
+                        "surface-container-high": "#1f1f26",
+                        "on-primary-fixed": "#000000",
+                        "tertiary-dim": "#8d51ea",
+                        "surface-container-lowest": "#000000",
+                        "on-error": "#490013",
+                        "surface-variant": "#25252d",
+                        "inverse-surface": "#fcf8ff",
+                        "secondary-fixed-dim": "#5debc4",
+                        "error-dim": "#d73357",
+                        "inverse-primary": "#5245df",
+                        "surface": "#0e0e13",
+                        "on-secondary-container": "#defff1",
+                        "on-surface": "#f9f5fd",
+                        "on-secondary": "#005d4a",
+                        "secondary-container": "#006b55",
+                        "primary": "#a9a4ff",
+                        "tertiary-container": "#9d62fb",
+                        "surface-container-low": "#131319",
+                        "on-secondary-fixed": "#004939",
+                        "surface-tint": "#a9a4ff",
+                        "secondary-dim": "#5debc4",
+                        "surface-bright": "#2c2b33",
+                        "on-surface-variant": "#acaab1",
+                        "on-primary-fixed-variant": "#1f0097",
+                        "on-primary": "#20009e",
+                        "error": "#ff6e84",
+                        "primary-fixed": "#9a94ff",
+                        "on-tertiary-container": "#000000",
+                        "tertiary": "#b486ff",
+                        "on-primary-container": "#17007c",
+                        "surface-container": "#19191f",
+                        "secondary-fixed": "#6dfad2",
+                        "outline": "#76747b",
+                        "on-tertiary": "#2d0062",
+                        "secondary": "#6dfad2",
+                        "surface-container-highest": "#25252d",
+                        "on-tertiary-fixed-variant": "#4d00a0",
+                        "on-secondary-fixed-variant": "#006853",
+                        "on-tertiary-fixed": "#22004e",
+                        "on-error-container": "#ffb2b9",
+                        "surface-dim": "#0e0e13",
+                        "primary-container": "#9a94ff",
+                        "tertiary-fixed-dim": "#b88dff",
+                        "outline-variant": "#48474d"
+                    },
+                    "borderRadius": {
+                        "DEFAULT": "0.25rem",
+                        "lg": "1.0rem",
+                        "xl": "1.25rem",
+                        "full": "9999px"
+                    },
+                    "fontFamily": {
+                        "headline": ["Manrope"],
+                        "body": ["Inter"],
+                        "label": ["Inter"]
+                    }
+                },
+            },
+        }
+    </script>
+<style>
+        .glass-blur {
+            backdrop-filter: blur(24px) saturate(160%);
+        }
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+        }
+        .liquid-shadow {
+            box-shadow: 0 40px 40px -10px rgba(0,0,0,0.4);
+        }
+    </style>
+<style>
+    body {
+      min-height: max(884px, 100dvh);
+    }
+  </style>
+  </head>
+<body class="bg-background text-on-surface font-body min-h-screen pb-32">
+<!-- TopAppBar -->
+<header class="bg-[#0e0e13]/80 backdrop-blur-xl fixed top-0 left-0 right-0 z-50 flex justify-between items-center px-6 h-16 w-full">
+<div class="flex items-center gap-4">
+<button class="text-[#a9a4ff] hover:bg-[#1f1f26] transition-colors p-2 rounded-full active:scale-95 duration-100">
+<span class="material-symbols-outlined">arrow_back</span>
+</button>
+<h1 class="font-headline font-bold tracking-tight text-xl text-[#a9a4ff]">Images to PDF</h1>
+</div>
+<button class="text-[#a9a4ff] hover:bg-[#1f1f26] transition-colors p-2 rounded-full active:scale-95 duration-100">
+<span class="material-symbols-outlined">lock</span>
+</button>
+</header>
+<main class="pt-24 px-6 max-w-2xl mx-auto space-y-8">
+<!-- On-Device Badge -->
+<div class="bg-surface-container-high/60 glass-blur rounded-lg border-l-4 border-secondary p-4 flex items-center gap-3 outline outline-1 outline-white/5">
+<span class="material-symbols-outlined text-secondary" style="font-variation-settings: 'FILL' 1;">verified_user</span>
+<span class="text-on-surface-variant text-sm font-medium">On-device processing â nothing uploaded</span>
+</div>
+<!-- Add Images Section -->
+<section>
+<button class="w-full h-32 border-2 border-dashed border-secondary/30 rounded-xl bg-surface-container-low hover:bg-surface-container transition-colors group flex flex-col items-center justify-center gap-2">
+<div class="w-12 h-12 rounded-full bg-secondary/10 flex items-center justify-center text-secondary group-hover:scale-110 transition-transform">
+<span class="material-symbols-outlined text-3xl">add_photo_alternate</span>
+</div>
+<span class="font-headline font-bold text-secondary">Add Images</span>
+</button>
+</section>
+<!-- Image List (Reorderable) -->
+<section class="space-y-4">
+<div class="flex justify-between items-end mb-2">
+<h2 class="font-headline font-bold text-lg">Selected Assets</h2>
+<span class="text-on-surface-variant text-xs uppercase tracking-widest font-semibold">3 images selected â drag to reorder</span>
+</div>
+<div class="space-y-2">
+<!-- Row 1 -->
+<div class="h-[72px] bg-surface-container-high rounded-lg flex items-center px-4 gap-4 outline outline-1 outline-white/5 relative overflow-hidden group">
+<div class="absolute top-0 left-0 w-full h-[1px] bg-white/10"></div>
+<span class="material-symbols-outlined text-on-surface-variant cursor-grab active:cursor-grabbing">drag_indicator</span>
+<div class="w-12 h-12 rounded-lg bg-surface-container-lowest overflow-hidden">
+<img class="w-full h-full object-cover" data-alt="abstract liquid design with purple and blue gradients and smooth curves" src="https://lh3.googleusercontent.com/aida-public/AB6AXuA97KgfJ6HzYw1xEK96VXl2tz_R4BDMWMIh_uf0HnvIT_cT_F3foJKMky3mryV5vOrS1XRjTRaSDg3bASvN71AtWMGKcmZUKmN1uGRNzO2VQoZCCPOA3BQ0R5Ogt5_q5T8t58fdTOawS2mOsRm-XrKWciviZVLC3pnHX7qYNi6ZJeiDoB4VWZlMAN9DUv9sOVLHLqAHAjdM32IeNcxeNDldp9dIfx9BEtIlLlraQA-YW9Dn8fWFKJ6HbJZyeFfWJlj8et_jWUyc7kU"/>
+</div>
+<div class="flex-1 min-w-0">
+<p class="font-semibold text-sm truncate">IMG_2024_001.jpg</p>
+<p class="text-on-surface-variant text-xs">2.4 MB</p>
+</div>
+<button class="text-error-dim hover:bg-error-container/20 p-2 rounded-full transition-colors">
+<span class="material-symbols-outlined">delete</span>
+</button>
+</div>
+<!-- Row 2 -->
+<div class="h-[72px] bg-surface-container-high rounded-lg flex items-center px-4 gap-4 outline outline-1 outline-white/5 relative overflow-hidden group">
+<div class="absolute top-0 left-0 w-full h-[1px] bg-white/10"></div>
+<span class="material-symbols-outlined text-on-surface-variant cursor-grab active:cursor-grabbing">drag_indicator</span>
+<div class="w-12 h-12 rounded-lg bg-surface-container-lowest overflow-hidden">
+<img class="w-full h-full object-cover" data-alt="geometric architecture photography with sharp lines and deep shadows in grayscale" src="https://lh3.googleusercontent.com/aida-public/AB6AXuBjHjpraSgejyvyvSorVqw6HoHswihRMKeEtHzt18DAzl-7RvSv5FA-2LStIPK3oSeZP1MjvZA3UqacTZJB6TpwD7ac1Db10laayAbvNuYivSZhDCV_h2icUQVwTHMgkD24FoP1dzjamoXTgvPrwvWhhEfTL98DIdcn8GSHX5Hd3o7b2LqWudmeLdQ-RpIw1mEKNV74rZL8cIt5tvJTEN_mGmu0adnIsHOu9c1Suxeqw10iRg9eqSmeR12kTwkpLS40AMoVQpsp3ZQ"/>
+</div>
+<div class="flex-1 min-w-0">
+<p class="font-semibold text-sm truncate">IMG_2024_002.png</p>
+<p class="text-on-surface-variant text-xs">4.1 MB</p>
+</div>
+<button class="text-error-dim hover:bg-error-container/20 p-2 rounded-full transition-colors">
+<span class="material-symbols-outlined">delete</span>
+</button>
+</div>
+<!-- Row 3 -->
+<div class="h-[72px] bg-surface-container-high rounded-lg flex items-center px-4 gap-4 outline outline-1 outline-white/5 relative overflow-hidden group">
+<div class="absolute top-0 left-0 w-full h-[1px] bg-white/10"></div>
+<span class="material-symbols-outlined text-on-surface-variant cursor-grab active:cursor-grabbing">drag_indicator</span>
+<div class="w-12 h-12 rounded-lg bg-surface-container-lowest overflow-hidden">
+<img class="w-full h-full object-cover" data-alt="soft aesthetic background with pastel pink and teal waves flowing smoothly" src="https://lh3.googleusercontent.com/aida-public/AB6AXuBo0rK-jUhbMmkMkl75u2BzRbz4o9c38Km-RjInis-HYExAly3IwHtIe_aBbipdnV61xrmJNokSlT0xgdp3T4kXtB-IGeSpo1bIF6dWBrvqm4c52KpczteyY3FyDuJJlhmDuqk2j7XGJQf5tRolwLoGhyffboS0UlTic1sI7ANeNFo1QrS-w9j8lhOlsotRnCJfzioDM9hDsvyM22Wz5CNltK0a_fNQ843fSQ_vEQF7VQn0uhA7bH-32Z02ZZ2pK5LoK8KxRI-xAHc"/>
+</div>
+<div class="flex-1 min-w-0">
+<p class="font-semibold text-sm truncate">IMG_2024_003.webp</p>
+<p class="text-on-surface-variant text-xs">1.8 MB</p>
+</div>
+<button class="text-error-dim hover:bg-error-container/20 p-2 rounded-full transition-colors">
+<span class="material-symbols-outlined">delete</span>
+</button>
+</div>
+</div>
+</section>
+<!-- PDF Settings -->
+<section class="bg-surface-container-low rounded-xl p-6 space-y-6 outline outline-1 outline-white/5">
+<h3 class="font-headline font-bold text-sm text-on-surface-variant uppercase tracking-widest">PDF Export Settings</h3>
+<div class="space-y-4">
+<div class="space-y-3">
+<label class="text-sm font-medium text-on-surface/70 block">Page Size</label>
+<div class="flex gap-2">
+<button class="px-4 py-2 rounded-lg bg-secondary text-on-secondary text-sm font-bold shadow-lg shadow-secondary/20">A4</button>
+<button class="px-4 py-2 rounded-lg bg-surface-container-highest text-on-surface-variant text-sm font-medium hover:bg-surface-bright transition-colors outline outline-1 outline-white/5">Letter</button>
+<button class="px-4 py-2 rounded-lg bg-surface-container-highest text-on-surface-variant text-sm font-medium hover:bg-surface-bright transition-colors outline outline-1 outline-white/5">Custom</button>
+</div>
+</div>
+<div class="space-y-3">
+<label class="text-sm font-medium text-on-surface/70 block">Image Fit</label>
+<div class="flex gap-2">
+<button class="px-4 py-2 rounded-lg bg-surface-container-highest text-on-surface-variant text-sm font-medium hover:bg-surface-bright transition-colors outline outline-1 outline-white/5">Fill</button>
+<button class="px-4 py-2 rounded-lg bg-secondary text-on-secondary text-sm font-bold shadow-lg shadow-secondary/20">Contain</button>
+</div>
+</div>
+</div>
+</section>
+<!-- Create PDF Button -->
+<button class="w-full h-14 bg-gradient-to-br from-secondary to-secondary-dim rounded-lg font-headline font-extrabold text-on-secondary text-lg shadow-2xl shadow-secondary/20 flex items-center justify-center gap-3 hover:scale-[1.02] active:scale-95 transition-all">
+<span class="material-symbols-outlined" style="font-variation-settings: 'FILL' 1;">picture_as_pdf</span>
+            Create PDF
+        </button>
+</main>
+<!-- BottomNavBar -->
+<nav class="fixed bottom-4 left-0 right-0 z-50 flex justify-around items-center px-4">
+<div class="bg-[#25252d]/60 backdrop-blur-[24px] fixed bottom-4 left-1/2 -translate-x-1/2 w-[calc(100%-32px)] max-w-md h-[72px] rounded-full border border-white/15 liquid-shadow flex justify-around items-center px-4">
+<button class="bg-gradient-to-br from-[#a9a4ff] to-[#695ef6] text-[#0e0e13] rounded-full p-4 scale-110 transition-transform">
+<span class="material-symbols-outlined" style="font-variation-settings: 'FILL' 1;">home</span>
+</button>
+<button class="text-[#acaab1] p-4 hover:text-white transition-all">
+<span class="material-symbols-outlined">history</span>
+</button>
+<button class="text-[#acaab1] p-4 hover:text-white transition-all">
+<span class="material-symbols-outlined">settings</span>
+</button>
+</div>
+</nav>
+</body></html>

@@ -1,0 +1,646 @@
+<!DOCTYPE html>
+<html lang="en" class="dark">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+    <title>Formatica Studio</title>
+    <!-- Fonts & Icons -->
+    <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet">
+    <!-- Tailwind -->
+    <script src="https://cdn.tailwindcss.com?plugins=forms"></script>
+    <!-- WASM Engines & Libraries -->
+    <script src="https://unpkg.com/pdf-lib@1.17.1/dist/pdf-lib.min.js"></script>
+    <script src="https://unpkg.com/mammoth@1.6.0/mammoth.browser.min.js"></script>
+    <script src="https://unpkg.com/@ffmpeg/ffmpeg@0.12.7/dist/umd/ffmpeg.js"></script>
+    <script src="https://unpkg.com/@ffmpeg/util@0.12.1/dist/umd/index.js"></script>
+    <script>
+        tailwind.config = {
+            darkMode: 'class',
+            theme: {
+                extend: {
+                    colors: {
+                        bg: '#0b1326',
+                        surface: '#171f33',
+                        'surface-low': '#131b2e',
+                        'surface-high': '#222a3d',
+                        'surface-highest': '#2d3449',
+                        primary: '#c4c0ff',
+                        'primary-container': '#5b4fe8',
+                        secondary: '#d0bcff',
+                        tertiary: '#4cd7f6',
+                        'on-surface': '#dae2fd',
+                        'on-surface-var': '#c8c4d8',
+                        outline: '#918fa1',
+                        'outline-var': '#464555',
+                        'audio-rose': '#E8507C',
+                        'video-purple': '#8b5cf6',
+                        'compress-orange': '#F97316',
+                        'merge-teal': '#10b981',
+                        'split-amber': '#F59E0B',
+                        'doc-indigo': '#6366f1',
+                        'grey-slate': '#64748b',
+                        error: '#ffb4ab',
+                    },
+                    fontFamily: { sans: ['Manrope', 'sans-serif'] },
+                    borderRadius: { DEFAULT: '1rem', lg: '2rem', xl: '3rem', full: '9999px' }
+                }
+            }
+        }
+    </script>
+    <style>
+        * { font-family: 'Manrope', sans-serif; -webkit-tap-highlight-color: transparent; }
+        .msymbol { font-family: 'Material Symbols Outlined'; font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24; display: inline-block; }
+        .msymbol.filled { font-variation-settings: 'FILL' 1, 'wght' 400, 'GRAD' 0, 'opsz' 24; }
+
+        /* Glass */
+        .glass { background: rgba(255,255,255,0.07); backdrop-filter: blur(28px); border-top: 1px solid rgba(255,255,255,0.15); border-left: 1px solid rgba(255,255,255,0.1); }
+        .glass-light { background: rgba(255,255,255,0.82); backdrop-filter: blur(28px); border-top: 1px solid rgba(255,255,255,0.5); border-left: 1px solid rgba(255,255,255,0.3); }
+
+        /* Mesh backgrounds */
+        .mesh-dark { background: radial-gradient(at 0% 0%, #1a1b3a 0%, transparent 50%), radial-gradient(at 100% 0%, #2d1633 0%, transparent 50%), radial-gradient(at 50% 100%, #0f1628 0%, transparent 60%); background-color: #0b1326; }
+        .mesh-light { background: radial-gradient(at 0% 0%, #e8e4ff 0%, transparent 50%), radial-gradient(at 100% 0%, #ffe4ec 0%, transparent 50%), radial-gradient(at 50% 100%, #f0f4ff 0%, transparent 60%); background-color: #f8f9ff; }
+
+        /* Screen transitions */
+        .screen { display: none; width: 100%; height: 100%; flex-direction: column; opacity: 0; transform: translateY(18px); transition: opacity 0.28s ease, transform 0.28s ease; }
+        .screen.active { display: flex; opacity: 1; transform: translateY(0); }
+
+        /* App shell */
+        body { background: #060e20; display: flex; align-items: center; justify-content: center; min-height: 100dvh; overflow: hidden; margin: 0; }
+        #app { position: relative; width: 100%; max-width: 430px; height: 100dvh; max-height: 932px; background-color: #0b1326; overflow: hidden; transition: box-shadow 0.3s; }
+        
+        @media (min-width: 430px) {
+            body { background: #060e20; }
+            #app { height: 844px; width: 390px; border-radius: 44px; box-shadow: 0 40px 80px rgba(0,0,0,0.7), 0 0 0 8px #0d111e; }
+        }
+
+        .content-area { flex: 1; overflow-y: auto; overflow-x: hidden; -webkit-overflow-scrolling: touch; scrollbar-width: none; }
+        .content-area::-webkit-scrollbar { display: none; }
+
+        .bottom-nav { position: absolute; bottom: 20px; left: 50%; transform: translateX(-50%); z-index: 100; display: flex; align-items: center; justify-content: space-around; width: 260px; height: 68px; border-radius: 34px; padding: 0 10px; background: rgba(255,255,255,0.08); backdrop-filter: blur(28px); border: 1px solid rgba(255,255,255,0.18); box-shadow: 0 24px 48px rgba(91,79,232,0.15); transition: all 0.3s cubic-bezier(0.34, 1.56, 0.64, 1); }
+        .nav-btn { position: relative; width: 48px; height: 48px; border-radius: 24px; display: flex; align-items: center; justify-content: center; cursor: pointer; transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1); color: rgba(255,255,255,0.35); }
+        .nav-btn:active { transform: scale(0.9); }
+        .nav-btn.active { color: #c4c0ff; z-index: 2; }
+        
+        .nav-indicator { position: absolute; top: 10px; left: 0; width: 48px; height: 48px; border-radius: 24px; background: rgba(91,79,232,0.25); box-shadow: 0 0 16px rgba(91,79,232,0.35); transition: transform 0.45s cubic-bezier(0.34, 1.56, 0.64, 1); z-index: 1; pointer-events: none; }
+
+        .theme-face-container { width: 96px; height: 48px; border-radius: 24px; position: relative; cursor: pointer; transition: all 0.5s; overflow: visible; flex-shrink: 0; }
+        .theme-face-container.dark { background: linear-gradient(135deg, #1a1f3a, #2d1f4a); border: 1.5px solid rgba(196,192,255,0.2); }
+        .theme-face-container.light { background: linear-gradient(135deg, #87ceeb, #ffd580); border: 1.5px solid rgba(255,200,60,0.4); }
+        
+        .face-ball { width: 40px; height: 40px; border-radius: 50%; position: absolute; top: 2.5px; left: 4px; transition: transform 0.5s cubic-bezier(0.34, 1.56, 0.64, 1), background 0.5s; display: flex; align-items: center; justify-content: center; }
+        .face-ball.dark { background: radial-gradient(circle at 35% 35%, #d0d8f0, #8a90c8); box-shadow: inset -3px -2px 0 rgba(0,0,0,0.15), 0 3px 12px rgba(0,0,0,0.5); }
+        .face-ball.light { transform: translateX(46px); background: radial-gradient(circle at 38% 35%, #fff7a0, #ffcc00); box-shadow: 0 0 14px rgba(255,200,0,0.8), 0 3px 8px rgba(0,0,0,0.2); }
+
+        .face-svg { width: 28px; height: 28px; overflow: visible; }
+        @keyframes blink { 0%,90%,100% { transform: scaleY(1); } 93% { transform: scaleY(0.1); } }
+        .eye { animation: blink 4s infinite; transform-origin: center; }
+        @keyframes ray-spin { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }
+        .rays-group { transform-origin: 14px 14px; opacity: 0; transition: opacity 0.5s; }
+        .face-ball.light .rays-group { opacity: 1; animation: ray-spin 12s linear infinite; }
+        .moon-crater { transition: opacity 0.5s; }
+        .face-ball.light .moon-crater { opacity: 0; }
+
+        .badge { font-size: 9px; font-weight: 800; letter-spacing: 0.1em; text-transform: uppercase; padding: 3px 10px; border-radius: 999px; }
+        .section-label { font-size: 10px; font-weight: 800; letter-spacing: 0.14em; text-transform: uppercase; color: rgba(200,196,216,0.5); }
+        
+        .tool-card { transition: transform 0.2s cubic-bezier(0.34, 1.56, 0.64, 1), box-shadow 0.2s; cursor: pointer; }
+        .tool-card:hover { transform: translateY(-4px) scale(1.01); }
+        .tool-card:active { transform: scale(0.96); }
+
+        .format-chip { padding: 10px 16px; border-radius: 16px; font-weight: 800; font-size: 11px; letter-spacing: 0.05em; border: 1.5px solid rgba(255,255,255,0.08); background: rgba(255,255,255,0.04); color: rgba(255,255,255,0.4); cursor: pointer; transition: all 0.2s; }
+        .format-chip.selected { border-width: 2px; }
+
+        .cta-btn { height: 58px; border-radius: 29px; display: flex; align-items: center; justify-content: center; gap: 10px; font-weight: 900; font-size: 13px; text-transform: uppercase; letter-spacing: 0.12em; transition: transform 0.15s, box-shadow 0.15s, opacity 0.2s; cursor: pointer; box-shadow: 0 12px 32px rgba(0,0,0,0.3); }
+        .cta-btn:active { transform: scale(0.97); }
+
+        .sticky-bar { position: sticky; bottom: 0; padding: 20px 20px 100px; background: linear-gradient(to top, rgba(11,19,38,1) 75%, transparent); z-index: 60; }
+
+        @keyframes spin { to { transform: rotate(360deg); } }
+        .spin { animation: spin 1s linear infinite; }
+        @keyframes pulse-glow { 0%,100% { opacity: 1; transform: scale(1); } 50% { opacity: 0.6; transform: scale(0.95); } }
+        .pulse { animation: pulse-glow 2s ease-in-out infinite; }
+        @keyframes pop-in { 0% { transform: scale(0) rotate(-45deg); opacity: 0; } 70% { transform: scale(1.15) rotate(5deg); } 100% { transform: scale(1) rotate(0deg); opacity: 1; } }
+        .pop-in { animation: pop-in 0.5s cubic-bezier(0.34, 1.56, 0.64, 1) forwards; }
+
+        /* Light Mode */
+        .light-mode #app { background-color: #f8f9ff; box-shadow: 0 40px 80px rgba(0,0,0,0.15), 0 0 0 8px #e2e8f0; }
+        .light-mode .bottom-nav { background: rgba(255,255,255,0.85); border-color: rgba(0,0,0,0.08); box-shadow: 0 16px 32px rgba(0,0,0,0.1); }
+        .light-mode .nav-btn { color: rgba(0,0,0,0.3); }
+        .light-mode .nav-btn.active { color: #5b4fe8; }
+        .light-mode .nav-indicator { background: rgba(91,79,232,0.12); box-shadow: 0 4px 12px rgba(91,79,232,0.15); }
+        .light-mode .topbar { background: rgba(248,249,255,0.85); border-bottom-color: rgba(0,0,0,0.06); }
+        .light-mode .glass { background: rgba(255,255,255,0.8); border-color: rgba(0,0,0,0.05); }
+        .light-mode .text-on-surface { color: #1e293b; }
+        .light-mode .text-outline { color: #64748b; }
+        .light-mode .sticky-bar { background: linear-gradient(to top, rgba(248,249,255,1) 75%, transparent); }
+    </style>
+</head>
+<body>
+    <div id="app" class="mesh-dark flex flex-col">
+        <!-- Toast -->
+        <div id="toast" class="fixed bottom-32 left-1/2 -translate-x-1/2 z-[200] px-6 py-3 rounded-full bg-emerald-500/90 text-white text-xs font-bold tracking-wider opacity-0 pointer-events-none transition-all duration-300 transform translate-y-4 shadow-xl">
+            Success
+        </div>
+
+        <div id="screens-container" class="flex-1 relative overflow-hidden">
+            
+            <!-- Home Screen -->
+            <div id="screen-home" class="screen active">
+                <div class="topbar h-20">
+                    <div class="flex items-center gap-3">
+                        <div class="w-10 h-10 rounded-2xl bg-gradient-to-br from-primary-container to-purple-600 flex items-center justify-center font-black text-white text-lg shadow-lg rotate-3">F</div>
+                        <span class="font-black text-on-surface text-xl tracking-tighter dark:text-white">Formatica</span>
+                    </div>
+                    <div id="theme-toggle" class="theme-face-container dark" onclick="Formatica.toggleTheme()">
+                        <!-- Face UI ... -->
+                        <div class="face-ball dark">
+                            <svg class="face-svg" viewBox="0 0 28 28" fill="none">
+                                <g class="rays-group"><line x1="14" y1="0" x2="14" y2="3" stroke="#ffcc00" stroke-width="2"/><line x1="14" y1="25" x2="14" y2="28" stroke="#ffcc00" stroke-width="2"/><line x1="0" y1="14" x2="3" y2="14" stroke="#ffcc00" stroke-width="2"/><line x1="25" y1="14" x2="28" y2="14" stroke="#ffcc00" stroke-width="2"/></g>
+                                <circle class="moon-crater" cx="9" cy="9" r="2" fill="rgba(0,0,0,0.1)"/><circle class="moon-crater" cx="18" cy="16" r="1.3" fill="rgba(0,0,0,0.1)"/>
+                                <ellipse class="eye" cx="10.5" cy="12" rx="1.4" ry="1.6" fill="#171f33"/>
+                                <ellipse class="eye" cx="17.5" cy="12" rx="1.4" ry="1.6" fill="#171f33"/>
+                                <path d="M10 17 Q14 20.5 18 17" stroke="#171f33" stroke-width="1.5" stroke-linecap="round" fill="none"/>
+                            </svg>
+                        </div>
+                    </div>
+                </div>
+                <div class="content-area px-5 pt-4 pb-32">
+                    <div class="flex justify-center mb-8">
+                        <div class="glass px-5 py-2.5 rounded-full flex items-center gap-3 shadow-lg border border-white/5">
+                            <span class="w-2.5 h-2.5 rounded-full bg-amber-400 pulse shadow-[0_0_12px_rgba(251,191,36,0.5)]"></span>
+                            <span class="text-[10px] font-black uppercase tracking-[0.25em] text-amber-400/90">Multicore WASM Mode</span>
+                        </div>
+                    </div>
+                    <div class="relative mb-10 group">
+                        <span class="msymbol absolute left-5 top-1/2 -translate-y-1/2 text-on-surface-var/50 group-focus-within:text-primary transition-colors" style="font-size:22px">search</span>
+                        <input id="search-input" oninput="Formatica.filterTools(this.value)" type="text" placeholder="Search 9 on-device tools..." class="w-full h-14 bg-white/5 border border-white/5 rounded-2xl pl-14 pr-4 text-sm text-on-surface placeholder:text-outline/40 focus:outline-none focus:ring-1 focus:ring-primary/40 transition-all font-semibold">
+                    </div>
+                    
+                    <div id="tools-grid" class="space-y-10">
+                        <!-- DOCS -->
+                        <div class="tool-section" data-category="documents">
+                            <div class="flex items-center justify-between px-2 mb-4">
+                                <h3 class="section-label">Document Suite</h3>
+                                <div class="badge bg-indigo-500/10 text-doc-indigo border border-indigo-500/20">5 TOOLS</div>
+                            </div>
+                            <div class="grid grid-cols-2 gap-4">
+                                <div class="col-span-2 glass tool-card rounded-3xl p-6 flex items-center gap-6 border border-white/5 shadow-xl" onclick="Formatica.openTool('convert-doc')">
+                                    <div class="w-16 h-16 rounded-2xl flex items-center justify-center bg-indigo-500/15 border border-indigo-500/20 shadow-inner">
+                                        <span class="msymbol filled text-doc-indigo" style="font-size:36px">picture_as_pdf</span>
+                                    </div>
+                                    <div class="flex-1">
+                                        <h4 class="text-base font-black text-on-surface tracking-tight">Convert Document</h4>
+                                        <p class="text-[11px] text-outline mt-1 font-medium leading-relaxed">DOCX, ODT to PDF Rendering.</p>
+                                    </div>
+                                    <span class="msymbol text-outline/30" style="font-size:24px">chevron_right</span>
+                                </div>
+                                <div class="glass tool-card rounded-2xl p-5 flex flex-col justify-between aspect-square border border-white/5" onclick="Formatica.openTool('images-pdf')">
+                                    <span class="msymbol filled text-merge-teal" style="font-size:32px">image</span>
+                                    <div><h4 class="text-xs font-black text-on-surface tracking-wide">Images to PDF</h4><p class="text-[10px] text-outline pt-1 font-bold">Bundle PNG/JPG</p></div>
+                                </div>
+                                <div class="glass tool-card rounded-2xl p-5 flex flex-col justify-between aspect-square border border-white/5" onclick="Formatica.openTool('merge-pdf')">
+                                    <span class="msymbol text-merge-teal" style="font-size:32px">layers</span>
+                                    <div><h4 class="text-xs font-black text-on-surface tracking-wide">Merge PDF</h4><p class="text-[10px] text-outline pt-1 font-bold">Combine files</p></div>
+                                </div>
+                                <div class="glass tool-card rounded-2xl p-5 flex flex-col justify-between aspect-square border border-white/5" onclick="Formatica.openTool('split-pdf')">
+                                    <span class="msymbol text-split-amber" style="font-size:32px">call_split</span>
+                                    <div><h4 class="text-xs font-black text-on-surface tracking-wide">Split PDF</h4><p class="text-[10px] text-outline pt-1 font-bold">Divide pages</p></div>
+                                </div>
+                                <div class="glass tool-card rounded-2xl p-5 flex flex-col justify-between aspect-square border border-white/5" onclick="Formatica.openTool('greyscale-pdf')">
+                                    <span class="msymbol text-grey-slate" style="font-size:32px">tonality</span>
+                                    <div><h4 class="text-xs font-black text-on-surface tracking-wide">Greyscale PDF</h4><p class="text-[10px] text-outline pt-1 font-bold">Monochrome</p></div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- MEDIA -->
+                        <div class="tool-section" data-category="media">
+                            <div class="flex items-center justify-between px-2 mb-4">
+                                <h3 class="section-label">Media & Motion</h3>
+                                <div class="badge bg-audio-rose/10 text-audio-rose border border-audio-rose/20">4 TOOLS</div>
+                            </div>
+                            <div class="grid grid-cols-2 gap-4">
+                                <div class="glass tool-card rounded-2xl p-5 flex flex-col justify-between aspect-square border border-white/5 shadow-xl" onclick="Formatica.openTool('extract-audio')">
+                                    <span class="msymbol filled text-audio-rose" style="font-size:32px">audiotrack</span>
+                                    <div><h4 class="text-xs font-black text-on-surface tracking-wide">Extract Audio</h4><p class="text-[10px] text-outline pt-1 font-bold">Rip MP3 stream</p></div>
+                                </div>
+                                <div class="glass tool-card rounded-2xl p-5 flex flex-col justify-between aspect-square border border-white/5" onclick="Formatica.openTool('compress-video')">
+                                    <span class="msymbol text-compress-orange" style="font-size:32px">compress</span>
+                                    <div><h4 class="text-xs font-black text-on-surface tracking-wide">Compress Video</h4><p class="text-[10px] text-outline pt-1 font-bold">FFmpeg CRF</p></div>
+                                </div>
+                                <div class="glass tool-card rounded-2xl p-5 flex flex-col justify-between aspect-square border border-white/5" onclick="Formatica.openTool('convert-video')">
+                                    <span class="msymbol filled text-video-purple" style="font-size:32px">movie</span>
+                                    <div><h4 class="text-xs font-black text-on-surface tracking-wide">Convert Video</h4><p class="text-[10px] text-outline pt-1 font-bold">MP4, MKV, MOV</p></div>
+                                </div>
+                                <div class="glass tool-card rounded-2xl p-5 flex flex-col justify-between aspect-square border border-white/5" onclick="Formatica.openTool('convert-image')">
+                                    <span class="msymbol text-tertiary" style="font-size:32px">image_search</span>
+                                    <div><h4 class="text-xs font-black text-on-surface tracking-wide">Convert Image</h4><p class="text-[10px] text-outline pt-1 font-bold">WebP, PNG, JPG</p></div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Generic Tool Screen Template -->
+            <template id="tool-screen-template">
+                <div class="screen">
+                    <div class="topbar h-16">
+                        <div class="flex items-center gap-3">
+                            <button onclick="Formatica.goBack()" class="w-10 h-10 flex items-center justify-center rounded-full hover:bg-white/5 transition-colors">
+                                <span class="msymbol text-on-surface" style="font-size:24px">arrow_back</span>
+                            </button>
+                            <span class="font-black text-on-surface tracking-tight tool-title text-base">Tool Name</span>
+                        </div>
+                        <span class="badge border border-white/10 tool-badge">On-Device</span>
+                    </div>
+                    <div class="content-area p-5 tool-content"></div>
+                    <div class="sticky-bar tool-bar">
+                        <div class="cta-container"></div>
+                        <div class="processing-container hidden space-y-4">
+                            <div class="flex justify-between items-end px-1">
+                                <span class="text-[10px] font-black text-on-surface tracking-widest uppercase proc-status">Engine Running...</span>
+                                <span class="text-xs font-black proc-pct text-primary">0%</span>
+                            </div>
+                            <div class="h-2 w-full rounded-full bg-white/5 overflow-hidden border border-white/5">
+                                <div class="h-full bg-primary shadow-[0_0_12px_rgba(196,192,255,0.4)] transition-all duration-300 proc-bar" style="width:0%"></div>
+                            </div>
+                            <div class="flex justify-between items-center px-1">
+                                <span class="text-[10px] text-outline font-bold uppercase tracking-wider proc-eta">Calculating...</span>
+                                <button class="text-[10px] text-audio-rose font-black uppercase tracking-widest cancel-btn" onclick="Formatica.cancelProcessing()">Cancel</button>
+                            </div>
+                        </div>
+                        <div class="success-container hidden space-y-4">
+                            <div class="flex items-center gap-3 pb-2 px-2">
+                                <div class="w-6 h-6 rounded-full bg-merge-teal flex items-center justify-center pop-in shadow-lg">
+                                    <span class="msymbol filled text-white" style="font-size:14px">check</span>
+                                </div>
+                                <span class="text-xs font-black text-merge-teal uppercase tracking-widest">Job Complete · Ready</span>
+                            </div>
+                            <div class="flex gap-3">
+                                <button class="flex-1 h-14 rounded-2xl bg-primary-container text-white text-[11px] font-black uppercase tracking-[0.15em] flex items-center justify-center gap-2 shadow-2xl download-btn">Download Result <span class="msymbol" style="font-size:20px">download</span></button>
+                                <button class="w-14 h-14 rounded-2xl glass flex items-center justify-center text-on-surface share-btn shadow-lg"><span class="msymbol" style="font-size:22px">share</span></button>
+                            </div>
+                            <button onclick="Formatica.goBack()" class="w-full text-center text-[10px] font-black text-outline uppercase tracking-widest pt-1">Return to Grid</button>
+                        </div>
+                    </div>
+                </div>
+            </template>
+
+            <!-- Success Template -->
+            <div id="screen-success" class="screen flex-col h-full bg-bg">
+                <div class="content-area flex flex-col items-center justify-center p-8 text-center space-y-8">
+                    <div class="w-24 h-24 rounded-full bg-merge-teal flex items-center justify-center pop-in shadow-[0_0_40px_rgba(16,185,129,0.4)]">
+                        <span class="msymbol filled text-white" style="font-size:48px">check</span>
+                    </div>
+                    <div class="space-y-2">
+                        <h2 class="text-2xl font-black text-on-surface tracking-tight">Process Completed</h2>
+                        <p class="text-sm text-outline font-medium px-4">Your file was processed entirely on-device and is ready for export.</p>
+                    </div>
+                    <div class="glass rounded-3xl p-6 w-full border border-white/10 shadow-xl">
+                        <span class="msymbol filled text-doc-indigo mb-3" style="font-size:40px">description</span>
+                        <p id="output-filename" class="font-black text-on-surface truncate">output.file</p>
+                        <p id="output-meta" class="text-[10px] text-outline font-bold uppercase tracking-wider mt-1">Ready for Storage</p>
+                    </div>
+                </div>
+                <div class="p-8 space-y-3">
+                    <button class="w-full h-14 rounded-2xl bg-primary-container text-white text-xs font-black uppercase tracking-widest shadow-2xl download-btn">Save to Downloads</button>
+                    <button onclick="Formatica.navigate('home')" class="w-full text-center text-primary font-black text-xs uppercase tracking-[0.2em] py-4">Done</button>
+                </div>
+            </div>
+
+            <!-- History Screen -->
+            <div id="screen-history" class="screen">
+                <div class="topbar h-24 px-6 flex flex-col justify-center items-start gap-1">
+                    <p class="text-[10px] font-black text-primary uppercase tracking-[0.3em]">Vault Activity</p>
+                    <div class="flex justify-between w-full items-center">
+                        <h1 class="font-black text-on-surface text-2xl tracking-tighter dark:text-white">Activity History</h1>
+                        <button onclick="Formatica.clearHistory()" class="text-[9px] font-black text-audio-rose uppercase tracking-widest px-4 py-2 rounded-full glass border border-audio-rose/20">Clear</button>
+                    </div>
+                </div>
+                <div class="content-area px-5 pt-4 pb-32" id="history-list"></div>
+            </div>
+
+            <!-- Settings Screen -->
+            <div id="screen-settings" class="screen">
+                <div class="topbar h-24 px-6 flex flex-col justify-center items-start">
+                    <p class="text-[10px] font-black text-outline uppercase tracking-[0.3em] mb-1">Studio Config</p>
+                    <h1 class="font-black text-on-surface text-2xl tracking-tighter dark:text-white">Settings</h1>
+                </div>
+                <div class="content-area p-6 space-y-10">
+                    <div class="space-y-4">
+                        <label class="section-label">Performance Mode</label>
+                        <div class="glass rounded-3xl p-6 flex items-center justify-between border border-white/5">
+                            <div class="flex items-center gap-4">
+                                <div class="w-12 h-12 rounded-2xl bg-tertiary/10 flex items-center justify-center text-tertiary shadow-inner">
+                                    <span class="msymbol filled" style="font-size:24px">bolt</span>
+                                </div>
+                                <div>
+                                    <p class="text-sm font-black text-on-surface">Multithreaded Processing</p>
+                                    <p class="text-[11px] text-outline font-medium">Parallel WASM Workers</p>
+                                </div>
+                            </div>
+                            <div class="w-12 h-6 rounded-full bg-primary-container relative cursor-pointer shadow-inner">
+                                <div class="absolute right-1 top-1 w-4 h-4 rounded-full bg-white shadow-md transition-all"></div>
+                            </div>
+                        </div>
+                    </div>
+                    <!-- Credits Card -->
+                    <div class="glass rounded-3xl p-8 text-center border border-white/5 relative overflow-hidden group">
+                        <div class="absolute -top-12 -right-12 w-32 h-32 bg-primary/20 rounded-full blur-3xl group-hover:scale-125 transition-transform duration-700"></div>
+                        <p class="text-[10px] font-black text-outline uppercase tracking-[0.3em] mb-2">Build Identifier</p>
+                        <p class="text-on-surface font-black text-sm tracking-widest dark:text-white">FORMATICA STUDIO V2.0.4</p>
+                        <p class="text-[10px] text-outline font-bold mt-4">100% On-Device Engine</p>
+                        <p class="text-[10px] text-outline/50 mt-1">No metadata leaves your system</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Navigation -->
+        <div class="bottom-nav">
+            <div id="nav-indicator" class="nav-indicator"></div>
+            <div class="nav-btn active" data-screen="home" onclick="Formatica.navigate('home')">
+                <span class="msymbol filled" style="font-size:26px">home</span>
+            </div>
+            <div class="nav-btn" data-screen="history" onclick="Formatica.navigate('history')">
+                <span class="msymbol" style="font-size:26px">history</span>
+            </div>
+            <div class="nav-btn" data-screen="settings" onclick="Formatica.navigate('settings')">
+                <span class="msymbol" style="font-size:26px">settings</span>
+            </div>
+        </div>
+    </div>
+
+    <!-- SCRIPT -->
+    <script>
+        const Formatica = {
+            state: {
+                theme: 'dark',
+                currentScreen: 'home',
+                previousScreen: null,
+                history: JSON.parse(localStorage.getItem('f_history') || '[]'),
+                currentFile: null,
+                currentToolId: null,
+                ffmpeg: null
+            },
+
+            tools: {
+                'extract-audio': { title: 'Extract Audio', icon: 'audiotrack', badge: 'WASM MP3', color: 'audio-rose', accept: 'video/*', type: 'media' },
+                'compress-video': { title: 'Compress Video', icon: 'compress', badge: 'FFmpeg CRF', color: 'compress-orange', accept: 'video/*', type: 'media' },
+                'convert-video': { title: 'Convert Video', icon: 'movie', badge: 'Multiformat', color: 'video-purple', accept: 'video/*', type: 'media' },
+                'convert-image': { title: 'Convert Image', icon: 'image_search', badge: 'High Quality', color: 'tertiary', accept: 'image/*', type: 'media' },
+                'convert-doc': { title: 'Convert Document', icon: 'picture_as_pdf', badge: 'High Fidelity', color: 'doc-indigo', accept: '.docx', type: 'doc' },
+                'merge-pdf': { title: 'Merge PDF', icon: 'layers', badge: 'Assembly', color: 'merge-teal', accept: 'application/pdf', type: 'pdf', multiple: true },
+                'split-pdf': { title: 'Split PDF', icon: 'call_split', badge: 'Page Level', color: 'split-amber', accept: 'application/pdf', type: 'pdf' },
+                'greyscale-pdf': { title: 'Greyscale PDF', icon: 'tonality', badge: 'Ink Saver', color: 'grey-slate', accept: 'application/pdf', type: 'pdf' },
+                'images-pdf': { title: 'Images to PDF', icon: 'image', badge: 'Bundle', color: 'merge-teal', accept: 'image/*', type: 'pdf', multiple: true }
+            },
+
+            init() {
+                this.updateTheme();
+                this.renderHistory();
+                this.initFFmpeg();
+            },
+
+            async initFFmpeg() {
+                try {
+                    const { createFFmpeg } = FFmpeg;
+                    this.state.ffmpeg = createFFmpeg({ log: false });
+                } catch(e) { console.warn("FFmpeg Load Delayed", e); }
+            },
+
+            navigate(screenId) {
+                const isTool = screenId.startsWith('tool-');
+                const realId = isTool ? screenId : `screen-${screenId}`;
+                const nextScreen = document.getElementById(realId);
+                
+                if (!nextScreen) return;
+                
+                this.state.previousScreen = this.state.currentScreen;
+                this.state.currentScreen = screenId;
+                
+                document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+                nextScreen.classList.add('active');
+                
+                if(!isTool) this.updateNav(screenId);
+                if (window.navigator.vibrate) window.navigator.vibrate(10);
+            },
+
+            updateNav(screenId) {
+                const navBtns = document.querySelectorAll('.nav-btn');
+                const indicator = document.getElementById('nav-indicator');
+                navBtns.forEach(b => {
+                    if (b.dataset.screen === screenId) {
+                        b.classList.add('active');
+                        const rect = b.getBoundingClientRect();
+                        const pRect = b.parentElement.getBoundingClientRect();
+                        indicator.style.transform = `translateX(${rect.left - pRect.left}px)`;
+                    } else b.classList.remove('active');
+                });
+            },
+
+            goBack() {
+                const isTool = this.state.currentScreen.startsWith('tool-');
+                if (isTool) {
+                    const toolScreen = document.getElementById(`screen-${this.state.currentScreen}`);
+                    if(toolScreen) toolScreen.remove();
+                }
+                this.navigate('home');
+            },
+
+            openTool(toolId) {
+                const config = this.tools[toolId];
+                const template = document.getElementById('tool-screen-template');
+                const clone = template.content.cloneNode(true);
+                const screen = clone.querySelector('.screen');
+                screen.id = `screen-tool-${toolId}`;
+                
+                screen.querySelector('.tool-title').innerText = config.title;
+                screen.querySelector('.tool-badge').innerText = config.badge;
+                screen.querySelector('.tool-badge').classList.add(`text-${config.color}`, `bg-${config.color}/10`);
+                
+                const content = screen.querySelector('.tool-content');
+                content.innerHTML = `
+                    <div class="h-full flex flex-col gap-6 stagger">
+                        <div class="glass rounded-[2.5rem] p-10 flex flex-col items-center gap-5 text-center border-2 border-dashed border-${config.color}/30 cursor-pointer hover:bg-white/5 transition-all active:scale-[0.98]" onclick="Formatica.handleToolUpload('${toolId}')">
+                            <div class="w-20 h-20 rounded-3xl bg-${config.color}/15 flex items-center justify-center text-${config.color} shadow-lg shadow-${config.color}/20">
+                                <span class="msymbol filled" style="font-size:44px">${config.icon}</span>
+                            </div>
+                            <div class="space-y-1">
+                                <p class="font-black text-on-surface text-lg tracking-tight dark:text-white">Import Source</p>
+                                <p class="text-[11px] text-outline font-bold uppercase tracking-[0.1em]">${config.accept.toUpperCase()} Files</p>
+                            </div>
+                        </div>
+                        <div id="file-info-${toolId}" class="hidden glass rounded-3xl p-5 border border-white/5 flex items-center gap-4">
+                            <div class="w-10 h-10 rounded-xl bg-white/5 flex items-center justify-center text-outline"><span class="msymbol" style="font-size:20px">check_circle</span></div>
+                            <div class="flex-1 min-w-0"><p class="text-xs font-black text-on-surface truncate fname dark:text-white">file.name</p><p class="text-[10px] text-outline fsize font-bold">0 MB</p></div>
+                        </div>
+                    </div>
+                `;
+                
+                const cta = screen.querySelector('.cta-container');
+                cta.innerHTML = `<button class="w-full cta-btn bg-${config.color} text-white opacity-25 pointer-events-none transition-all shadow-xl" id="cta-${toolId}">Tap to Initialize</button>`;
+
+                document.getElementById('screens-container').appendChild(screen);
+                this.navigate(`tool-${toolId}`);
+            },
+
+            handleToolUpload(toolId) {
+                const config = this.tools[toolId];
+                const input = document.createElement('input');
+                input.type = 'file';
+                input.accept = config.accept;
+                input.multiple = !!config.multiple;
+                input.onchange = (e) => {
+                    const files = Array.from(e.target.files);
+                    if(files.length === 0) return;
+                    
+                    this.state.currentFile = config.multiple ? files : files[0];
+                    const info = document.getElementById(`file-info-${toolId}`);
+                    info.classList.remove('hidden');
+                    info.querySelector('.fname').innerText = config.multiple ? `${files.length} Files Selected` : files[0].name;
+                    info.querySelector('.fsize').innerText = config.multiple ? 'Batch Mode' : (files[0].size/1024/1024).toFixed(2) + ' MB';
+                    
+                    const cta = document.getElementById(`cta-${toolId}`);
+                    cta.classList.remove('opacity-25', 'pointer-events-none');
+                    cta.innerText = config.multiple ? `Process Batch` : `Process ${files[0].name}`;
+                    cta.onclick = () => this.runTool(toolId);
+                    this.showToast("Files loaded");
+                };
+                input.click();
+            },
+
+            async runTool(toolId) {
+                const config = this.tools[toolId];
+                const screen = document.getElementById(`screen-tool-${toolId}`);
+                const cta = screen.querySelector('.cta-container');
+                const proc = screen.querySelector('.processing-container');
+                const bar = screen.querySelector('.proc-bar');
+                const pct = screen.querySelector('.proc-pct');
+                
+                cta.classList.add('hidden');
+                proc.classList.remove('hidden');
+                
+                try {
+                    const result = await this.engines[config.type](this.state.currentFile, toolId, (p) => {
+                        bar.style.width = p + '%';
+                        pct.innerText = p + '%';
+                    });
+                    
+                    proc.classList.add('hidden');
+                    const succ = screen.querySelector('.success-container');
+                    succ.classList.remove('hidden');
+                    
+                    const downloadBtn = succ.querySelector('.download-btn');
+                    downloadBtn.onclick = () => {
+                        const url = URL.createObjectURL(result.blob);
+                        const a = document.createElement('a');
+                        a.href = url;
+                        a.download = result.name;
+                        a.click();
+                        this.showToast("File Saved");
+                    };
+
+                    this.addToHistory({ filename: result.name, tool: config.title, status: 'success', icon: config.icon });
+                } catch(e) {
+                    this.showToast("Engine Error", 'error');
+                    console.error(e);
+                    this.goBack();
+                }
+            },
+
+            engines: {
+                async media(file, toolId, onProgress) {
+                    const ffmpeg = Formatica.state.ffmpeg;
+                    if (!ffmpeg.loaded) await ffmpeg.load({ coreURL: 'https://unpkg.com/@ffmpeg/core@0.12.6/dist/umd/ffmpeg-core.js' });
+                    
+                    const { fetchFile } = FFmpegUtil;
+                    const inName = 'input_' + file.name;
+                    await ffmpeg.writeFile(inName, await fetchFile(file));
+                    
+                    ffmpeg.on('progress', ({ progress }) => onProgress(Math.round(progress * 100)));
+                    
+                    let outName = 'output.mov';
+                    let args = ['-i', inName];
+                    
+                    if(toolId === 'extract-audio') { outName = 'audio.mp3'; args.push('-vn', '-acodec', 'libmp3lame', '-q:a', '2'); }
+                    else if(toolId === 'compress-video') { outName = 'compressed.mp4'; args.push('-vcodec', 'libx264', '-crf', '28', '-preset', 'ultrafast'); }
+                    else if(toolId === 'convert-image') { outName = 'converted.webp'; }
+                    
+                    args.push(outName);
+                    await ffmpeg.exec(args);
+                    
+                    const data = await ffmpeg.readFile(outName);
+                    return { blob: new Blob([data.buffer]), name: outName };
+                },
+
+                async pdf(files, toolId, onProgress) {
+                    const { PDFDocument, rgb } = PDFLib;
+                    const pdfDoc = await PDFDocument.create();
+                    onProgress(20);
+                    
+                    const fileArr = Array.isArray(files) ? files : [files];
+                    for(let file of fileArr) {
+                        const donor = await PDFDocument.load(await file.arrayBuffer());
+                        const pages = await pdfDoc.copyPages(donor, donor.getPageIndices());
+                        pages.forEach(p => pdfDoc.addPage(p));
+                    }
+                    
+                    onProgress(80);
+                    const bytes = await pdfDoc.save();
+                    onProgress(100);
+                    return { blob: new Blob([bytes], {type:'application/pdf'}), name: 'studio_export.pdf' };
+                },
+
+                async doc(file, toolId, onProgress) {
+                    onProgress(30);
+                    const result = await mammoth.convertToHtml({ arrayBuffer: await file.arrayBuffer() });
+                    onProgress(70);
+                    // For now, HTML result to show capability, actual PDF would need a renderer like jsPDF
+                    return { blob: new Blob([result.value], {type:'text/html'}), name: 'document_converted.html' };
+                }
+            },
+
+            toggleTheme() { this.state.theme = this.state.theme === 'dark' ? 'light' : 'dark'; this.updateTheme(); if(window.navigator.vibrate) window.navigator.vibrate(5); },
+            updateTheme() {
+                const h = document.documentElement; const t = document.getElementById('theme-toggle'); const a = document.getElementById('app');
+                if(this.state.theme === 'dark') { h.classList.add('dark'); t.classList.add('dark'); t.classList.remove('light'); a.classList.add('mesh-dark'); a.classList.remove('mesh-light'); }
+                else { h.classList.remove('dark'); t.classList.remove('dark'); t.classList.add('light'); a.classList.remove('mesh-dark'); a.classList.add('mesh-light'); }
+            },
+            filterTools(q) { 
+                const query = q.toLowerCase();
+                document.querySelectorAll('.tool-card').forEach(c => {
+                    const t = c.innerText.toLowerCase();
+                    const s = c.closest('.tool-section');
+                    c.style.display = t.includes(query) ? '' : 'none';
+                });
+            },
+            showToast(m, ty='success') {
+                const t = document.getElementById('toast'); t.innerText = m; t.style.opacity = '1'; t.style.transform = 'translateX(-50%) translateY(-20px)';
+                t.style.background = ty === 'error' ? 'rgba(244,63,94,0.95)' : 'rgba(16,185,129,0.95)';
+                setTimeout(() => { t.style.opacity = '0'; t.style.transform = 'translateX(-50%) translateY(0)'; }, 3000);
+            },
+            addToHistory(j) { this.state.history.unshift({id: Date.now(), date: new Date().toISOString(), ...j}); localStorage.setItem('f_history', JSON.stringify(this.state.history)); this.renderHistory(); },
+            clearHistory() { this.state.history = []; localStorage.removeItem('f_history'); this.renderHistory(); },
+            renderHistory() {
+                const l = document.getElementById('history-list'); if(!l) return;
+                if(this.state.history.length === 0) { l.innerHTML = '<div class="pt-32 text-center opacity-20"><span class="msymbol" style="font-size:64px">history_edu</span><p class="text-[10px] font-black uppercase tracking-widest mt-4">No activity yet</p></div>'; return; }
+                l.innerHTML = this.state.history.map(i => `
+                    <div class="glass rounded-[2rem] p-5 mb-4 flex items-center gap-4 border border-white/5">
+                        <div class="w-12 h-12 rounded-2xl bg-white/5 flex items-center justify-center text-on-surface/40"><span class="msymbol filled" style="font-size:22px">${i.icon}</span></div>
+                        <div class="flex-1 min-w-0"><p class="text-xs font-black text-on-surface truncate pb-1 dark:text-white">${i.filename}</p><p class="text-[10px] text-outline font-bold uppercase tracking-widest">${i.tool} · ${new Date(i.date).toLocaleTimeString([],{hour:'2-digit',minute:'2-digit'})}</p></div>
+                        <span class="msymbol text-outline/20" style="font-size:18px">chevron_right</span>
+                    </div>
+                `).join('');
+            }
+        };
+
+        window.onload = () => { 
+            Formatica.init(); 
+            setTimeout(() => Formatica.updateNav('home'), 100); 
+        };
+    </script>
+</body>
+</html>

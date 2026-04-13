@@ -1,0 +1,260 @@
+<!DOCTYPE html>
+
+<html class="dark" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Formatica | Digital Curator</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;700;800&amp;family=Inter:wght@400;500;600&amp;family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+      tailwind.config = {
+        darkMode: "class",
+        theme: {
+          extend: {
+            "colors": {
+                    "primary-dim": "#695ef6",
+                    "inverse-on-surface": "#55545b",
+                    "on-background": "#f9f5fd",
+                    "tertiary-fixed": "#c39fff",
+                    "primary-fixed-dim": "#8b84ff",
+                    "error-container": "#a70138",
+                    "background": "#0e0e13",
+                    "surface-container-high": "#1f1f26",
+                    "on-primary-fixed": "#000000",
+                    "tertiary-dim": "#8d51ea",
+                    "surface-container-lowest": "#000000",
+                    "on-error": "#490013",
+                    "surface-variant": "#25252d",
+                    "inverse-surface": "#fcf8ff",
+                    "secondary-fixed-dim": "#5debc4",
+                    "error-dim": "#d73357",
+                    "inverse-primary": "#5245df",
+                    "surface": "#0e0e13",
+                    "on-secondary-container": "#defff1",
+                    "on-surface": "#f9f5fd",
+                    "on-secondary": "#005d4a",
+                    "secondary-container": "#006b55",
+                    "primary": "#a9a4ff",
+                    "tertiary-container": "#9d62fb",
+                    "surface-container-low": "#131319",
+                    "on-secondary-fixed": "#004939",
+                    "surface-tint": "#a9a4ff",
+                    "secondary-dim": "#5debc4",
+                    "surface-bright": "#2c2b33",
+                    "on-surface-variant": "#acaab1",
+                    "on-primary-fixed-variant": "#1f0097",
+                    "on-primary": "#20009e",
+                    "error": "#ff6e84",
+                    "primary-fixed": "#9a94ff",
+                    "on-tertiary-container": "#000000",
+                    "tertiary": "#b486ff",
+                    "on-primary-container": "#17007c",
+                    "surface-container": "#19191f",
+                    "secondary-fixed": "#6dfad2",
+                    "outline": "#76747b",
+                    "on-tertiary": "#2d0062",
+                    "secondary": "#6dfad2",
+                    "surface-container-highest": "#25252d",
+                    "on-tertiary-fixed-variant": "#4d00a0",
+                    "on-secondary-fixed-variant": "#006853",
+                    "on-tertiary-fixed": "#22004e",
+                    "on-error-container": "#ffb2b9",
+                    "surface-dim": "#0e0e13",
+                    "primary-container": "#9a94ff",
+                    "tertiary-fixed-dim": "#b88dff",
+                    "outline-variant": "#48474d"
+            },
+            "borderRadius": {
+                    "DEFAULT": "0.25rem",
+                    "lg": "1.0rem",
+                    "xl": "1.5rem",
+                    "full": "9999px"
+            },
+            "fontFamily": {
+                    "headline": ["Manrope"],
+                    "body": ["Inter"],
+                    "label": ["Inter"]
+            }
+          },
+        },
+      }
+    </script>
+<style>
+        body {
+            background-color: #0e0e13; /* Forcing dark theme base per config */
+            font-family: 'Inter', sans-serif;
+        }
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+            display: inline-block;
+            line-height: 1;
+        }
+        .glass-card {
+            background: rgba(37, 37, 45, 0.4);
+            backdrop-filter: blur(24px) saturate(160%);
+            border-top: 1px solid rgba(255, 255, 255, 0.1);
+        }
+    </style>
+<style>
+    body {
+      min-height: max(884px, 100dvh);
+    }
+  </style>
+  </head>
+<body class="bg-surface text-on-surface selection:bg-primary/30">
+<!-- TopAppBar -->
+<nav class="fixed top-0 z-[60] bg-[#0e0e13]/80 backdrop-blur-xl flex justify-between items-center px-6 h-16 w-full">
+<div class="flex items-center gap-4">
+<span class="material-symbols-outlined text-[#a9a4ff]" data-icon="arrow_back">arrow_back</span>
+<span class="font-['Manrope'] font-black tracking-tighter text-2xl text-[#a9a4ff]">Formatica</span>
+</div>
+<div class="flex items-center gap-3">
+<div class="flex items-center gap-2 bg-surface-container-low px-3 py-1 rounded-full border border-outline-variant/10">
+<span class="w-2 h-2 rounded-full bg-secondary shadow-[0_0_10px_rgba(109,250,210,0.5)]"></span>
+<span class="text-[10px] font-bold uppercase tracking-widest text-secondary">System Active</span>
+</div>
+<span class="material-symbols-outlined text-[#a9a4ff] p-2 hover:bg-[#1f1f26] transition-colors rounded-full" data-icon="lock">lock</span>
+</div>
+</nav>
+<main class="pt-24 pb-32 px-6 max-w-5xl mx-auto space-y-8">
+<!-- Hero Editorial Section -->
+<header class="flex flex-col md:flex-row md:items-end justify-between gap-6">
+<div class="max-w-xl">
+<h1 class="font-headline font-extrabold text-4xl md:text-5xl tracking-tight leading-[1.1]">
+                    Curating your <span class="text-transparent bg-clip-text bg-gradient-to-br from-primary to-primary-dim">digital architecture</span> with precision.
+                </h1>
+<p class="mt-4 text-on-surface-variant font-body text-lg leading-relaxed">
+                    A private studio for high-security document processing and automated synthesis.
+                </p>
+</div>
+<div class="flex gap-2">
+<button class="bg-surface-container-high p-4 rounded-xl hover:bg-surface-container-highest transition-all group active:scale-95">
+<span class="material-symbols-outlined text-primary group-hover:scale-110 transition-transform" data-icon="search">search</span>
+</button>
+<button class="bg-gradient-to-br from-primary to-primary-dim text-on-primary font-headline font-bold px-6 py-4 rounded-xl flex items-center gap-3 active:scale-95 transition-all shadow-lg shadow-primary/20">
+<span class="material-symbols-outlined" data-icon="add" data-weight="fill" style="font-variation-settings: 'FILL' 1;">add</span>
+                    New Asset
+                </button>
+</div>
+</header>
+<!-- Bento Grid Layout -->
+<div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+<!-- Large Focus Card -->
+<div class="md:col-span-2 glass-card rounded-xl p-8 relative overflow-hidden group">
+<div class="relative z-10 h-full flex flex-col justify-between">
+<div>
+<span class="text-secondary font-headline font-bold tracking-widest text-xs uppercase">Recent Activity</span>
+<h2 class="text-2xl font-headline font-bold mt-2">Document Synthesis 04</h2>
+<p class="text-on-surface-variant text-sm mt-1">Status: Optimized for Studio Pipeline</p>
+</div>
+<div class="mt-12 flex items-center gap-4">
+<div class="h-1 w-full bg-surface-container-highest rounded-full overflow-hidden">
+<div class="h-full w-3/4 bg-gradient-to-r from-secondary to-primary rounded-full"></div>
+</div>
+<span class="text-xs font-mono text-secondary">75%</span>
+</div>
+</div>
+<div class="absolute -right-8 -bottom-8 opacity-20 group-hover:opacity-30 transition-opacity">
+<span class="material-symbols-outlined text-[200px]" data-icon="auto_awesome">auto_awesome</span>
+</div>
+</div>
+<!-- Side Card: Quick Action -->
+<div class="bg-surface-container-low rounded-xl p-6 border border-outline-variant/10 flex flex-col justify-between hover:bg-surface-container-high transition-colors cursor-pointer">
+<div class="flex justify-between items-start">
+<div class="bg-tertiary-container/20 p-3 rounded-lg">
+<span class="material-symbols-outlined text-tertiary" data-icon="folder_zip">folder_zip</span>
+</div>
+<span class="material-symbols-outlined text-on-surface-variant" data-icon="north_east">north_east</span>
+</div>
+<div class="mt-8">
+<h3 class="font-headline font-bold text-lg">Archive Engine</h3>
+<p class="text-on-surface-variant text-xs mt-1">12.4 GB currently managed</p>
+</div>
+</div>
+<!-- Health & Metrics -->
+<div class="glass-card rounded-xl p-6 border border-outline-variant/10">
+<div class="flex items-center gap-3">
+<span class="material-symbols-outlined text-error" data-icon="encrypted">encrypted</span>
+<span class="font-headline font-bold text-sm">Security Layer</span>
+</div>
+<div class="mt-6 flex justify-between items-end">
+<div>
+<span class="block text-3xl font-headline font-black">99.9%</span>
+<span class="text-xs text-on-surface-variant">Uptime integrity</span>
+</div>
+<span class="material-symbols-outlined text-secondary" data-icon="show_chart">show_chart</span>
+</div>
+</div>
+<div class="md:col-span-2 grid grid-cols-2 gap-4">
+<div class="bg-surface-container-high rounded-xl p-6 hover:bg-surface-variant transition-all cursor-pointer flex items-center gap-4">
+<span class="material-symbols-outlined text-primary-dim text-3xl" data-icon="history_edu">history_edu</span>
+<div>
+<span class="block font-headline font-bold">Drafts</span>
+<span class="text-xs text-on-surface-variant">14 items pending</span>
+</div>
+</div>
+<div class="bg-surface-container-high rounded-xl p-6 hover:bg-surface-variant transition-all cursor-pointer flex items-center gap-4">
+<span class="material-symbols-outlined text-secondary text-3xl" data-icon="monitoring">monitoring</span>
+<div>
+<span class="block font-headline font-bold">Analytics</span>
+<span class="text-xs text-on-surface-variant">Live cluster data</span>
+</div>
+</div>
+</div>
+</div>
+<!-- Featured Section: Curated Gallery -->
+<section class="space-y-6">
+<div class="flex justify-between items-center">
+<h3 class="font-headline font-bold text-xl">Digital Portfolio</h3>
+<span class="text-primary text-sm font-bold cursor-pointer hover:underline">View All</span>
+</div>
+<div class="grid grid-cols-2 md:grid-cols-4 gap-4">
+<div class="aspect-square bg-surface-container-low rounded-xl overflow-hidden relative group">
+<img alt="abstract digital art" class="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700" data-alt="abstract digital flow of liquid glass and violet light with smooth organic curves and grain texture" src="https://lh3.googleusercontent.com/aida-public/AB6AXuCfWEYWmy4KqMraT4cqwf1QTmgpv8xwtktonQ0SYyCpMAys1yVSi-8XJ73C2RvU3RB3EEvPQo5CgxpUYEJZ7Jw610nKzWECr86DzCyk1kPBoEhJJ2aRbF1lGOON7BHOZKcOr9vZqFZWBOUMmoQItBY3rUt98u7BYXbXAsytBnDPf0Q3i7OAGXvaoUo_6DKqGcNwVP9oK0RjQomIgZo9DrTReL7TH7vHAQH0_YaessjGS8GKC0Plym9m4eqovzab2VoK-J5N7iP20sQ"/>
+<div class="absolute inset-0 bg-gradient-to-t from-black/80 via-transparent to-transparent p-4 flex flex-col justify-end">
+<span class="text-white font-bold text-sm">Visual Identity</span>
+<span class="text-white/60 text-[10px]">Feb 2024</span>
+</div>
+</div>
+<div class="aspect-square bg-surface-container-low rounded-xl overflow-hidden relative group">
+<img alt="abstract geometric shape" class="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700" data-alt="3d rendered minimalist iridescent cube floating in a dark studio space with soft dramatic shadows" src="https://lh3.googleusercontent.com/aida-public/AB6AXuA19vOA8snGGJV8pjW3CmKT--rtn33S4_dUm_kB33ua-4xH_xmi7sr0AEczb9Vb0BGZqr0nyL7Sn9_Qf3sgGneObA2GNwRG9I2sg7H_lCuNIfnQlqPzcDgLVExHmM513ugrmsILdlsRA0RXvNrioPtJJBIPd0xZ1UoATGseU38MQzDQRQxPtIs9E2udJJq_jIQg5nf0OvCucrGO7Ax-6H-_qvsA1Az8sQew9MfeFgiWHOyQ5s2wnOrNGewf9jiZQQWBujr0ZonK4R4"/>
+<div class="absolute inset-0 bg-gradient-to-t from-black/80 via-transparent to-transparent p-4 flex flex-col justify-end">
+<span class="text-white font-bold text-sm">Asset Pack 09</span>
+<span class="text-white/60 text-[10px]">Mar 2024</span>
+</div>
+</div>
+<div class="aspect-square bg-surface-container-low rounded-xl overflow-hidden relative group">
+<img alt="vintage technology" class="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700" data-alt="extreme close up of retro computer circuit boards with neon cyan and pink lighting accents" src="https://lh3.googleusercontent.com/aida-public/AB6AXuAHuHTILI2T2BBs-guYMOWHZFBrztOXxd-BAUn8E7gSZN42z3TU_9pPPWXhxlnsk8P7Sy3NAJjz8Fi6G0Jhc1CYjMxOvQStSto7MFVK5t56V5X-OlOzQ6GSog1G40Tb3z2l0WidJ2uR9-7_ox_xwPbm1D2iNoAzAdXVyx3DQbKCXvP8-V3ov9-C4cYYINeMEoWpz4deW-J2nOhSu4aOXAff5kuCeTvh-fKyrStpHtXSzy_sEgoggd4X5AybMtV6bn0UJlUAxE5VkkQ"/>
+<div class="absolute inset-0 bg-gradient-to-t from-black/80 via-transparent to-transparent p-4 flex flex-col justify-end">
+<span class="text-white font-bold text-sm">Legacy Synth</span>
+<span class="text-white/60 text-[10px]">Jan 2024</span>
+</div>
+</div>
+<div class="aspect-square bg-surface-container-low rounded-xl overflow-hidden relative group">
+<img alt="liquid glass" class="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700" data-alt="close up of flowing clear viscous liquid over dark background with sharp highlights and refraction" src="https://lh3.googleusercontent.com/aida-public/AB6AXuDHtfI4GbDpvIWvje5GEeouSj-KaLyCpuTLiZ_YIUlXdm_fX6rSm2GqRfS54vCzN64BE1pQAJrKAqS031-0MZyLwCh7RMzRxPwm3N43Hji_bghfA3i8CD9ewlMI8fKRLEcKrxwLSg5LLuMOwwsBVN_HSp_OxwqJ4kK1gYmPRD_VzTftDOK08p0W-hDY1mqMuidxFFIVL3z88_JSnAe733s00h1WDFxfhSnu9Mvr4zoj_53O2pBpRPDtBRN2zBevD-BRzp-Y6repmB4"/>
+<div class="absolute inset-0 bg-gradient-to-t from-black/80 via-transparent to-transparent p-4 flex flex-col justify-end">
+<span class="text-white font-bold text-sm">Liquid Glass UI</span>
+<span class="text-white/60 text-[10px]">Now Active</span>
+</div>
+</div>
+</div>
+</section>
+</main>
+<!-- BottomNavBar (Liquid Dock) -->
+<div class="fixed bottom-4 left-0 right-0 z-50 flex justify-around items-center px-4">
+<div class="bg-[#25252d]/60 backdrop-blur-[24px] fixed bottom-4 left-1/2 -translate-x-1/2 w-[calc(100%-32px)] max-w-md h-[72px] rounded-full border border-white/15 shadow-[0_40px_40px_-10px_rgba(0,0,0,0.4)] flex justify-around items-center px-6">
+<!-- Active Tab -->
+<div class="bg-gradient-to-br from-[#a9a4ff] to-[#695ef6] text-[#0e0e13] rounded-full p-4 scale-110 transition-transform cursor-pointer flex items-center justify-center">
+<span class="material-symbols-outlined" data-icon="home" data-weight="fill" style="font-variation-settings: 'FILL' 1;">home</span>
+</div>
+<!-- Inactive Tabs -->
+<div class="text-[#acaab1] p-4 hover:text-white transition-all cursor-pointer flex items-center justify-center group">
+<span class="material-symbols-outlined group-hover:scale-110 transition-transform" data-icon="history">history</span>
+</div>
+<div class="text-[#acaab1] p-4 hover:text-white transition-all cursor-pointer flex items-center justify-center group">
+<span class="material-symbols-outlined group-hover:scale-110 transition-transform" data-icon="settings">settings</span>
+</div>
+</div>
+</div>
+</body></html>

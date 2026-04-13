@@ -1,0 +1,209 @@
+<!DOCTYPE html>
+
+<html class="dark" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Formatica - Extract Audio</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;700;800&amp;family=Inter:wght@400;500;600&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    "colors": {
+                        "primary-dim": "#695ef6",
+                        "inverse-on-surface": "#55545b",
+                        "on-background": "#f9f5fd",
+                        "tertiary-fixed": "#c39fff",
+                        "primary-fixed-dim": "#8b84ff",
+                        "error-container": "#a70138",
+                        "background": "#0e0e13",
+                        "surface-container-high": "#1f1f26",
+                        "on-primary-fixed": "#000000",
+                        "tertiary-dim": "#8d51ea",
+                        "surface-container-lowest": "#000000",
+                        "on-error": "#490013",
+                        "surface-variant": "#25252d",
+                        "inverse-surface": "#fcf8ff",
+                        "secondary-fixed-dim": "#5debc4",
+                        "error-dim": "#d73357",
+                        "inverse-primary": "#5245df",
+                        "surface": "#0e0e13",
+                        "on-secondary-container": "#defff1",
+                        "on-surface": "#f9f5fd",
+                        "on-secondary": "#005d4a",
+                        "secondary-container": "#006b55",
+                        "primary": "#a9a4ff",
+                        "tertiary-container": "#9d62fb",
+                        "surface-container-low": "#131319",
+                        "on-secondary-fixed": "#004939",
+                        "surface-tint": "#a9a4ff",
+                        "secondary-dim": "#5debc4",
+                        "surface-bright": "#2c2b33",
+                        "on-surface-variant": "#acaab1",
+                        "on-primary-fixed-variant": "#1f0097",
+                        "on-primary": "#20009e",
+                        "error": "#ff6e84",
+                        "primary-fixed": "#9a94ff",
+                        "on-tertiary-container": "#000000",
+                        "tertiary": "#b486ff",
+                        "on-primary-container": "#17007c",
+                        "surface-container": "#19191f",
+                        "secondary-fixed": "#6dfad2",
+                        "outline": "#76747b",
+                        "on-tertiary": "#2d0062",
+                        "secondary": "#6dfad2",
+                        "surface-container-highest": "#25252d",
+                        "on-tertiary-fixed-variant": "#4d00a0",
+                        "on-secondary-fixed-variant": "#006853",
+                        "on-tertiary-fixed": "#22004e",
+                        "on-error-container": "#ffb2b9",
+                        "surface-dim": "#0e0e13",
+                        "primary-container": "#9a94ff",
+                        "tertiary-fixed-dim": "#b88dff",
+                        "outline-variant": "#48474d"
+                    },
+                    "borderRadius": {
+                        "DEFAULT": "0.25rem",
+                        "lg": "1.0rem",
+                        "xl": "1.25rem",
+                        "full": "9999px"
+                    },
+                    "fontFamily": {
+                        "headline": ["Manrope"],
+                        "body": ["Inter"],
+                        "label": ["Inter"]
+                    }
+                },
+            },
+        }
+    </script>
+<style>
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+        }
+        .glass-panel {
+            background: rgba(37, 37, 45, 0.6);
+            backdrop-filter: blur(24px) saturate(160%);
+            outline: 1px solid rgba(72, 71, 77, 0.15);
+        }
+    </style>
+<style>
+    body {
+      min-height: max(884px, 100dvh);
+    }
+  </style>
+  </head>
+<body class="bg-surface text-on-surface font-body selection:bg-primary/30 min-h-screen pb-32">
+<!-- TopAppBar -->
+<header class="bg-[#0e0e13]/80 backdrop-blur-xl docked full-width top-0 z-50 flex justify-between items-center px-6 h-16 w-full">
+<div class="flex items-center gap-4">
+<button class="material-symbols-outlined text-[#a9a4ff] hover:bg-[#1f1f26] transition-colors p-2 rounded-full scale-95 active:duration-100">arrow_back</button>
+<h1 class="font-headline font-bold tracking-tight text-xl text-[#a9a4ff]">Extract Audio</h1>
+</div>
+<div class="flex items-center gap-2">
+<span class="bg-error/10 text-error px-3 py-1 rounded-full text-[10px] font-bold tracking-widest uppercase border border-error/20">On-Device</span>
+<button class="material-symbols-outlined text-[#acaab1] hover:bg-[#1f1f26] transition-colors p-2 rounded-full scale-95 active:duration-100">lock</button>
+</div>
+</header>
+<main class="max-w-md mx-auto px-6 mt-8 space-y-8">
+<!-- Bento-style Feature Card -->
+<section class="relative group">
+<div class="absolute -inset-0.5 bg-gradient-to-r from-primary-dim to-error opacity-20 blur rounded-xl"></div>
+<div class="relative surface-container-high rounded-xl p-8 border border-white/5 overflow-hidden">
+<div class="flex flex-col gap-4">
+<div class="w-12 h-12 bg-primary/10 rounded-lg flex items-center justify-center">
+<span class="material-symbols-outlined text-primary text-3xl" style="font-variation-settings: 'FILL' 1;">graphic_eq</span>
+</div>
+<div>
+<h2 class="font-headline font-extrabold text-2xl tracking-tight mb-1">Studio Precision</h2>
+<p class="text-on-surface-variant text-sm leading-relaxed">High-fidelity extraction using neural engine acceleration. Zero data leaves your device.</p>
+</div>
+</div>
+<div class="absolute top-4 right-4 opacity-10">
+<span class="material-symbols-outlined text-8xl">spatial_audio_off</span>
+</div>
+</div>
+</section>
+<!-- File Picker Zone -->
+<section class="space-y-3">
+<label class="font-headline font-bold text-sm text-on-surface-variant ml-1">Source Video</label>
+<div class="w-full h-48 rounded-xl border-2 border-dashed border-outline-variant bg-surface-container-low flex flex-col items-center justify-center gap-3 group hover:border-primary/50 transition-colors cursor-pointer">
+<div class="w-14 h-14 bg-surface-variant rounded-full flex items-center justify-center group-hover:scale-110 transition-transform">
+<span class="material-symbols-outlined text-primary text-2xl">video_file</span>
+</div>
+<div class="text-center">
+<p class="font-semibold text-on-surface">Tap to select video</p>
+<p class="text-xs text-on-surface-variant mt-1">MP4, MOV, or MKV up to 500MB</p>
+</div>
+</div>
+</section>
+<!-- Configuration Grid -->
+<div class="grid grid-cols-1 gap-6">
+<!-- Format Selection -->
+<section class="space-y-4">
+<div class="flex justify-between items-center px-1">
+<label class="font-headline font-bold text-sm text-on-surface-variant">Output Format</label>
+<span class="text-[10px] font-mono text-primary/60">Lossless enabled</span>
+</div>
+<div class="flex flex-wrap gap-2">
+<!-- MP3 (Selected) -->
+<button class="h-10 px-6 rounded-xl bg-primary text-on-primary font-bold text-sm transition-all shadow-[0_0_20px_rgba(169,164,255,0.2)]">
+                        MP3
+                    </button>
+<!-- AAC -->
+<button class="h-10 px-6 rounded-xl border border-outline-variant bg-surface-container-low text-on-surface-variant font-medium text-sm hover:bg-surface-variant transition-colors">
+                        AAC
+                    </button>
+<!-- WAV -->
+<button class="h-10 px-6 rounded-xl border border-outline-variant bg-surface-container-low text-on-surface-variant font-medium text-sm hover:bg-surface-variant transition-colors">
+                        WAV
+                    </button>
+</div>
+</section>
+<!-- Quality Selection -->
+<section class="space-y-4">
+<label class="font-headline font-bold text-sm text-on-surface-variant ml-1">Audio Quality</label>
+<div class="flex flex-wrap gap-2">
+<!-- 128k -->
+<button class="h-10 px-6 rounded-xl border border-outline-variant bg-surface-container-low text-on-surface-variant font-medium text-sm hover:bg-surface-variant transition-colors">
+                        128k
+                    </button>
+<!-- 192k (Selected) -->
+<button class="h-10 px-6 rounded-xl bg-primary text-on-primary font-bold text-sm shadow-[0_0_20px_rgba(169,164,255,0.2)]">
+                        192k
+                    </button>
+<!-- 320k -->
+<button class="h-10 px-6 rounded-xl border border-outline-variant bg-surface-container-low text-on-surface-variant font-medium text-sm hover:bg-surface-variant transition-colors">
+                        320k
+                    </button>
+</div>
+</section>
+</div>
+<!-- Extract Button -->
+<button class="w-full h-14 rounded-lg bg-gradient-to-br from-error to-[#d73357] text-white font-headline font-extrabold tracking-tight text-lg shadow-[0_10px_30px_-5px_rgba(255,110,132,0.4)] active:scale-[0.98] transition-all flex items-center justify-center gap-2">
+<span class="material-symbols-outlined">music_note</span>
+            Extract Audio
+        </button>
+</main>
+<!-- BottomNavBar -->
+<nav class="fixed bottom-4 left-0 right-0 z-50 flex justify-around items-center px-4">
+<div class="bg-[#25252d]/60 backdrop-blur-[24px] fixed bottom-4 left-1/2 -translate-x-1/2 w-[calc(100%-32px)] max-w-md h-[72px] rounded-full border border-white/15 shadow-[0_40px_40px_-10px_rgba(0,0,0,0.4)] flex justify-around items-center px-6">
+<!-- Home (Active) -->
+<a class="bg-gradient-to-br from-[#a9a4ff] to-[#695ef6] text-[#0e0e13] rounded-full p-4 scale-110 transition-transform flex items-center justify-center" href="#">
+<span class="material-symbols-outlined" style="font-variation-settings: 'FILL' 1;">home</span>
+</a>
+<!-- History -->
+<a class="text-[#acaab1] p-4 hover:text-white transition-all flex items-center justify-center" href="#">
+<span class="material-symbols-outlined">history</span>
+</a>
+<!-- Settings -->
+<a class="text-[#acaab1] p-4 hover:text-white transition-all flex items-center justify-center" href="#">
+<span class="material-symbols-outlined">settings</span>
+</a>
+</div>
+</nav>
+</body></html>

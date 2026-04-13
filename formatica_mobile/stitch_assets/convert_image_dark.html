@@ -1,0 +1,202 @@
+<!DOCTYPE html>
+
+<html class="dark" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Formatica - Convert Image</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;700;800&amp;family=Inter:wght@400;500;600&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    "colors": {
+                        "primary-dim": "#695ef6",
+                        "inverse-on-surface": "#55545b",
+                        "on-background": "#f9f5fd",
+                        "tertiary-fixed": "#c39fff",
+                        "primary-fixed-dim": "#8b84ff",
+                        "error-container": "#a70138",
+                        "background": "#0e0e13",
+                        "surface-container-high": "#1f1f26",
+                        "on-primary-fixed": "#000000",
+                        "tertiary-dim": "#8d51ea",
+                        "surface-container-lowest": "#000000",
+                        "on-error": "#490013",
+                        "surface-variant": "#25252d",
+                        "inverse-surface": "#fcf8ff",
+                        "secondary-fixed-dim": "#5debc4",
+                        "error-dim": "#d73357",
+                        "inverse-primary": "#5245df",
+                        "surface": "#0e0e13",
+                        "on-secondary-container": "#defff1",
+                        "on-surface": "#f9f5fd",
+                        "on-secondary": "#005d4a",
+                        "secondary-container": "#006b55",
+                        "primary": "#a9a4ff",
+                        "tertiary-container": "#9d62fb",
+                        "surface-container-low": "#131319",
+                        "on-secondary-fixed": "#004939",
+                        "surface-tint": "#a9a4ff",
+                        "secondary-dim": "#5debc4",
+                        "surface-bright": "#2c2b33",
+                        "on-surface-variant": "#acaab1",
+                        "on-primary-fixed-variant": "#1f0097",
+                        "on-primary": "#20009e",
+                        "error": "#ff6e84",
+                        "primary-fixed": "#9a94ff",
+                        "on-tertiary-container": "#000000",
+                        "tertiary": "#b486ff",
+                        "on-primary-container": "#17007c",
+                        "surface-container": "#19191f",
+                        "secondary-fixed": "#6dfad2",
+                        "outline": "#76747b",
+                        "on-tertiary": "#2d0062",
+                        "secondary": "#6dfad2",
+                        "surface-container-highest": "#25252d",
+                        "on-tertiary-fixed-variant": "#4d00a0",
+                        "on-secondary-fixed-variant": "#006853",
+                        "on-tertiary-fixed": "#22004e",
+                        "on-error-container": "#ffb2b9",
+                        "surface-dim": "#0e0e13",
+                        "primary-container": "#9a94ff",
+                        "tertiary-fixed-dim": "#b88dff",
+                        "outline-variant": "#48474d"
+                    },
+                    "borderRadius": {
+                        "DEFAULT": "0.25rem",
+                        "lg": "1.0rem",
+                        "xl": "0.75rem",
+                        "full": "9999px"
+                    },
+                    "fontFamily": {
+                        "headline": ["Manrope"],
+                        "body": ["Inter"],
+                        "label": ["Inter"]
+                    }
+                },
+            },
+        }
+    </script>
+<style>
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+        }
+        .glass-card {
+            background: rgba(37, 37, 45, 0.6);
+            backdrop-filter: blur(24px) saturate(160%);
+            border-top: 1px solid rgba(255, 255, 255, 0.1);
+        }
+    </style>
+<style>
+    body {
+      min-height: max(884px, 100dvh);
+    }
+  </style>
+  </head>
+<body class="bg-surface text-on-surface font-body min-h-screen pb-32 selection:bg-primary selection:text-on-primary">
+<!-- Top AppBar -->
+<header class="fixed top-0 left-0 right-0 z-50 bg-[#0e0e13]/80 backdrop-blur-xl h-16 flex justify-between items-center px-6 w-full">
+<div class="flex items-center gap-4">
+<span class="material-symbols-outlined text-[#a9a4ff] cursor-pointer" data-icon="arrow_back">arrow_back</span>
+<h1 class="font-headline font-bold tracking-tight text-xl text-on-surface">Convert Image</h1>
+</div>
+<div class="flex items-center gap-2">
+<div class="bg-secondary-container/20 px-3 py-1 rounded-full flex items-center gap-1.5 border border-secondary/10">
+<span class="w-1.5 h-1.5 rounded-full bg-secondary"></span>
+<span class="text-[10px] font-bold text-secondary tracking-widest uppercase">On-Device</span>
+</div>
+<span class="material-symbols-outlined text-[#a9a4ff]" data-icon="lock">lock</span>
+</div>
+</header>
+<main class="pt-24 px-6 max-w-2xl mx-auto space-y-8">
+<!-- Preview Section: Bento Grid Style -->
+<section class="grid grid-cols-1 md:grid-cols-2 gap-4">
+<div class="bg-surface-container-low rounded-xl overflow-hidden aspect-square relative group">
+<img class="w-full h-full object-cover opacity-80" data-alt="Abstract vibrant geometric 3D shapes with soft studio lighting and smooth purple gradients" src="https://lh3.googleusercontent.com/aida-public/AB6AXuCwqJ-WTYCl5SDhH9p8TeFO_JX-K2_9XBa0jZ6Oc6AE4_mWJi3d0sjgXmgLOmuiQ9dL4AHO--_h-ldpRyBL2kY25eWCmSXDPlPsyKOPPXcfg09S3i4DLe3rbEoK90P2enIoQmzcQfRmh-Wnnj0JzBZlEY0O24rx4w-wNuxx2dQxSWwrg7fz6luo2jx9mFpQeQwlkCHAco_9V9V4gLdO0kYeHUXfnUaS4uZQi857k6SBhqn0bk5_famOfuwP73HyChoNdWQXq_SKexk"/>
+<div class="absolute bottom-4 left-4 bg-surface-container-highest/80 backdrop-blur-md px-3 py-1.5 rounded-lg">
+<p class="text-[10px] font-medium text-on-surface-variant uppercase tracking-widest">Input (RAW)</p>
+<p class="text-sm font-bold text-on-surface">14.2 MB</p>
+</div>
+</div>
+<div class="bg-surface-container-high rounded-xl p-6 flex flex-col justify-between border-t border-white/5">
+<div>
+<div class="flex items-center justify-between mb-4">
+<span class="text-on-surface-variant font-medium text-sm">Estimated Size</span>
+<span class="material-symbols-outlined text-secondary" data-icon="auto_awesome">auto_awesome</span>
+</div>
+<div class="space-y-1">
+<h2 class="text-4xl font-headline font-black text-secondary tracking-tighter">1.8 MB</h2>
+<p class="text-on-surface-variant text-sm">87% reduction in size</p>
+</div>
+</div>
+<div class="mt-8 space-y-3">
+<div class="h-1.5 w-full bg-surface-container-lowest rounded-full overflow-hidden">
+<div class="h-full bg-secondary w-[13%] rounded-full"></div>
+</div>
+<div class="flex justify-between text-[10px] font-bold text-on-surface-variant uppercase tracking-widest">
+<span>New Size</span>
+<span>Old Size</span>
+</div>
+</div>
+</div>
+</section>
+<!-- Format Selector -->
+<section class="space-y-4">
+<h3 class="text-sm font-headline font-bold text-on-surface-variant uppercase tracking-[0.2em] ml-1">Output Format</h3>
+<div class="flex flex-wrap gap-3">
+<button class="px-6 py-3 rounded-full text-sm font-bold bg-surface-container-high text-on-surface-variant border border-white/5 transition-all hover:bg-surface-container-highest">JPG</button>
+<button class="px-6 py-3 rounded-full text-sm font-bold bg-gradient-to-br from-secondary to-secondary-container text-on-secondary border border-secondary/20 shadow-[0_8px_20px_-6px_rgba(109,250,210,0.3)]">PNG</button>
+<button class="px-6 py-3 rounded-full text-sm font-bold bg-surface-container-high text-on-surface-variant border border-white/5 transition-all hover:bg-surface-container-highest">WEBP</button>
+<button class="px-6 py-3 rounded-full text-sm font-bold bg-surface-container-high text-on-surface-variant border border-white/5 transition-all hover:bg-surface-container-highest">BMP</button>
+</div>
+</section>
+<!-- Quality Slider -->
+<section class="glass-card p-8 rounded-2xl space-y-6">
+<div class="flex justify-between items-end">
+<div class="space-y-1">
+<h3 class="text-lg font-headline font-bold text-on-surface">Compression Quality</h3>
+<p class="text-sm text-on-surface-variant">Balance visual fidelity and file size</p>
+</div>
+<div class="text-3xl font-headline font-black text-primary tracking-tighter">85%</div>
+</div>
+<div class="relative py-4 flex items-center">
+<div class="absolute w-full h-2 bg-surface-container-lowest rounded-full"></div>
+<div class="absolute w-[85%] h-2 bg-primary rounded-full"></div>
+<div class="absolute left-[85%] -translate-x-1/2 w-6 h-6 bg-primary rounded-full border-4 border-surface shadow-xl cursor-pointer"></div>
+</div>
+<div class="flex justify-between text-xs font-medium text-on-surface-variant">
+<span>Maximum Compression</span>
+<span>Lossless Quality</span>
+</div>
+</section>
+<!-- CTA Action -->
+<div class="pt-4">
+<button class="w-full h-16 rounded-xl bg-gradient-to-br from-secondary to-secondary-container text-on-secondary font-headline font-extrabold text-lg flex items-center justify-center gap-3 transition-transform active:scale-[0.98] shadow-[0_20px_40px_-12px_rgba(0,107,85,0.4)]">
+<span class="material-symbols-outlined" data-icon="swap_horiz">swap_horiz</span>
+                Convert Image
+            </button>
+<p class="text-center mt-4 text-[11px] text-on-surface-variant/60 font-medium uppercase tracking-widest">Processed locally on your device hardware</p>
+</div>
+</main>
+<!-- BottomNavBar (The Liquid Dock) -->
+<nav class="fixed bottom-4 left-0 right-0 z-50 flex justify-around items-center px-4">
+<div class="bg-[#25252d]/60 backdrop-blur-[24px] fixed bottom-4 left-1/2 -translate-x-1/2 w-[calc(100%-32px)] max-w-md h-[72px] rounded-full border border-white/15 shadow-[0_40px_40px_-10px_rgba(0,0,0,0.4)] flex justify-around items-center px-4">
+<!-- Home (Active) -->
+<div class="bg-gradient-to-br from-[#a9a4ff] to-[#695ef6] text-[#0e0e13] rounded-full p-4 scale-110 transition-transform cursor-pointer">
+<span class="material-symbols-outlined" data-icon="home">home</span>
+</div>
+<!-- History -->
+<div class="text-[#acaab1] p-4 hover:text-white transition-all cursor-pointer">
+<span class="material-symbols-outlined" data-icon="history">history</span>
+</div>
+<!-- Settings -->
+<div class="text-[#acaab1] p-4 hover:text-white transition-all cursor-pointer">
+<span class="material-symbols-outlined" data-icon="settings">settings</span>
+</div>
+</div>
+</nav>
+</body></html>

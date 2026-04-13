@@ -1,0 +1,1933 @@
+<!DOCTYPE html>
+<html lang="en" class="dark">
+<head>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>Formatica Studio</title>
+<link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800;900&display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet"/>
+<script src="https://cdn.tailwindcss.com?plugins=forms"></script>
+<script>
+tailwind.config = {
+  darkMode: 'class',
+  theme: {
+    extend: {
+      colors: {
+        bg: '#0b1326',
+        surface: '#171f33',
+        'surface-low': '#131b2e',
+        'surface-high': '#222a3d',
+        'surface-highest': '#2d3449',
+        primary: '#c4c0ff',
+        'primary-container': '#5b4fe8',
+        secondary: '#d0bcff',
+        tertiary: '#4cd7f6',
+        'on-surface': '#dae2fd',
+        'on-surface-var': '#c8c4d8',
+        outline: '#918fa1',
+        'outline-var': '#464555',
+        'audio-rose': '#E8507C',
+        'video-purple': '#8b5cf6',
+        'compress-orange': '#F97316',
+        'merge-teal': '#10b981',
+        'split-amber': '#F59E0B',
+        'doc-indigo': '#6366f1',
+        'grey-slate': '#64748b',
+        error: '#ffb4ab',
+      },
+      fontFamily: { sans: ['Manrope', 'sans-serif'] },
+      borderRadius: { DEFAULT: '1rem', lg: '2rem', xl: '3rem', full: '9999px' }
+    }
+  }
+}
+</script>
+<style>
+  * { font-family: 'Manrope', sans-serif; }
+  .msymbol { font-family: 'Material Symbols Outlined'; font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24; }
+  .msymbol.filled { font-variation-settings: 'FILL' 1, 'wght' 400, 'GRAD' 0, 'opsz' 24; }
+
+  /* Glass */
+  .glass { background: rgba(255,255,255,0.07); backdrop-filter: blur(28px); border-top: 1px solid rgba(255,255,255,0.15); border-left: 1px solid rgba(255,255,255,0.1); }
+  .glass-light { background: rgba(255,255,255,0.82); backdrop-filter: blur(28px); border-top: 1px solid rgba(255,255,255,0.5); border-left: 1px solid rgba(255,255,255,0.3); }
+
+  /* Mesh backgrounds */
+  .mesh-dark { background: radial-gradient(at 0% 0%, #1a1b3a 0%, transparent 50%), radial-gradient(at 100% 0%, #2d1633 0%, transparent 50%), radial-gradient(at 50% 100%, #0f1628 0%, transparent 60%); background-color: #0b1326; }
+  .mesh-light { background: radial-gradient(at 0% 0%, #e8e4ff 0%, transparent 50%), radial-gradient(at 100% 0%, #ffe4ec 0%, transparent 50%), radial-gradient(at 50% 100%, #f0f4ff 0%, transparent 60%); background-color: #f8f9ff; }
+
+  /* Screen transitions */
+  .screen { display: none; animation: fadeSlideUp 0.28s ease forwards; }
+  .screen.active { display: flex; }
+  @keyframes fadeSlideUp { from { opacity: 0; transform: translateY(18px); } to { opacity: 1; transform: translateY(0); } }
+
+  /* App shell */
+  body { background: #060e20; display: flex; align-items: center; justify-content: center; min-height: 100dvh; overflow: hidden; }
+  #app { position: relative; width: 390px; height: 844px; border-radius: 44px; overflow: hidden; box-shadow: 0 40px 80px rgba(0,0,0,0.7), 0 0 0 8px #0d111e; }
+
+  /* Scrollable content area */
+  .content-area { flex: 1; overflow-y: auto; overflow-x: hidden; -webkit-overflow-scrolling: touch; scrollbar-width: none; }
+  .content-area::-webkit-scrollbar { display: none; }
+
+  /* Bottom nav pill */
+  .bottom-nav { position: absolute; bottom: 20px; left: 50%; transform: translateX(-50%); z-index: 100; display: flex; align-items: center; justify-content: space-around; width: 240px; height: 64px; border-radius: 32px; padding: 0 8px; background: rgba(255,255,255,0.08); backdrop-filter: blur(28px); border: 1px solid rgba(255,255,255,0.18); box-shadow: 0 24px 48px rgba(91,79,232,0.12); }
+  .nav-btn { width: 44px; height: 44px; border-radius: 22px; display: flex; align-items: center; justify-content: center; cursor: pointer; transition: all 0.2s; color: rgba(255,255,255,0.4); }
+  .nav-btn:hover { color: rgba(255,255,255,0.8); }
+  .nav-btn.active { background: rgba(91,79,232,0.25); color: #c4c0ff; box-shadow: 0 0 14px rgba(91,79,232,0.3); }
+
+  /* Light mode adjustments */
+  .light-mode #app { box-shadow: 0 40px 80px rgba(0,0,0,0.2), 0 0 0 8px #e2e8f0; }
+  .light-mode .bottom-nav { background: rgba(255,255,255,0.85); border-color: rgba(0,0,0,0.08); box-shadow: 0 16px 32px rgba(0,0,0,0.1); }
+  .light-mode .nav-btn { color: rgba(0,0,0,0.4); }
+  .light-mode .nav-btn:hover { color: rgba(0,0,0,0.8); }
+  .light-mode .nav-btn.active { background: rgba(91,79,232,0.12); color: #5b4fe8; }
+
+  /* Format chips */
+  .format-chip { padding: 8px 16px; border-radius: 999px; font-size: 11px; font-weight: 700; letter-spacing: 0.08em; cursor: pointer; transition: all 0.2s; border: 1.5px solid rgba(255,255,255,0.12); background: rgba(255,255,255,0.06); color: rgba(255,255,255,0.5); }
+  .format-chip.selected { border-color: currentColor; opacity: 1; }
+
+  /* Quality pills */
+  .quality-pill { flex: 1; padding: 8px 0; text-align: center; border-radius: 999px; font-size: 10px; font-weight: 700; letter-spacing: 0.08em; cursor: pointer; transition: all 0.2s; color: rgba(255,255,255,0.4); }
+  .quality-pill.selected { background: rgba(232,80,124,0.2); color: #E8507C; border: 1px solid rgba(232,80,124,0.4); }
+
+  /* Toggle switch */
+  .toggle { width: 44px; height: 26px; border-radius: 13px; position: relative; cursor: pointer; transition: background 0.2s; background: rgba(255,255,255,0.15); }
+  .toggle.on { background: #5b4fe8; }
+  .toggle-thumb { width: 20px; height: 20px; border-radius: 10px; background: white; position: absolute; top: 3px; left: 3px; transition: left 0.2s; box-shadow: 0 2px 4px rgba(0,0,0,0.3); }
+  .toggle.on .toggle-thumb { left: 21px; }
+
+  /* Sun/Moon face theme toggle */
+  .theme-face-toggle { width: 96px; height: 48px; border-radius: 24px; position: relative; cursor: pointer; transition: background 0.5s; overflow: visible; flex-shrink: 0; }
+  .theme-face-toggle.dark-tog { background: linear-gradient(135deg, #1a1f3a, #2d1f4a); border: 1.5px solid rgba(196,192,255,0.2); }
+  .theme-face-toggle.light-tog { background: linear-gradient(135deg, #87ceeb, #ffd580); border: 1.5px solid rgba(255,200,60,0.4); }
+  .toggle-track-stars { position: absolute; inset: 0; border-radius: 24px; overflow: hidden; pointer-events: none; }
+  .star-dot { position: absolute; border-radius: 50%; background: white; opacity: 0; transition: opacity 0.4s; }
+  .theme-face-toggle.dark-tog .star-dot { opacity: 1; }
+  .toggle-track-clouds { position: absolute; inset: 0; border-radius: 24px; overflow: hidden; pointer-events: none; }
+  .cloud-puff { position: absolute; border-radius: 50%; background: rgba(255,255,255,0.7); opacity: 0; transition: opacity 0.4s; }
+  .theme-face-toggle.light-tog .cloud-puff { opacity: 1; }
+
+  .face-ball { width: 40px; height: 40px; border-radius: 50%; position: absolute; top: 4px; left: 4px; transition: left 0.45s cubic-bezier(0.34,1.56,0.64,1), background 0.45s, box-shadow 0.45s; display: flex; align-items: center; justify-content: center; box-shadow: 0 3px 10px rgba(0,0,0,0.4); }
+  .face-ball.dark { background: radial-gradient(circle at 35% 35%, #d0d8f0, #8a90c8); box-shadow: inset -3px -2px 0 rgba(0,0,0,0.15), 0 3px 12px rgba(0,0,0,0.5); }
+  .face-ball.light { left: 52px; background: radial-gradient(circle at 38% 35%, #fff7a0, #ffcc00); box-shadow: 0 0 14px rgba(255,200,0,0.8), 0 3px 8px rgba(0,0,0,0.2); }
+
+  /* Face SVG */
+  .face-svg { width: 28px; height: 28px; overflow: visible; }
+
+  /* Sun rays */
+  .sun-ray { transform-origin: 14px 14px; transition: opacity 0.3s; }
+  .face-ball.dark .sun-ray { opacity: 0; }
+  .face-ball.light .sun-ray { opacity: 1; }
+
+  /* Moon craters */
+  .moon-crater { transition: opacity 0.3s; }
+  .face-ball.dark .moon-crater { opacity: 1; }
+  .face-ball.light .moon-crater { opacity: 0; }
+
+  /* Face eyes blinking */
+  @keyframes blink { 0%,90%,100% { transform: scaleY(1); } 93% { transform: scaleY(0.1); } }
+  .eye { animation: blink 4s infinite; transform-origin: center; }
+  .left-eye { animation-delay: 0.1s; }
+  .right-eye { animation-delay: 0.15s; }
+
+  /* Smile wobble */
+  @keyframes smile-wobble { 0%,100% { transform: scaleX(1); } 50% { transform: scaleX(1.06); } }
+  .face-smile { animation: smile-wobble 3s ease-in-out infinite; transform-origin: center; }
+
+  /* Ray rotate on light mode */
+  @keyframes ray-spin { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }
+  .rays-group { transform-origin: 14px 14px; }
+  .face-ball.light .rays-group { animation: ray-spin 8s linear infinite; }
+
+  /* CRF slider */
+  input[type=range] { -webkit-appearance: none; width: 100%; height: 4px; border-radius: 2px; background: rgba(255,255,255,0.1); outline: none; }
+  input[type=range]::-webkit-slider-thumb { -webkit-appearance: none; width: 20px; height: 20px; border-radius: 50%; background: #F97316; cursor: pointer; box-shadow: 0 0 12px rgba(249,115,22,0.5); }
+
+  /* PDF row drag visual */
+  .pdf-row { transition: all 0.15s; cursor: grab; }
+  .pdf-row:active { cursor: grabbing; transform: scale(1.01); }
+
+  /* Processing animation */
+  @keyframes spin { to { transform: rotate(360deg); } }
+  .spin { animation: spin 1s linear infinite; }
+  @keyframes pulse-glow { 0%,100% { opacity: 1; } 50% { opacity: 0.4; } }
+  .pulse { animation: pulse-glow 2s ease-in-out infinite; }
+
+  /* Progress bar fill animation */
+  @keyframes fill-bar { from { width: 0%; } to { width: 74%; } }
+  .progress-fill { animation: fill-bar 1.2s ease-out forwards; }
+
+  /* Success checkmark */
+  @keyframes pop-in { 0% { transform: scale(0) rotate(-180deg); opacity: 0; } 80% { transform: scale(1.15) rotate(5deg); } 100% { transform: scale(1) rotate(0deg); opacity: 1; } }
+  .pop-in { animation: pop-in 0.5s cubic-bezier(0.34, 1.56, 0.64, 1) forwards; }
+
+  /* Page load stagger */
+  .stagger > * { opacity: 0; animation: fadeSlideUp 0.3s ease forwards; }
+  .stagger > *:nth-child(1) { animation-delay: 0.05s; }
+  .stagger > *:nth-child(2) { animation-delay: 0.10s; }
+  .stagger > *:nth-child(3) { animation-delay: 0.15s; }
+  .stagger > *:nth-child(4) { animation-delay: 0.20s; }
+  .stagger > *:nth-child(5) { animation-delay: 0.25s; }
+  .stagger > *:nth-child(6) { animation-delay: 0.30s; }
+  .stagger > *:nth-child(7) { animation-delay: 0.35s; }
+
+  /* Toast notification */
+  #toast { position: absolute; bottom: 100px; left: 50%; transform: translateX(-50%) translateY(20px); background: rgba(16,185,129,0.95); color: white; padding: 10px 20px; border-radius: 999px; font-size: 12px; font-weight: 700; white-space: nowrap; opacity: 0; transition: all 0.3s; z-index: 200; letter-spacing: 0.04em; }
+  #toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
+
+  /* Hover card lift */
+  .tool-card { transition: transform 0.18s, box-shadow 0.18s; cursor: pointer; }
+  .tool-card:hover { transform: translateY(-2px); box-shadow: 0 12px 28px rgba(0,0,0,0.25); }
+  .tool-card:active { transform: scale(0.97); }
+
+  /* Light mode text overrides */
+  .light-mode .light-text { color: #1e293b; }
+  .light-mode .light-text-muted { color: #64748b; }
+  .light-mode .light-bg { background: #f8fafc; }
+  .light-mode .light-surface { background: #ffffff; }
+  .light-mode .light-border { border-color: rgba(0,0,0,0.07); }
+  .light-mode .glass { background: rgba(255,255,255,0.82); border-top-color: rgba(255,255,255,0.5); border-left-color: rgba(255,255,255,0.3); }
+  .light-mode .mesh-dark { background: #f8fafc; }
+
+  /* Header blur for tool screens */
+  .topbar { position: sticky; top: 0; z-index: 50; padding: 0 20px; height: 56px; display: flex; align-items: center; justify-content: space-between; background: rgba(11,19,38,0.75); backdrop-filter: blur(24px); border-bottom: 1px solid rgba(255,255,255,0.1); }
+  .light-mode .topbar { background: rgba(248,249,255,0.85); border-bottom-color: rgba(0,0,0,0.07); }
+
+  /* Section headers */
+  .section-label { font-size: 10px; font-weight: 800; letter-spacing: 0.14em; text-transform: uppercase; color: rgba(200,196,216,0.6); padding: 0 4px; }
+
+  /* Action button */
+  .cta-btn { width: 100%; height: 54px; border-radius: 999px; font-weight: 800; font-size: 13px; letter-spacing: 0.1em; text-transform: uppercase; display: flex; align-items: center; justify-content: center; gap: 10px; cursor: pointer; transition: transform 0.15s, box-shadow 0.15s; }
+  .cta-btn:active { transform: scale(0.97); }
+  .cta-rose { background: #E8507C; box-shadow: 0 12px 32px rgba(232,80,124,0.35); }
+  .cta-indigo { background: #5b4fe8; box-shadow: 0 12px 32px rgba(91,79,232,0.35); }
+  .cta-purple { background: #8b5cf6; box-shadow: 0 12px 32px rgba(139,92,246,0.35); }
+  .cta-orange { background: linear-gradient(135deg, #F97316, #ea580c); box-shadow: 0 12px 32px rgba(249,115,22,0.35); }
+  .cta-teal { background: linear-gradient(135deg, #10b981, #059669); box-shadow: 0 12px 32px rgba(16,185,129,0.3); }
+  .cta-amber { background: linear-gradient(135deg, #F59E0B, #d97706); box-shadow: 0 12px 32px rgba(245,158,11,0.3); }
+  .cta-slate { background: linear-gradient(135deg, #475569, #334155); box-shadow: 0 8px 20px rgba(0,0,0,0.3); }
+  .cta-btn:hover { filter: brightness(1.06); }
+
+  /* Badge pill */
+  .badge { font-size: 9px; font-weight: 800; letter-spacing: 0.1em; text-transform: uppercase; padding: 3px 10px; border-radius: 999px; }
+
+  /* Floating action sticky bar */
+  .sticky-bar { position: sticky; bottom: 0; padding: 14px 20px 98px; background: linear-gradient(to top, rgba(11,19,38,1) 70%, transparent); }
+  .light-mode .sticky-bar { background: linear-gradient(to top, rgba(248,249,255,1) 70%, transparent); }
+
+  /* Inline processing bar */
+  .proc-fill { transition: width 0.25s ease; }
+  .done-action-btn { height: 44px; border-radius: 14px; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 2px; cursor: pointer; transition: all 0.15s; font-size: 10px; font-weight: 800; letter-spacing: 0.04em; text-transform: uppercase; flex: 1; }
+  .done-action-btn:hover { filter: brightness(1.1); transform: translateY(-1px); }
+  .done-action-btn:active { transform: scale(0.96); }
+  .done-action-primary { background: rgba(91,79,232,0.2); border: 1px solid rgba(91,79,232,0.35); color: #c4c0ff; }
+  .done-action-neutral { background: rgba(255,255,255,0.06); border: 1px solid rgba(255,255,255,0.1); color: rgba(218,226,253,0.8); }
+  .light-mode .done-action-neutral { color: #475569; background: rgba(0,0,0,0.05); border-color: rgba(0,0,0,0.08); }
+  .light-mode .done-action-primary { background: rgba(91,79,232,0.1); color: #5b4fe8; }
+</style>
+</head>
+<body>
+<div id="app" class="mesh-dark flex flex-col">
+
+  <!-- ===== TOAST ===== -->
+  <div id="toast"></div>
+
+  <!-- ===== SCREENS CONTAINER ===== -->
+  <div class="flex-1 relative overflow-hidden">
+
+    <!-- ==================== HOME ==================== -->
+    <div id="screen-home" class="screen active flex-col h-full">
+      <!-- Top bar -->
+      <div class="topbar">
+        <div class="flex items-center gap-2">
+          <div class="w-8 h-8 rounded-xl bg-gradient-to-br from-indigo-500 to-purple-600 flex items-center justify-center font-black text-white text-sm shadow-lg">F</div>
+          <span class="font-black text-on-surface text-base tracking-tight light-text">Formatica</span>
+        </div>
+        <div class="flex items-center gap-3">
+          <button onclick="navigate('history')" class="w-9 h-9 flex items-center justify-center rounded-full hover:bg-white/10 transition-colors">
+            <span class="msymbol text-on-surface-var light-text-muted" style="font-size:20px">history</span>
+          </button>
+          <button onclick="toggleTheme()" class="w-9 h-9 flex items-center justify-center rounded-full hover:bg-white/10 transition-colors">
+            <span class="msymbol text-primary" id="theme-icon" style="font-size:20px">dark_mode</span>
+          </button>
+        </div>
+      </div>
+      <!-- Content -->
+      <div class="content-area px-5 pb-28 pt-4 stagger">
+        <!-- Status chip -->
+        <div class="flex justify-center mb-6">
+          <div class="glass px-4 py-1.5 rounded-full flex items-center gap-2">
+            <span class="w-1.5 h-1.5 rounded-full bg-amber-400 pulse" style="box-shadow:0 0 8px rgba(251,191,36,0.7)"></span>
+            <span class="text-amber-400 text-xs font-bold tracking-wider uppercase">On-Device Mode</span>
+          </div>
+        </div>
+        <!-- Search -->
+        <div class="relative mb-6">
+          <span class="msymbol absolute left-4 top-1/2 -translate-y-1/2 text-on-surface-var" style="font-size:20px">search</span>
+          <input id="search-input" oninput="filterTools()" type="text" placeholder="Search tools..." class="w-full h-11 rounded-2xl pl-11 pr-4 text-sm text-on-surface placeholder:text-outline bg-black/20 border border-white/5 focus:outline-none focus:border-primary/40 light-text" style="background:rgba(255,255,255,0.06)"/>
+        </div>
+        <!-- Document Tools -->
+        <div id="doc-section" class="mb-6">
+          <div class="flex justify-between items-center mb-3">
+            <span class="section-label">Document Tools</span>
+            <span class="badge bg-white/5 text-primary border border-white/10">5 TOOLS</span>
+          </div>
+          <div class="grid grid-cols-2 gap-3" id="doc-tools">
+            <!-- Convert Document — full width / 2-col span -->
+            <div class="tool-card glass rounded-2xl p-5 col-span-2 flex flex-row items-center gap-5" style="min-height:96px" onclick="navigate('convert-doc')">
+              <div class="w-14 h-14 rounded-2xl flex items-center justify-center flex-shrink-0" style="background:rgba(99,102,241,0.15)">
+                <span class="msymbol filled text-doc-indigo" style="font-size:32px">picture_as_pdf</span>
+              </div>
+              <div>
+                <span class="text-sm font-bold text-on-surface light-text block">Convert Document</span>
+                <span class="text-xs text-outline mt-0.5 block">Turn DOCX, ODT &amp; HTML into PDF instantly</span>
+              </div>
+              <span class="msymbol text-outline ml-auto" style="font-size:20px">chevron_right</span>
+            </div>
+            <!-- Images to PDF -->
+            <div class="tool-card glass rounded-2xl p-4 aspect-square flex flex-col justify-between" onclick="navigate('images-pdf')">
+              <span class="msymbol filled text-teal-400" style="font-size:30px">image</span>
+              <div>
+                <span class="text-xs font-bold text-on-surface light-text block">Images to PDF</span>
+                <span class="text-xs text-outline mt-0.5 block leading-tight">Bundle JPG &amp; PNG into a single PDF</span>
+              </div>
+            </div>
+            <!-- Merge PDF -->
+            <div class="tool-card glass rounded-2xl p-4 aspect-square flex flex-col justify-between" onclick="navigate('merge-pdf')">
+              <span class="msymbol text-merge-teal" style="font-size:30px">merge</span>
+              <div>
+                <span class="text-xs font-bold text-on-surface light-text block">Merge PDF</span>
+                <span class="text-xs text-outline mt-0.5 block leading-tight">Combine multiple PDFs into one file</span>
+              </div>
+            </div>
+            <!-- Split PDF -->
+            <div class="tool-card glass rounded-2xl p-4 aspect-square flex flex-col justify-between" onclick="navigate('split-pdf')">
+              <span class="msymbol text-split-amber" style="font-size:30px">call_split</span>
+              <div>
+                <span class="text-xs font-bold text-on-surface light-text block">Split PDF</span>
+                <span class="text-xs text-outline mt-0.5 block leading-tight">Divide a PDF by pages or ranges</span>
+              </div>
+            </div>
+            <!-- Greyscale PDF -->
+            <div class="tool-card glass rounded-2xl p-4 aspect-square flex flex-col justify-between" onclick="navigate('greyscale-pdf')">
+              <span class="msymbol text-grey-slate" style="font-size:30px">tonality</span>
+              <div>
+                <span class="text-xs font-bold text-on-surface light-text block">Greyscale PDF</span>
+                <span class="text-xs text-outline mt-0.5 block leading-tight">Strip color for print-ready output</span>
+              </div>
+            </div>
+          </div>
+        </div>
+        <!-- Media Tools -->
+        <div id="media-section" class="mb-6">
+          <div class="flex justify-between items-center mb-3">
+            <span class="section-label">Media Tools</span>
+            <span class="badge bg-white/5 text-audio-rose border border-white/10">4 TOOLS</span>
+          </div>
+          <div class="grid grid-cols-2 gap-3" id="media-tools">
+            <div class="tool-card glass rounded-2xl p-4 aspect-square flex flex-col justify-between" onclick="navigate('extract-audio')">
+              <span class="msymbol filled text-audio-rose" style="font-size:30px">audio_file</span>
+              <div>
+                <span class="text-xs font-bold text-on-surface light-text block">Extract Audio</span>
+                <span class="text-xs text-outline mt-0.5 block leading-tight">Rip audio track from any video file</span>
+              </div>
+            </div>
+            <div class="tool-card glass rounded-2xl p-4 aspect-square flex flex-col justify-between" onclick="navigate('compress-video')">
+              <span class="msymbol text-compress-orange" style="font-size:30px">compress</span>
+              <div>
+                <span class="text-xs font-bold text-on-surface light-text block">Compress Video</span>
+                <span class="text-xs text-outline mt-0.5 block leading-tight">Shrink file size without visible quality loss</span>
+              </div>
+            </div>
+            <div class="tool-card glass rounded-2xl p-4 aspect-square flex flex-col justify-between" onclick="navigate('convert-video')">
+              <span class="msymbol filled text-video-purple" style="font-size:30px">movie</span>
+              <div>
+                <span class="text-xs font-bold text-on-surface light-text block">Convert Video</span>
+                <span class="text-xs text-outline mt-0.5 block leading-tight">Change format between MP4, MKV, MOV &amp; more</span>
+              </div>
+            </div>
+            <div class="tool-card glass rounded-2xl p-4 aspect-square flex flex-col justify-between" onclick="navigate('convert-image')">
+              <span class="msymbol text-tertiary" style="font-size:30px">image_search</span>
+              <div>
+                <span class="text-xs font-bold text-on-surface light-text block">Convert Image</span>
+                <span class="text-xs text-outline mt-0.5 block leading-tight">Convert between JPG, PNG, WEBP &amp; more</span>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div id="no-results" class="hidden text-center py-12">
+          <span class="msymbol text-outline" style="font-size:48px">search_off</span>
+          <p class="text-on-surface-var mt-2 text-sm">No tools found</p>
+        </div>
+      </div>
+    </div>
+
+    <!-- ==================== EXTRACT AUDIO ==================== -->
+    <div id="screen-extract-audio" class="screen flex-col h-full">
+      <div class="topbar">
+        <div class="flex items-center gap-2">
+          <button onclick="goBack()" class="w-9 h-9 flex items-center justify-center rounded-full hover:bg-white/10 transition-colors">
+            <span class="msymbol text-on-surface light-text" style="font-size:22px">arrow_back</span>
+          </button>
+          <span class="font-bold text-on-surface light-text text-base">Extract Audio</span>
+        </div>
+        <span class="badge bg-audio-rose/15 text-audio-rose border border-audio-rose/25">On-Device</span>
+      </div>
+      <div class="content-area px-5 pb-8 pt-4 space-y-5 stagger">
+        <!-- Preview zone -->
+        <div class="relative rounded-2xl overflow-hidden aspect-video flex items-center justify-center cursor-pointer group" style="background: rgba(232,80,124,0.08); border: 1.5px dashed rgba(232,80,124,0.3);" onclick="showToast('Preview playing...')">
+          <div class="absolute inset-0 bg-cover bg-center opacity-25 group-hover:opacity-35 transition-opacity" style="background-image:url('https://lh3.googleusercontent.com/aida-public/AB6AXuBc1_t7jxfBrjepyGDRB7ld9cXOpRM-1KsF3JE1vU-jDLiG06vvIKNFozZN0oy8jk9wQr8eNaNwAzvj8usV07nNWQzAimaqGt9-HScJ4aOxS7tzXwfElgZO7FWhL2RSZGJO6dF8E3mWYl1nYefmx_0f99np_lXMxQjf8kBVQig3Ouwq3ER_tpKIMeTwHvlPADt7kxwok7E0ns9RXreAcUp5OQTjObx_EhzRk3HF8VSQcfi8W-zhzu3FQ1xO_MhWb5gukOPqtiN3Mow')"></div>
+          <div class="z-10 flex flex-col items-center gap-2">
+            <div class="w-12 h-12 rounded-full flex items-center justify-center" style="background:rgba(232,80,124,0.25); border:1.5px solid rgba(232,80,124,0.4)">
+              <span class="msymbol filled text-audio-rose" style="font-size:24px">play_arrow</span>
+            </div>
+            <span class="text-xs font-bold tracking-widest uppercase text-white/70">Preview Selected</span>
+          </div>
+        </div>
+        <!-- File info -->
+        <div class="glass rounded-2xl p-4 space-y-3">
+          <div class="flex justify-between items-start">
+            <div>
+              <p class="font-bold text-on-surface text-sm light-text">cinematic_sequence_01.mp4</p>
+              <div class="flex gap-2 mt-1">
+                <span class="badge bg-white/8 text-outline border border-white/10" style="background:rgba(255,255,255,0.06)">4K UHD</span>
+                <span class="badge bg-audio-rose/15 text-audio-rose border border-audio-rose/25">H.264</span>
+              </div>
+            </div>
+            <span class="msymbol text-outline" style="font-size:20px">info</span>
+          </div>
+          <div class="grid grid-cols-2 gap-3 pt-1">
+            <div class="flex items-center gap-2">
+              <span class="msymbol text-audio-rose" style="font-size:16px">schedule</span>
+              <span class="text-sm text-on-surface light-text">03:45</span>
+            </div>
+            <div class="flex items-center gap-2">
+              <span class="msymbol text-audio-rose" style="font-size:16px">database</span>
+              <span class="text-sm text-on-surface light-text">45.2 MB</span>
+            </div>
+          </div>
+        </div>
+        <!-- Format -->
+        <div class="space-y-2">
+          <p class="section-label">Output Format</p>
+          <div class="flex gap-2" id="audio-formats">
+            <div class="format-chip selected flex-1 text-center text-audio-rose" style="border-color:#E8507C; background:rgba(232,80,124,0.15)" onclick="selectChip(this,'audio-formats','#E8507C','rgba(232,80,124,0.15)')">MP3</div>
+            <div class="format-chip flex-1 text-center" onclick="selectChip(this,'audio-formats','#E8507C','rgba(232,80,124,0.15)')">AAC</div>
+            <div class="format-chip flex-1 text-center" onclick="selectChip(this,'audio-formats','#E8507C','rgba(232,80,124,0.15)')">WAV</div>
+          </div>
+        </div>
+        <!-- Quality -->
+        <div class="space-y-2">
+          <p class="section-label">Audio Quality</p>
+          <div class="flex gap-1 p-1 rounded-full" style="background:rgba(255,255,255,0.06)" id="audio-quality">
+            <div class="quality-pill" onclick="selectQuality(this,'audio-quality')">128k</div>
+            <div class="quality-pill selected" onclick="selectQuality(this,'audio-quality')">192k</div>
+            <div class="quality-pill" onclick="selectQuality(this,'audio-quality')">320k</div>
+          </div>
+        </div>
+      </div>
+      <div class="sticky-bar" id="sbar-extract-audio">
+        <div id="sbar-extract-audio-cta">
+          <button class="cta-btn cta-rose text-white" onclick="startInlineProcess('extract-audio','linear-gradient(90deg,#E8507C,#ff6b95)','rgba(232,80,124,0.4)')">
+            <span class="msymbol filled" style="font-size:20px">audiotrack</span>
+            Extract Audio
+          </button>
+        </div>
+        <div id="sbar-extract-audio-proc" style="display:none" class="space-y-2">
+          <div class="flex justify-between items-center">
+            <span class="text-xs font-bold text-on-surface light-text">Extracting audio stream...</span>
+            <span class="text-xs font-black text-audio-rose" id="sbar-extract-audio-pct">0%</span>
+          </div>
+          <div class="h-2 rounded-full" style="background:rgba(255,255,255,0.08)"><div class="h-full rounded-full proc-fill" id="sbar-extract-audio-fill" style="width:0%;background:linear-gradient(90deg,#E8507C,#ff6b95);box-shadow:0 0 8px rgba(232,80,124,0.4)"></div></div>
+          <div class="flex justify-between"><span class="text-xs text-outline" id="sbar-extract-audio-eta">Estimating...</span><button onclick="cancelInlineProcess('extract-audio')" class="text-xs font-bold text-outline uppercase tracking-wider">Cancel</button></div>
+        </div>
+        <div id="sbar-extract-audio-done" style="display:none" class="space-y-2">
+          <div class="flex items-center gap-2 mb-2"><div class="w-4 h-4 rounded-full bg-merge-teal flex items-center justify-center"><span class="msymbol filled text-white" style="font-size:10px">check</span></div><span class="text-xs font-bold text-merge-teal">Output ready · sequence_01.mp3</span></div>
+          <div class="flex gap-2">
+            <button onclick="showToast('Opening file...')" class="done-action-btn done-action-primary"><span class="msymbol" style="font-size:16px">open_in_new</span>Open File</button>
+            <button onclick="showToast('Showing in folder...')" class="done-action-btn done-action-neutral"><span class="msymbol" style="font-size:16px">folder_open</span>Folder</button>
+            <button onclick="showToast('Sharing file...')" class="done-action-btn done-action-neutral"><span class="msymbol" style="font-size:16px">share</span>Share</button>
+          </div>
+          <button onclick="resetTool('extract-audio')" class="w-full text-center text-xs font-bold text-outline uppercase tracking-wider pt-1">Extract Another</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- ==================== CONVERT DOCUMENT ==================== -->
+    <div id="screen-convert-doc" class="screen flex-col h-full">
+      <div class="topbar">
+        <div class="flex items-center gap-2">
+          <button onclick="goBack()" class="w-9 h-9 flex items-center justify-center rounded-full hover:bg-white/10">
+            <span class="msymbol text-on-surface light-text" style="font-size:22px">arrow_back</span>
+          </button>
+          <span class="font-bold text-on-surface light-text text-base">Convert Document</span>
+        </div>
+        <span class="badge bg-doc-indigo/15 text-doc-indigo border border-doc-indigo/25">On-Device</span>
+      </div>
+      <div class="content-area px-5 pb-8 pt-5 space-y-5 stagger">
+        <!-- Upload Zone -->
+        <div class="glass rounded-2xl p-8 flex flex-col items-center gap-3 cursor-pointer hover:bg-white/5 transition-colors" onclick="showToast('File browser opened')">
+          <div class="w-14 h-14 rounded-full flex items-center justify-center" style="background:rgba(99,102,241,0.15)">
+            <span class="msymbol filled text-doc-indigo" style="font-size:28px">upload_file</span>
+          </div>
+          <p class="font-bold text-on-surface light-text text-center">Drop your document here</p>
+          <p class="text-xs text-outline text-center tracking-wider uppercase">DOCX, ODT, TXT, HTML</p>
+          <button class="mt-2 px-5 py-2 rounded-full text-xs font-bold text-doc-indigo border border-doc-indigo/30" style="background:rgba(99,102,241,0.1)">Browse Files</button>
+        </div>
+        <!-- Output Format -->
+        <div class="space-y-2">
+          <p class="section-label">Convert To</p>
+          <div class="grid grid-cols-3 gap-2" id="doc-formats">
+            <div class="format-chip text-center py-3 selected text-doc-indigo" style="border-color:#6366f1; background:rgba(99,102,241,0.15)" onclick="selectChip(this,'doc-formats','#6366f1','rgba(99,102,241,0.15)')">PDF</div>
+            <div class="format-chip text-center py-3" onclick="selectChip(this,'doc-formats','#6366f1','rgba(99,102,241,0.15)')">DOCX</div>
+            <div class="format-chip text-center py-3" onclick="selectChip(this,'doc-formats','#6366f1','rgba(99,102,241,0.15)')">TXT</div>
+            <div class="format-chip text-center py-3" onclick="selectChip(this,'doc-formats','#6366f1','rgba(99,102,241,0.15)')">HTML</div>
+            <div class="format-chip text-center py-3" onclick="selectChip(this,'doc-formats','#6366f1','rgba(99,102,241,0.15)')">ODT</div>
+            <div class="format-chip text-center py-3" onclick="selectChip(this,'doc-formats','#6366f1','rgba(99,102,241,0.15)')">RTF</div>
+          </div>
+        </div>
+        <!-- Options -->
+        <div class="space-y-2">
+          <p class="section-label">Options</p>
+          <div class="glass rounded-2xl overflow-hidden">
+            <div class="p-4 flex items-center justify-between">
+              <div class="flex items-center gap-3">
+                <span class="msymbol text-outline" style="font-size:18px">high_quality</span>
+                <span class="text-sm font-semibold text-on-surface light-text">High Quality Mode</span>
+              </div>
+              <div class="toggle on" onclick="this.classList.toggle('on')"><div class="toggle-thumb"></div></div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="sticky-bar" id="sbar-convert-doc">
+        <div id="sbar-convert-doc-cta">
+          <button class="cta-btn cta-indigo text-white" onclick="startInlineProcess('convert-doc','linear-gradient(90deg,#5b4fe8,#818cf8)','rgba(91,79,232,0.4)')">
+            <span class="msymbol filled" style="font-size:20px">picture_as_pdf</span>
+            Convert Document
+          </button>
+        </div>
+        <div id="sbar-convert-doc-proc" style="display:none" class="space-y-2">
+          <div class="flex justify-between items-center">
+            <span class="text-xs font-bold text-on-surface light-text">Rendering document...</span>
+            <span class="text-xs font-black text-doc-indigo" id="sbar-convert-doc-pct">0%</span>
+          </div>
+          <div class="h-2 rounded-full" style="background:rgba(255,255,255,0.08)"><div class="h-full rounded-full proc-fill" id="sbar-convert-doc-fill" style="width:0%;background:linear-gradient(90deg,#5b4fe8,#818cf8);box-shadow:0 0 8px rgba(91,79,232,0.4)"></div></div>
+          <div class="flex justify-between"><span class="text-xs text-outline" id="sbar-convert-doc-eta">Estimating...</span><button onclick="cancelInlineProcess('convert-doc')" class="text-xs font-bold text-outline uppercase tracking-wider">Cancel</button></div>
+        </div>
+        <div id="sbar-convert-doc-done" style="display:none" class="space-y-2">
+          <div class="flex items-center gap-2 mb-2"><div class="w-4 h-4 rounded-full bg-merge-teal flex items-center justify-center"><span class="msymbol filled text-white" style="font-size:10px">check</span></div><span class="text-xs font-bold text-merge-teal">Output ready · Report.pdf</span></div>
+          <div class="flex gap-2">
+            <button onclick="showToast('Opening file...')" class="done-action-btn done-action-primary"><span class="msymbol" style="font-size:16px">open_in_new</span>Open File</button>
+            <button onclick="showToast('Showing in folder...')" class="done-action-btn done-action-neutral"><span class="msymbol" style="font-size:16px">folder_open</span>Folder</button>
+            <button onclick="showToast('Sharing file...')" class="done-action-btn done-action-neutral"><span class="msymbol" style="font-size:16px">share</span>Share</button>
+          </div>
+          <button onclick="resetTool('convert-doc')" class="w-full text-center text-xs font-bold text-outline uppercase tracking-wider pt-1">Convert Another</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- ==================== IMAGES TO PDF ==================== -->
+    <div id="screen-images-pdf" class="screen flex-col h-full">
+      <div class="topbar">
+        <div class="flex items-center gap-2">
+          <button onclick="goBack()" class="w-9 h-9 flex items-center justify-center rounded-full hover:bg-white/10">
+            <span class="msymbol text-on-surface light-text" style="font-size:22px">arrow_back</span>
+          </button>
+          <span class="font-bold text-on-surface light-text text-base">Images to PDF</span>
+        </div>
+        <span class="badge bg-teal-500/15 text-teal-400 border border-teal-500/25">On-Device</span>
+      </div>
+      <div class="content-area px-5 pb-8 pt-5 space-y-5 stagger">
+        <!-- Add images zone -->
+        <div class="glass rounded-2xl p-6 border-2 border-dashed border-teal-500/25 flex flex-col items-center gap-3 cursor-pointer hover:border-teal-500/50 transition-colors" onclick="showToast('Image picker opened')">
+          <span class="msymbol filled text-teal-400" style="font-size:36px">add_photo_alternate</span>
+          <p class="font-bold text-on-surface light-text text-sm">Add Images</p>
+          <p class="text-xs text-outline text-center uppercase tracking-widest">JPG, PNG, WEBP · Up to 50 files</p>
+        </div>
+        <!-- Preview grid of selected images -->
+        <div>
+          <div class="flex justify-between items-center mb-3">
+            <p class="section-label">Selected (3)</p>
+            <button class="text-xs font-bold text-teal-400" onclick="showToast('All images cleared')">Clear All</button>
+          </div>
+          <div class="grid grid-cols-3 gap-2">
+            <div class="aspect-square rounded-xl overflow-hidden relative glass" onclick="showToast('Image options')">
+              <div class="absolute inset-0 bg-gradient-to-br from-teal-900/50 to-indigo-900/50"></div>
+              <span class="msymbol filled text-teal-400 absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2" style="font-size:28px">image</span>
+              <div class="absolute bottom-1 left-1 right-1 text-center text-xs text-white/60 font-bold truncate">img_01.jpg</div>
+            </div>
+            <div class="aspect-square rounded-xl overflow-hidden relative glass" onclick="showToast('Image options')">
+              <div class="absolute inset-0 bg-gradient-to-br from-purple-900/50 to-pink-900/50"></div>
+              <span class="msymbol filled text-purple-400 absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2" style="font-size:28px">image</span>
+              <div class="absolute bottom-1 left-1 right-1 text-center text-xs text-white/60 font-bold truncate">img_02.jpg</div>
+            </div>
+            <div class="aspect-square rounded-xl overflow-hidden relative glass" onclick="showToast('Image options')">
+              <div class="absolute inset-0 bg-gradient-to-br from-rose-900/50 to-orange-900/50"></div>
+              <span class="msymbol filled text-rose-400 absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2" style="font-size:28px">image</span>
+              <div class="absolute bottom-1 left-1 right-1 text-center text-xs text-white/60 font-bold truncate">img_03.jpg</div>
+            </div>
+          </div>
+        </div>
+        <!-- Page size + Fit options — 2 equal capsules -->
+        <div class="space-y-2">
+          <p class="section-label">Page Options</p>
+          <div class="flex gap-3" id="page-size">
+            <div class="format-chip flex-1 text-center selected text-teal-400" style="border-color:#10b981; background:rgba(16,185,129,0.12); padding:14px 0; font-size:12px; font-weight:800; letter-spacing:0.06em" onclick="selectChip(this,'page-size','#10b981','rgba(16,185,129,0.12)')">A4</div>
+            <div class="format-chip flex-1 text-center" style="padding:14px 0; font-size:12px; font-weight:800; letter-spacing:0.06em" onclick="selectChip(this,'page-size','#10b981','rgba(16,185,129,0.12)')">Fit to Page</div>
+          </div>
+        </div>
+      </div>
+      <div class="sticky-bar" id="sbar-images-pdf">
+        <div id="sbar-images-pdf-cta">
+          <button class="cta-btn cta-teal text-white" onclick="startInlineProcess('images-pdf','linear-gradient(90deg,#10b981,#34d399)','rgba(16,185,129,0.4)')">
+            <span class="msymbol filled" style="font-size:20px">picture_as_pdf</span>
+            Create PDF
+          </button>
+        </div>
+        <div id="sbar-images-pdf-proc" style="display:none" class="space-y-2">
+          <div class="flex justify-between items-center">
+            <span class="text-xs font-bold text-on-surface light-text">Assembling pages...</span>
+            <span class="text-xs font-black text-merge-teal" id="sbar-images-pdf-pct">0%</span>
+          </div>
+          <div class="h-2 rounded-full" style="background:rgba(255,255,255,0.08)"><div class="h-full rounded-full proc-fill" id="sbar-images-pdf-fill" style="width:0%;background:linear-gradient(90deg,#10b981,#34d399);box-shadow:0 0 8px rgba(16,185,129,0.4)"></div></div>
+          <div class="flex justify-between"><span class="text-xs text-outline" id="sbar-images-pdf-eta">Estimating...</span><button onclick="cancelInlineProcess('images-pdf')" class="text-xs font-bold text-outline uppercase tracking-wider">Cancel</button></div>
+        </div>
+        <div id="sbar-images-pdf-done" style="display:none" class="space-y-2">
+          <div class="flex items-center gap-2 mb-2"><div class="w-4 h-4 rounded-full bg-merge-teal flex items-center justify-center"><span class="msymbol filled text-white" style="font-size:10px">check</span></div><span class="text-xs font-bold text-merge-teal">Output ready · images_bundle.pdf</span></div>
+          <div class="flex gap-2">
+            <button onclick="showToast('Opening file...')" class="done-action-btn done-action-primary"><span class="msymbol" style="font-size:16px">open_in_new</span>Open File</button>
+            <button onclick="showToast('Showing in folder...')" class="done-action-btn done-action-neutral"><span class="msymbol" style="font-size:16px">folder_open</span>Folder</button>
+            <button onclick="showToast('Sharing file...')" class="done-action-btn done-action-neutral"><span class="msymbol" style="font-size:16px">share</span>Share</button>
+          </div>
+          <button onclick="resetTool('images-pdf')" class="w-full text-center text-xs font-bold text-outline uppercase tracking-wider pt-1">Create Another</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- ==================== MERGE PDF ==================== -->
+    <div id="screen-merge-pdf" class="screen flex-col h-full">
+      <div class="topbar">
+        <div class="flex items-center gap-2">
+          <button onclick="goBack()" class="w-9 h-9 flex items-center justify-center rounded-full hover:bg-white/10">
+            <span class="msymbol text-on-surface light-text" style="font-size:22px">arrow_back</span>
+          </button>
+          <span class="font-bold text-on-surface light-text text-base">Merge PDF</span>
+        </div>
+        <span class="badge bg-merge-teal/15 text-merge-teal border border-merge-teal/25">On-Device</span>
+      </div>
+      <div class="content-area px-5 pb-8 pt-5 space-y-4 stagger">
+        <!-- Add button -->
+        <button class="w-full glass rounded-2xl p-6 flex flex-col items-center gap-2 border-2 border-dashed border-merge-teal/25 hover:border-merge-teal/50 transition-colors" onclick="showToast('PDF picker opened')">
+          <div class="w-10 h-10 rounded-full bg-merge-teal/15 flex items-center justify-center text-merge-teal">
+            <span class="msymbol filled" style="font-size:22px">add</span>
+          </div>
+          <span class="text-xs font-bold text-on-surface tracking-widest uppercase light-text">Add PDF Files</span>
+        </button>
+        <!-- PDF list -->
+        <div class="space-y-2">
+          <div class="pdf-row glass rounded-2xl p-4 flex items-center gap-3">
+            <span class="msymbol text-outline" style="font-size:20px">drag_indicator</span>
+            <div class="w-10 h-12 rounded-lg flex items-center justify-center bg-merge-teal/15 border border-merge-teal/25">
+              <span class="msymbol filled text-merge-teal" style="font-size:18px">picture_as_pdf</span>
+            </div>
+            <div class="flex-1 min-w-0">
+              <p class="text-sm font-bold text-on-surface truncate light-text">Project_Proposal_v2.pdf</p>
+              <p class="text-xs text-outline">1.2 MB · 12 Pages</p>
+            </div>
+            <button class="w-8 h-8 rounded-full flex items-center justify-center text-outline hover:text-error hover:bg-red-500/10 transition-colors" onclick="this.closest('.pdf-row').remove(); showToast('File removed')">
+              <span class="msymbol" style="font-size:18px">close</span>
+            </button>
+          </div>
+          <div class="pdf-row glass rounded-2xl p-4 flex items-center gap-3">
+            <span class="msymbol text-outline" style="font-size:20px">drag_indicator</span>
+            <div class="w-10 h-12 rounded-lg flex items-center justify-center bg-merge-teal/15 border border-merge-teal/25">
+              <span class="msymbol filled text-merge-teal" style="font-size:18px">picture_as_pdf</span>
+            </div>
+            <div class="flex-1 min-w-0">
+              <p class="text-sm font-bold text-on-surface truncate light-text">Financial_Appendices_Final.pdf</p>
+              <p class="text-xs text-outline">4.8 MB · 34 Pages</p>
+            </div>
+            <button class="w-8 h-8 rounded-full flex items-center justify-center text-outline hover:text-error hover:bg-red-500/10 transition-colors" onclick="this.closest('.pdf-row').remove(); showToast('File removed')">
+              <span class="msymbol" style="font-size:18px">close</span>
+            </button>
+          </div>
+          <div class="pdf-row glass rounded-2xl p-4 flex items-center gap-3">
+            <span class="msymbol text-outline" style="font-size:20px">drag_indicator</span>
+            <div class="w-10 h-12 rounded-lg flex items-center justify-center bg-merge-teal/15 border border-merge-teal/25">
+              <span class="msymbol filled text-merge-teal" style="font-size:18px">picture_as_pdf</span>
+            </div>
+            <div class="flex-1 min-w-0">
+              <p class="text-sm font-bold text-on-surface truncate light-text">Contract_Draft_Signed.pdf</p>
+              <p class="text-xs text-outline">850 KB · 4 Pages</p>
+            </div>
+            <button class="w-8 h-8 rounded-full flex items-center justify-center text-outline hover:text-error hover:bg-red-500/10 transition-colors" onclick="this.closest('.pdf-row').remove(); showToast('File removed')">
+              <span class="msymbol" style="font-size:18px">close</span>
+            </button>
+          </div>
+        </div>
+        <!-- Info card -->
+        <div class="rounded-2xl p-4 flex gap-3" style="background:rgba(245,158,11,0.08); border:1px solid rgba(245,158,11,0.2)">
+          <span class="msymbol text-amber-400" style="font-size:18px">info</span>
+          <div>
+            <p class="text-xs font-bold text-amber-200 uppercase tracking-wider mb-1">Order Notice</p>
+            <p class="text-xs text-amber-200/70 leading-relaxed">PDFs will be merged in the order shown. Drag rows to reorder your document sequence.</p>
+          </div>
+        </div>
+      </div>
+      <div class="sticky-bar" id="sbar-merge-pdf">
+        <div id="sbar-merge-pdf-cta">
+          <button class="cta-btn cta-teal text-white" onclick="startInlineProcess('merge-pdf','linear-gradient(90deg,#10b981,#34d399)','rgba(16,185,129,0.4)')">
+            <span class="msymbol" style="font-size:20px">layers</span>
+            Merge PDFs
+          </button>
+        </div>
+        <div id="sbar-merge-pdf-proc" style="display:none" class="space-y-2">
+          <div class="flex justify-between items-center">
+            <span class="text-xs font-bold text-on-surface light-text">Merging documents...</span>
+            <span class="text-xs font-black text-merge-teal" id="sbar-merge-pdf-pct">0%</span>
+          </div>
+          <div class="h-2 rounded-full" style="background:rgba(255,255,255,0.08)"><div class="h-full rounded-full proc-fill" id="sbar-merge-pdf-fill" style="width:0%;background:linear-gradient(90deg,#10b981,#34d399);box-shadow:0 0 8px rgba(16,185,129,0.4)"></div></div>
+          <div class="flex justify-between"><span class="text-xs text-outline" id="sbar-merge-pdf-eta">Estimating...</span><button onclick="cancelInlineProcess('merge-pdf')" class="text-xs font-bold text-outline uppercase tracking-wider">Cancel</button></div>
+        </div>
+        <div id="sbar-merge-pdf-done" style="display:none" class="space-y-2">
+          <div class="flex items-center gap-2 mb-2"><div class="w-4 h-4 rounded-full bg-merge-teal flex items-center justify-center"><span class="msymbol filled text-white" style="font-size:10px">check</span></div><span class="text-xs font-bold text-merge-teal">Output ready · merged_output.pdf</span></div>
+          <div class="flex gap-2">
+            <button onclick="showToast('Opening file...')" class="done-action-btn done-action-primary"><span class="msymbol" style="font-size:16px">open_in_new</span>Open File</button>
+            <button onclick="showToast('Showing in folder...')" class="done-action-btn done-action-neutral"><span class="msymbol" style="font-size:16px">folder_open</span>Folder</button>
+            <button onclick="showToast('Sharing file...')" class="done-action-btn done-action-neutral"><span class="msymbol" style="font-size:16px">share</span>Share</button>
+          </div>
+          <button onclick="resetTool('merge-pdf')" class="w-full text-center text-xs font-bold text-outline uppercase tracking-wider pt-1">Merge Another</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- ==================== SPLIT PDF ==================== -->
+    <div id="screen-split-pdf" class="screen flex-col h-full">
+      <div class="topbar">
+        <div class="flex items-center gap-2">
+          <button onclick="goBack()" class="w-9 h-9 flex items-center justify-center rounded-full hover:bg-white/10">
+            <span class="msymbol text-on-surface light-text" style="font-size:22px">arrow_back</span>
+          </button>
+          <span class="font-bold text-on-surface light-text text-base">Split PDF</span>
+        </div>
+        <span class="badge bg-split-amber/15 text-split-amber border border-split-amber/25">On-Device</span>
+      </div>
+      <div class="content-area px-5 pb-8 pt-5 space-y-5 stagger">
+        <!-- File loaded card -->
+        <div class="glass rounded-2xl p-5 flex items-center gap-4">
+          <div class="w-12 h-14 rounded-lg flex items-center justify-center bg-split-amber/15 border border-split-amber/25">
+            <span class="msymbol filled text-split-amber" style="font-size:22px">picture_as_pdf</span>
+          </div>
+          <div class="flex-1">
+            <p class="font-bold text-on-surface light-text">master_document.pdf</p>
+            <p class="text-xs text-outline">48 Pages · 6.4 MB</p>
+            <div class="flex gap-1 mt-1">
+              <span class="badge bg-white/5 text-outline border border-white/8" style="font-size:8px">PDF 1.7</span>
+            </div>
+          </div>
+          <button onclick="showToast('File removed')" class="w-8 h-8 rounded-full text-outline hover:text-error hover:bg-red-500/10 transition-colors flex items-center justify-center">
+            <span class="msymbol" style="font-size:18px">close</span>
+          </button>
+        </div>
+        <!-- Split mode -->
+        <div class="space-y-2">
+          <p class="section-label">Split Mode</p>
+          <div class="glass rounded-2xl overflow-hidden">
+            <div class="p-4 flex items-center gap-3 border-b border-white/5 light-border cursor-pointer" onclick="document.getElementById('split-by-range').checked=true; showToast('Split by page range selected')">
+              <div class="w-5 h-5 rounded-full border-2 border-split-amber flex items-center justify-center">
+                <div id="split-by-range" class="w-2.5 h-2.5 rounded-full bg-split-amber"></div>
+              </div>
+              <div>
+                <p class="text-sm font-bold text-on-surface light-text">By Page Range</p>
+                <p class="text-xs text-outline">e.g. 1-10, 11-20</p>
+              </div>
+            </div>
+            <div class="p-4 flex items-center gap-3 border-b border-white/5 light-border cursor-pointer" onclick="showToast('Split every N pages selected')">
+              <div class="w-5 h-5 rounded-full border-2 border-white/20 flex items-center justify-center">
+                <div class="w-2.5 h-2.5 rounded-full"></div>
+              </div>
+              <div>
+                <p class="text-sm font-bold text-on-surface light-text">Every N Pages</p>
+                <p class="text-xs text-outline">Divide into equal chunks</p>
+              </div>
+            </div>
+            <div class="p-4 flex items-center gap-3 cursor-pointer" onclick="showToast('Extract pages selected')">
+              <div class="w-5 h-5 rounded-full border-2 border-white/20 flex items-center justify-center">
+                <div class="w-2.5 h-2.5 rounded-full"></div>
+              </div>
+              <div>
+                <p class="text-sm font-bold text-on-surface light-text">Extract Specific Pages</p>
+                <p class="text-xs text-outline">Pick individual pages</p>
+              </div>
+            </div>
+          </div>
+        </div>
+        <!-- Range input -->
+        <div class="space-y-2">
+          <p class="section-label">Page Range</p>
+          <input type="text" placeholder="e.g. 1-10, 15, 20-25" class="w-full rounded-2xl px-4 py-3 text-sm text-on-surface placeholder:text-outline border border-white/10 focus:outline-none focus:border-split-amber/50 light-text" style="background:rgba(255,255,255,0.06)"/>
+        </div>
+        <!-- Output -->
+        <div class="glass rounded-2xl p-4 flex items-center justify-between">
+          <div class="flex items-center gap-3">
+            <span class="msymbol text-split-amber" style="font-size:20px">folder_zip</span>
+            <div>
+              <p class="text-sm font-bold text-on-surface light-text">Output as ZIP</p>
+              <p class="text-xs text-outline">Bundle all split files</p>
+            </div>
+          </div>
+          <div class="toggle on" onclick="this.classList.toggle('on')"><div class="toggle-thumb"></div></div>
+        </div>
+      </div>
+      <div class="sticky-bar" id="sbar-split-pdf">
+        <div id="sbar-split-pdf-cta">
+          <button class="cta-btn cta-amber text-white" onclick="startInlineProcess('split-pdf','linear-gradient(90deg,#F59E0B,#fbbf24)','rgba(245,158,11,0.4)')">
+            <span class="msymbol" style="font-size:20px">call_split</span>
+            Split PDF
+          </button>
+        </div>
+        <div id="sbar-split-pdf-proc" style="display:none" class="space-y-2">
+          <div class="flex justify-between items-center">
+            <span class="text-xs font-bold text-on-surface light-text">Splitting pages...</span>
+            <span class="text-xs font-black text-split-amber" id="sbar-split-pdf-pct">0%</span>
+          </div>
+          <div class="h-2 rounded-full" style="background:rgba(255,255,255,0.08)"><div class="h-full rounded-full proc-fill" id="sbar-split-pdf-fill" style="width:0%;background:linear-gradient(90deg,#F59E0B,#fbbf24);box-shadow:0 0 8px rgba(245,158,11,0.4)"></div></div>
+          <div class="flex justify-between"><span class="text-xs text-outline" id="sbar-split-pdf-eta">Estimating...</span><button onclick="cancelInlineProcess('split-pdf')" class="text-xs font-bold text-outline uppercase tracking-wider">Cancel</button></div>
+        </div>
+        <div id="sbar-split-pdf-done" style="display:none" class="space-y-2">
+          <div class="flex items-center gap-2 mb-2"><div class="w-4 h-4 rounded-full bg-merge-teal flex items-center justify-center"><span class="msymbol filled text-white" style="font-size:10px">check</span></div><span class="text-xs font-bold text-merge-teal">Output ready · split_pages.zip</span></div>
+          <div class="flex gap-2">
+            <button onclick="showToast('Opening file...')" class="done-action-btn done-action-primary"><span class="msymbol" style="font-size:16px">open_in_new</span>Open File</button>
+            <button onclick="showToast('Showing in folder...')" class="done-action-btn done-action-neutral"><span class="msymbol" style="font-size:16px">folder_open</span>Folder</button>
+            <button onclick="showToast('Sharing file...')" class="done-action-btn done-action-neutral"><span class="msymbol" style="font-size:16px">share</span>Share</button>
+          </div>
+          <button onclick="resetTool('split-pdf')" class="w-full text-center text-xs font-bold text-outline uppercase tracking-wider pt-1">Split Another</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- ==================== COMPRESS VIDEO ==================== -->
+    <div id="screen-compress-video" class="screen flex-col h-full">
+      <div class="topbar">
+        <div class="flex items-center gap-2">
+          <button onclick="goBack()" class="w-9 h-9 flex items-center justify-center rounded-full hover:bg-white/10">
+            <span class="msymbol text-on-surface light-text" style="font-size:22px">arrow_back</span>
+          </button>
+          <span class="font-bold text-on-surface light-text text-base">Compress Video</span>
+        </div>
+        <span class="badge bg-compress-orange/15 text-compress-orange border border-compress-orange/25">On-Device</span>
+      </div>
+      <div class="content-area px-5 pb-8 pt-5 space-y-5 stagger">
+        <div>
+          <p class="text-compress-orange text-xs font-black tracking-widest uppercase mb-1">Pillar: Export &amp; Processing</p>
+          <h2 class="text-2xl font-black text-on-surface light-text tracking-tight">Compress Video</h2>
+        </div>
+        <!-- File drop -->
+        <div class="glass rounded-2xl p-8 text-center cursor-pointer hover:bg-white/5 transition-colors relative overflow-hidden" onclick="showToast('File browser opened')">
+          <div class="absolute -top-8 -right-8 w-24 h-24 rounded-full blur-2xl" style="background:rgba(249,115,22,0.2)"></div>
+          <span class="msymbol text-compress-orange" style="font-size:40px">video_file</span>
+          <p class="font-bold text-on-surface mt-3 light-text">Select Media Source</p>
+          <p class="text-xs text-outline mt-1 mb-4">MP4, MOV, or WEBM up to 2GB</p>
+          <button class="px-5 py-2 rounded-full text-xs font-bold text-on-surface glass">Browse Assets</button>
+        </div>
+        <!-- CRF Slider -->
+        <div class="glass rounded-2xl p-5">
+          <div class="flex justify-between items-center mb-4">
+            <span class="section-label">CRF Quality Factor</span>
+            <span class="text-compress-orange font-bold text-sm" id="crf-value">23 (Medium)</span>
+          </div>
+          <input type="range" min="0" max="51" value="23" oninput="updateCRF(this.value)" class="w-full mb-3"/>
+          <div class="flex justify-between text-xs text-outline">
+            <span>Higher Quality</span>
+            <span>Smaller File</span>
+          </div>
+        </div>
+        <!-- Output format chips -->
+        <div class="space-y-2">
+          <p class="section-label">Output Format</p>
+          <div class="flex flex-wrap gap-2" id="compress-formats">
+            <div class="format-chip selected text-compress-orange" style="border-color:#F97316; background:rgba(249,115,22,0.15)" onclick="selectChip(this,'compress-formats','#F97316','rgba(249,115,22,0.15)')">MP4</div>
+            <div class="format-chip" onclick="selectChip(this,'compress-formats','#F97316','rgba(249,115,22,0.15)')">MKV</div>
+            <div class="format-chip" onclick="selectChip(this,'compress-formats','#F97316','rgba(249,115,22,0.15)')">MOV</div>
+            <div class="format-chip" onclick="selectChip(this,'compress-formats','#F97316','rgba(249,115,22,0.15)')">WEBM</div>
+          </div>
+        </div>
+        <!-- Metadata -->
+        <div class="grid grid-cols-2 gap-3">
+          <div class="glass rounded-2xl p-4">
+            <p class="text-xs text-outline mb-1">Resolution</p>
+            <p class="font-bold text-on-surface text-sm light-text">4K Ultra HD</p>
+          </div>
+          <div class="glass rounded-2xl p-4">
+            <p class="text-xs text-outline mb-1">Bitrate</p>
+            <p class="font-bold text-on-surface text-sm light-text">Variable (VBR)</p>
+          </div>
+        </div>
+      </div>
+      <div class="sticky-bar" id="sbar-compress-video">
+        <div id="sbar-compress-video-cta">
+          <button class="cta-btn cta-orange text-white" onclick="startInlineProcess('compress-video','linear-gradient(90deg,#F97316,#fb923c)','rgba(249,115,22,0.4)')">
+            <span class="msymbol" style="font-size:20px">compress</span>
+            Compress Video
+          </button>
+        </div>
+        <div id="sbar-compress-video-proc" style="display:none" class="space-y-2">
+          <div class="flex justify-between items-center">
+            <span class="text-xs font-bold text-on-surface light-text">Encoding with FFmpeg...</span>
+            <span class="text-xs font-black text-compress-orange" id="sbar-compress-video-pct">0%</span>
+          </div>
+          <div class="h-2 rounded-full" style="background:rgba(255,255,255,0.08)"><div class="h-full rounded-full proc-fill" id="sbar-compress-video-fill" style="width:0%;background:linear-gradient(90deg,#F97316,#fb923c);box-shadow:0 0 8px rgba(249,115,22,0.4)"></div></div>
+          <div class="flex justify-between"><span class="text-xs text-outline" id="sbar-compress-video-eta">Estimating...</span><button onclick="cancelInlineProcess('compress-video')" class="text-xs font-bold text-outline uppercase tracking-wider">Cancel</button></div>
+        </div>
+        <div id="sbar-compress-video-done" style="display:none" class="space-y-2">
+          <div class="flex items-center gap-2 mb-2"><div class="w-4 h-4 rounded-full bg-merge-teal flex items-center justify-center"><span class="msymbol filled text-white" style="font-size:10px">check</span></div><span class="text-xs font-bold text-merge-teal">Output ready · compressed_output.mp4</span></div>
+          <div class="flex gap-2">
+            <button onclick="showToast('Opening file...')" class="done-action-btn done-action-primary"><span class="msymbol" style="font-size:16px">open_in_new</span>Open File</button>
+            <button onclick="showToast('Showing in folder...')" class="done-action-btn done-action-neutral"><span class="msymbol" style="font-size:16px">folder_open</span>Folder</button>
+            <button onclick="showToast('Sharing file...')" class="done-action-btn done-action-neutral"><span class="msymbol" style="font-size:16px">share</span>Share</button>
+          </div>
+          <button onclick="resetTool('compress-video')" class="w-full text-center text-xs font-bold text-outline uppercase tracking-wider pt-1">Compress Another</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- ==================== CONVERT VIDEO ==================== -->
+    <div id="screen-convert-video" class="screen flex-col h-full">
+      <div class="topbar">
+        <div class="flex items-center gap-2">
+          <button onclick="goBack()" class="w-9 h-9 flex items-center justify-center rounded-full hover:bg-white/10">
+            <span class="msymbol text-on-surface light-text" style="font-size:22px">arrow_back</span>
+          </button>
+          <span class="font-bold text-on-surface light-text text-base">Convert Video</span>
+        </div>
+        <span class="badge bg-video-purple/15 text-video-purple border border-video-purple/25">Secure Server</span>
+      </div>
+      <div class="content-area px-5 pb-8 pt-5 space-y-5 stagger">
+        <!-- File drop -->
+        <div class="glass rounded-2xl p-8 text-center flex flex-col items-center gap-3 cursor-pointer" onclick="showToast('File browser opened')" style="border:2px dashed rgba(139,92,246,0.3)">
+          <div class="w-14 h-14 rounded-full flex items-center justify-center bg-video-purple/15">
+            <span class="msymbol filled text-video-purple" style="font-size:28px">upload_file</span>
+          </div>
+          <p class="font-bold text-on-surface light-text">Drop your master file</p>
+          <p class="text-xs text-outline uppercase tracking-widest">ProRes, H.264, or RAW up to 2GB</p>
+        </div>
+        <!-- Format -->
+        <div class="space-y-2">
+          <div class="flex justify-between">
+            <p class="section-label">Output Format</p>
+            <span class="text-xs font-bold text-video-purple uppercase tracking-widest">Selected: MP4</span>
+          </div>
+          <div class="grid grid-cols-3 gap-2" id="video-formats">
+            <div class="format-chip text-center py-3 selected text-video-purple" style="border-color:#8b5cf6; background:rgba(139,92,246,0.2)" onclick="selectChip(this,'video-formats','#8b5cf6','rgba(139,92,246,0.2)')">MP4</div>
+            <div class="format-chip text-center py-3" onclick="selectChip(this,'video-formats','#8b5cf6','rgba(139,92,246,0.2)')">MKV</div>
+            <div class="format-chip text-center py-3" onclick="selectChip(this,'video-formats','#8b5cf6','rgba(139,92,246,0.2)')">MOV</div>
+            <div class="format-chip text-center py-3" onclick="selectChip(this,'video-formats','#8b5cf6','rgba(139,92,246,0.2)')">AVI</div>
+            <div class="format-chip text-center py-3" onclick="selectChip(this,'video-formats','#8b5cf6','rgba(139,92,246,0.2)')">WEBM</div>
+            <div class="format-chip text-center py-3 opacity-30 cursor-not-allowed">···</div>
+          </div>
+        </div>
+        <!-- Settings toggles -->
+        <div class="space-y-2">
+          <p class="section-label">Advanced</p>
+          <div class="glass rounded-2xl overflow-hidden">
+            <div class="p-4 flex items-center justify-between border-b border-white/5 light-border">
+              <div class="flex items-center gap-3">
+                <span class="msymbol text-outline" style="font-size:18px">high_quality</span>
+                <span class="text-sm font-semibold text-on-surface light-text">Preserve Audio Quality</span>
+              </div>
+              <div class="toggle on" onclick="this.classList.toggle('on')"><div class="toggle-thumb"></div></div>
+            </div>
+            <div class="p-4 flex items-center justify-between">
+              <div class="flex items-center gap-3">
+                <span class="msymbol text-outline" style="font-size:18px">cloud_upload</span>
+                <span class="text-sm font-semibold text-on-surface light-text">Upload to Workspace</span>
+              </div>
+              <div class="toggle" onclick="this.classList.toggle('on')"><div class="toggle-thumb"></div></div>
+            </div>
+          </div>
+        </div>
+        <!-- Metadata -->
+        <div class="grid grid-cols-2 gap-3">
+          <div class="glass rounded-2xl p-4">
+            <p class="text-xs text-outline mb-1">Resolution</p>
+            <p class="font-bold text-on-surface text-sm light-text">4K Ultra HD</p>
+          </div>
+          <div class="glass rounded-2xl p-4">
+            <p class="text-xs text-outline mb-1">Duration</p>
+            <p class="font-bold text-on-surface text-sm light-text">00:45</p>
+          </div>
+        </div>
+      </div>
+      <div class="sticky-bar" id="sbar-convert-video">
+        <div id="sbar-convert-video-cta">
+          <button class="cta-btn cta-purple text-white" onclick="startInlineProcess('convert-video','linear-gradient(90deg,#8b5cf6,#a78bfa)','rgba(139,92,246,0.4)')">
+            <span class="msymbol" style="font-size:20px">bolt</span>
+            Convert Video
+          </button>
+        </div>
+        <div id="sbar-convert-video-proc" style="display:none" class="space-y-2">
+          <div class="flex justify-between items-center">
+            <span class="text-xs font-bold text-on-surface light-text">Transcoding video...</span>
+            <span class="text-xs font-black text-video-purple" id="sbar-convert-video-pct">0%</span>
+          </div>
+          <div class="h-2 rounded-full" style="background:rgba(255,255,255,0.08)"><div class="h-full rounded-full proc-fill" id="sbar-convert-video-fill" style="width:0%;background:linear-gradient(90deg,#8b5cf6,#a78bfa);box-shadow:0 0 8px rgba(139,92,246,0.4)"></div></div>
+          <div class="flex justify-between"><span class="text-xs text-outline" id="sbar-convert-video-eta">Estimating...</span><button onclick="cancelInlineProcess('convert-video')" class="text-xs font-bold text-outline uppercase tracking-wider">Cancel</button></div>
+        </div>
+        <div id="sbar-convert-video-done" style="display:none" class="space-y-2">
+          <div class="flex items-center gap-2 mb-2"><div class="w-4 h-4 rounded-full bg-merge-teal flex items-center justify-center"><span class="msymbol filled text-white" style="font-size:10px">check</span></div><span class="text-xs font-bold text-merge-teal">Output ready · studio_reel_final.mp4</span></div>
+          <div class="flex gap-2">
+            <button onclick="showToast('Opening file...')" class="done-action-btn done-action-primary"><span class="msymbol" style="font-size:16px">open_in_new</span>Open File</button>
+            <button onclick="showToast('Showing in folder...')" class="done-action-btn done-action-neutral"><span class="msymbol" style="font-size:16px">folder_open</span>Folder</button>
+            <button onclick="showToast('Sharing file...')" class="done-action-btn done-action-neutral"><span class="msymbol" style="font-size:16px">share</span>Share</button>
+          </div>
+          <button onclick="resetTool('convert-video')" class="w-full text-center text-xs font-bold text-outline uppercase tracking-wider pt-1">Convert Another</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- ==================== GREYSCALE PDF ==================== -->
+    <div id="screen-greyscale-pdf" class="screen flex-col h-full">
+      <div class="topbar">
+        <div class="flex items-center gap-2">
+          <button onclick="goBack()" class="w-9 h-9 flex items-center justify-center rounded-full hover:bg-white/10">
+            <span class="msymbol text-on-surface light-text" style="font-size:22px">arrow_back</span>
+          </button>
+          <span class="font-bold text-on-surface light-text text-base">Greyscale PDF</span>
+        </div>
+        <span class="badge bg-white/8 text-outline border border-white/12">On-Device</span>
+      </div>
+      <div class="content-area px-5 pb-8 pt-5 space-y-5 stagger">
+        <!-- Upload -->
+        <div class="glass rounded-2xl p-8 flex flex-col items-center gap-3 cursor-pointer hover:bg-white/5 transition-colors" onclick="showToast('File picker opened')">
+          <span class="msymbol filled text-grey-slate" style="font-size:36px">picture_as_pdf</span>
+          <p class="font-bold text-on-surface light-text">Select PDF Document</p>
+          <p class="text-xs text-outline uppercase tracking-widest">Any PDF up to 200MB</p>
+          <button class="mt-1 px-5 py-2 rounded-full text-xs font-bold text-grey-slate border border-white/15 glass">Browse Files</button>
+        </div>
+        <!-- How it works — simplified -->
+        <div class="glass rounded-2xl p-5 space-y-2">
+          <div class="flex justify-between items-center mb-2">
+            <span class="section-label">How it Works</span>
+            <span class="badge bg-indigo-500/15 text-indigo-400 border border-indigo-500/25">On-Device</span>
+          </div>
+          <p class="text-sm text-on-surface-var leading-relaxed light-text-muted">Your PDF is processed locally — every detail preserved while color is stripped for a clean, print-ready greyscale output.</p>
+        </div>
+        <!-- Output naming -->
+        <div class="space-y-2">
+          <p class="section-label">Output File Name</p>
+          <input type="text" placeholder="greyscale_output" class="w-full rounded-2xl px-4 py-3 text-sm text-on-surface placeholder:text-outline border border-white/10 focus:outline-none focus:border-grey-slate/50 light-text" style="background:rgba(255,255,255,0.06)"/>
+        </div>
+      </div>
+      <div class="sticky-bar" id="sbar-greyscale-pdf">
+        <div id="sbar-greyscale-pdf-cta">
+          <button class="cta-btn cta-slate text-white" onclick="startInlineProcess('greyscale-pdf','linear-gradient(90deg,#64748b,#94a3b8)','rgba(100,116,139,0.3)')">
+            <span class="msymbol" style="font-size:20px">tonality</span>
+            Convert to Greyscale
+          </button>
+        </div>
+        <div id="sbar-greyscale-pdf-proc" style="display:none" class="space-y-2">
+          <div class="flex justify-between items-center">
+            <span class="text-xs font-bold text-on-surface light-text">Applying greyscale filter...</span>
+            <span class="text-xs font-black text-grey-slate" id="sbar-greyscale-pdf-pct">0%</span>
+          </div>
+          <div class="h-2 rounded-full" style="background:rgba(255,255,255,0.08)"><div class="h-full rounded-full proc-fill" id="sbar-greyscale-pdf-fill" style="width:0%;background:linear-gradient(90deg,#64748b,#94a3b8);box-shadow:0 0 8px rgba(100,116,139,0.3)"></div></div>
+          <div class="flex justify-between"><span class="text-xs text-outline" id="sbar-greyscale-pdf-eta">Estimating...</span><button onclick="cancelInlineProcess('greyscale-pdf')" class="text-xs font-bold text-outline uppercase tracking-wider">Cancel</button></div>
+        </div>
+        <div id="sbar-greyscale-pdf-done" style="display:none" class="space-y-2">
+          <div class="flex items-center gap-2 mb-2"><div class="w-4 h-4 rounded-full bg-merge-teal flex items-center justify-center"><span class="msymbol filled text-white" style="font-size:10px">check</span></div><span class="text-xs font-bold text-merge-teal">Output ready · greyscale_output.pdf</span></div>
+          <div class="flex gap-2">
+            <button onclick="showToast('Opening file...')" class="done-action-btn done-action-primary"><span class="msymbol" style="font-size:16px">open_in_new</span>Open File</button>
+            <button onclick="showToast('Showing in folder...')" class="done-action-btn done-action-neutral"><span class="msymbol" style="font-size:16px">folder_open</span>Folder</button>
+            <button onclick="showToast('Sharing file...')" class="done-action-btn done-action-neutral"><span class="msymbol" style="font-size:16px">share</span>Share</button>
+          </div>
+          <button onclick="resetTool('greyscale-pdf')" class="w-full text-center text-xs font-bold text-outline uppercase tracking-wider pt-1">Convert Another</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- ==================== CONVERT IMAGE ==================== -->
+    <div id="screen-convert-image" class="screen flex-col h-full">
+      <div class="topbar">
+        <div class="flex items-center gap-2">
+          <button onclick="goBack()" class="w-9 h-9 flex items-center justify-center rounded-full hover:bg-white/10">
+            <span class="msymbol text-on-surface light-text" style="font-size:22px">arrow_back</span>
+          </button>
+          <span class="font-bold text-on-surface light-text text-base">Convert Image</span>
+        </div>
+        <span class="badge border" style="background:rgba(76,215,246,0.12); color:#4cd7f6; border-color:rgba(76,215,246,0.25)">On-Device</span>
+      </div>
+      <div class="content-area px-5 pb-8 pt-4 space-y-5 stagger">
+        <!-- File drop zone -->
+        <div class="rounded-2xl p-6 flex flex-col items-center gap-3 cursor-pointer group transition-all" style="border:2px dashed rgba(76,215,246,0.25); background:rgba(76,215,246,0.05);" onclick="showToast('Image picker opened')">
+          <div class="w-16 h-16 rounded-2xl flex items-center justify-center transition-transform group-hover:scale-105" style="background:rgba(76,215,246,0.15); border:1px solid rgba(76,215,246,0.3)">
+            <span class="msymbol filled text-tertiary" style="font-size:30px">add_photo_alternate</span>
+          </div>
+          <div class="text-center">
+            <p class="font-bold text-on-surface light-text text-sm">Drop your image here</p>
+            <p class="text-xs text-outline mt-1 uppercase tracking-widest">JPG, PNG, WEBP, GIF, BMP, TIFF</p>
+          </div>
+          <button class="mt-1 px-5 py-2 rounded-full text-xs font-bold border transition-colors" style="background:rgba(76,215,246,0.1); color:#4cd7f6; border-color:rgba(76,215,246,0.3)">Browse Files</button>
+        </div>
+        <!-- Source file info (simulated loaded state) -->
+        <div class="glass rounded-2xl p-4 flex items-center gap-4">
+          <div class="w-12 h-12 rounded-xl overflow-hidden flex items-center justify-center flex-shrink-0" style="background:rgba(76,215,246,0.1); border:1px solid rgba(76,215,246,0.2)">
+            <span class="msymbol filled text-tertiary" style="font-size:24px">image</span>
+          </div>
+          <div class="flex-1 min-w-0">
+            <p class="font-bold text-on-surface text-sm truncate light-text">photo_shoot_raw.png</p>
+            <p class="text-xs text-outline mt-0.5">4032 × 3024 px · 8.4 MB · PNG</p>
+          </div>
+          <button onclick="showToast('File removed')" class="w-8 h-8 rounded-full flex items-center justify-center text-outline hover:text-error hover:bg-red-500/10 transition-colors">
+            <span class="msymbol" style="font-size:18px">close</span>
+          </button>
+        </div>
+        <!-- Output Format -->
+        <div class="space-y-2">
+          <p class="section-label">Convert To</p>
+          <div class="grid grid-cols-3 gap-2" id="img-formats">
+            <div class="format-chip text-center py-3" style="color:#4cd7f6; border-color:#4cd7f6; background:rgba(76,215,246,0.12)" onclick="selectChip(this,'img-formats','#4cd7f6','rgba(76,215,246,0.12)')">JPG</div>
+            <div class="format-chip text-center py-3 selected" style="color:#4cd7f6; border-color:#4cd7f6; background:rgba(76,215,246,0.12)" onclick="selectChip(this,'img-formats','#4cd7f6','rgba(76,215,246,0.12)')">PNG</div>
+            <div class="format-chip text-center py-3" onclick="selectChip(this,'img-formats','#4cd7f6','rgba(76,215,246,0.12)')">WEBP</div>
+            <div class="format-chip text-center py-3" onclick="selectChip(this,'img-formats','#4cd7f6','rgba(76,215,246,0.12)')">GIF</div>
+            <div class="format-chip text-center py-3" onclick="selectChip(this,'img-formats','#4cd7f6','rgba(76,215,246,0.12)')">AVIF</div>
+            <div class="format-chip text-center py-3" onclick="selectChip(this,'img-formats','#4cd7f6','rgba(76,215,246,0.12)')">BMP</div>
+          </div>
+        </div>
+        <!-- Quality slider (for lossy formats) -->
+        <div class="glass rounded-2xl p-5">
+          <div class="flex justify-between items-center mb-4">
+            <span class="section-label">Output Quality</span>
+            <span class="font-bold text-sm" style="color:#4cd7f6" id="img-quality-val">85 — High</span>
+          </div>
+          <input type="range" min="10" max="100" value="85" oninput="updateImgQuality(this.value)" style="accent-color:#4cd7f6" class="w-full mb-2"/>
+          <div class="flex justify-between text-xs text-outline">
+            <span>Smaller File</span>
+            <span>Best Quality</span>
+          </div>
+        </div>
+      </div>
+      <div class="sticky-bar" id="sbar-convert-image">
+        <div id="sbar-convert-image-cta">
+          <button class="cta-btn text-white" style="background:#4cd7f6; box-shadow:0 12px 32px rgba(76,215,246,0.3); color:#0b1326; font-weight:900" onclick="startInlineProcess('convert-image','linear-gradient(90deg,#4cd7f6,#7ee8fa)','rgba(76,215,246,0.4)')">
+            <span class="msymbol filled" style="font-size:20px; color:#0b1326">image_search</span>
+            Convert Image
+          </button>
+        </div>
+        <div id="sbar-convert-image-proc" style="display:none" class="space-y-2">
+          <div class="flex justify-between items-center">
+            <span class="text-xs font-bold text-on-surface light-text">Converting image...</span>
+            <span class="text-xs font-black" style="color:#4cd7f6" id="sbar-convert-image-pct">0%</span>
+          </div>
+          <div class="h-2 rounded-full" style="background:rgba(255,255,255,0.08)"><div class="h-full rounded-full proc-fill" id="sbar-convert-image-fill" style="width:0%;background:linear-gradient(90deg,#4cd7f6,#7ee8fa);box-shadow:0 0 8px rgba(76,215,246,0.4)"></div></div>
+          <div class="flex justify-between"><span class="text-xs text-outline" id="sbar-convert-image-eta">Estimating...</span><button onclick="cancelInlineProcess('convert-image')" class="text-xs font-bold text-outline uppercase tracking-wider">Cancel</button></div>
+        </div>
+        <div id="sbar-convert-image-done" style="display:none" class="space-y-2">
+          <div class="flex items-center gap-2 mb-2"><div class="w-4 h-4 rounded-full bg-merge-teal flex items-center justify-center"><span class="msymbol filled text-white" style="font-size:10px">check</span></div><span class="text-xs font-bold text-merge-teal">Output ready · photo_shoot_raw.png</span></div>
+          <div class="flex gap-2">
+            <button onclick="showToast('Opening file...')" class="done-action-btn done-action-primary"><span class="msymbol" style="font-size:16px">open_in_new</span>Open File</button>
+            <button onclick="showToast('Showing in folder...')" class="done-action-btn done-action-neutral"><span class="msymbol" style="font-size:16px">folder_open</span>Folder</button>
+            <button onclick="showToast('Sharing file...')" class="done-action-btn done-action-neutral"><span class="msymbol" style="font-size:16px">share</span>Share</button>
+          </div>
+          <button onclick="resetTool('convert-image')" class="w-full text-center text-xs font-bold text-outline uppercase tracking-wider pt-1">Convert Another</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- ==================== PROCESSING ==================== -->
+    <div id="screen-processing" class="screen flex-col h-full items-center justify-center px-6">
+      <div class="w-full max-w-xs flex flex-col items-center gap-6 text-center">
+        <!-- Animated ring -->
+        <div class="relative w-28 h-28">
+          <div class="absolute inset-0 rounded-full border-4 border-white/5"></div>
+          <div class="absolute inset-0 rounded-full border-4 border-transparent spin" style="border-top-color:#5b4fe8; border-right-color:rgba(91,79,232,0.3)"></div>
+          <div class="absolute inset-3 rounded-full glass flex items-center justify-center">
+            <span class="msymbol text-primary spin" style="font-size:28px">sync</span>
+          </div>
+        </div>
+        <div>
+          <p class="text-xs font-black text-outline uppercase tracking-widest mb-2">Processing</p>
+          <p class="text-xl font-black text-on-surface light-text" id="processing-label">Converting...</p>
+          <p class="text-xs text-outline mt-1">Please wait, do not close the app</p>
+        </div>
+        <!-- Progress bar -->
+        <div class="w-full">
+          <div class="h-1.5 w-full rounded-full" style="background:rgba(255,255,255,0.08)">
+            <div id="proc-bar" class="h-full rounded-full" style="width:0%; background:linear-gradient(90deg,#5b4fe8,#c4c0ff); transition:width 0.3s; box-shadow:0 0 12px rgba(91,79,232,0.5)"></div>
+          </div>
+          <div class="flex justify-between mt-2">
+            <span class="text-xs text-outline" id="proc-percent">0%</span>
+            <span class="text-xs text-outline" id="proc-eta">Estimating...</span>
+          </div>
+        </div>
+        <!-- Status steps -->
+        <div class="w-full glass rounded-2xl p-4 space-y-3 text-left">
+          <div class="flex items-center gap-3" id="step1">
+            <div class="w-5 h-5 rounded-full bg-merge-teal flex items-center justify-center pop-in">
+              <span class="msymbol filled text-white" style="font-size:12px">check</span>
+            </div>
+            <span class="text-xs text-on-surface light-text">File validated</span>
+          </div>
+          <div class="flex items-center gap-3" id="step2">
+            <div class="w-5 h-5 rounded-full flex items-center justify-center" style="background:rgba(255,255,255,0.1)">
+              <div class="w-2 h-2 rounded-full bg-outline pulse"></div>
+            </div>
+            <span class="text-xs text-outline" id="step2-label">Processing...</span>
+          </div>
+          <div class="flex items-center gap-3" id="step3">
+            <div class="w-5 h-5 rounded-full flex items-center justify-center" style="background:rgba(255,255,255,0.05)">
+              <div class="w-2 h-2 rounded-full" style="background:rgba(255,255,255,0.15)"></div>
+            </div>
+            <span class="text-xs text-outline opacity-50">Saving output...</span>
+          </div>
+        </div>
+        <button onclick="cancelProcessing()" class="text-xs font-bold text-outline uppercase tracking-widest px-6 py-2 rounded-full glass hover:bg-white/10 transition-colors">Cancel</button>
+      </div>
+    </div>
+
+    <!-- ==================== SUCCESS ==================== -->
+    <div id="screen-success" class="screen flex-col h-full items-center justify-between px-6 pt-12 pb-8">
+      <div class="w-full max-w-xs flex flex-col items-center gap-5 text-center">
+        <!-- Success icon -->
+        <div class="w-20 h-20 rounded-full bg-merge-teal flex items-center justify-center pop-in" style="box-shadow:0 0 40px rgba(16,185,129,0.4)">
+          <span class="msymbol filled text-white" style="font-size:36px">check</span>
+        </div>
+        <!-- Success banner -->
+        <div class="w-full rounded-2xl p-4 flex items-center gap-3" style="background:rgba(16,185,129,0.1); border:1px solid rgba(16,185,129,0.2)">
+          <div class="w-10 h-10 rounded-full bg-merge-teal flex items-center justify-center">
+            <span class="msymbol filled text-white" style="font-size:18px">check</span>
+          </div>
+          <div class="text-left">
+            <p class="font-bold text-merge-teal text-sm">Conversion complete</p>
+            <p class="text-xs text-merge-teal/60">File is ready for download</p>
+          </div>
+        </div>
+        <!-- Result card -->
+        <div class="w-full glass rounded-2xl p-5 flex flex-col items-center gap-4">
+          <div class="w-full aspect-video rounded-xl flex items-center justify-center" style="background:rgba(255,255,255,0.04); border:1px solid rgba(255,255,255,0.08)">
+            <div class="flex flex-col items-center gap-2">
+              <span class="msymbol filled text-doc-indigo" style="font-size:48px">picture_as_pdf</span>
+              <span class="text-xs text-outline">PDF Document Preview</span>
+            </div>
+          </div>
+          <div class="text-center">
+            <p class="font-black text-on-surface light-text text-lg" id="output-filename">Report.pdf</p>
+            <p class="text-xs text-outline mt-1" id="output-meta">PDF Document · 840 KB</p>
+          </div>
+        </div>
+      </div>
+      <div class="w-full max-w-xs space-y-3">
+        <div class="grid grid-cols-2 gap-3">
+          <button class="h-12 rounded-2xl cta-indigo text-white text-sm font-bold flex items-center justify-center gap-2" onclick="showToast('Opening file...')">
+            Open File
+            <span class="msymbol" style="font-size:16px">open_in_new</span>
+          </button>
+          <button class="h-12 rounded-2xl glass text-on-surface text-sm font-bold flex items-center justify-center gap-2 light-text" onclick="showToast('Showing in folder...')">
+            In Folder
+            <span class="msymbol" style="font-size:16px">folder</span>
+          </button>
+        </div>
+        <button onclick="navigate('home')" class="w-full text-primary font-bold text-sm tracking-widest uppercase py-3">
+          Convert Another
+        </button>
+        <p class="text-center text-xs text-outline px-6">Files are automatically deleted from our servers after 24 hours.</p>
+      </div>
+    </div>
+
+    <!-- ==================== HISTORY ==================== -->
+    <div id="screen-history" class="screen flex-col h-full">
+      <div class="topbar">
+        <div>
+          <p class="text-xs font-black text-primary uppercase tracking-widest">Activity Log</p>
+          <h1 class="font-black text-on-surface light-text text-xl tracking-tight">History</h1>
+        </div>
+        <button onclick="showToast('All history cleared')" class="text-xs font-bold text-audio-rose uppercase tracking-wider px-3 py-1.5 rounded-full" style="background:rgba(232,80,124,0.1); border:1px solid rgba(232,80,124,0.2)">Clear All</button>
+      </div>
+      <div class="content-area px-5 pb-28 pt-4 space-y-5 stagger">
+
+        <!-- ACTIVE JOBS — priority banner, shown when something is running -->
+        <div class="rounded-2xl overflow-hidden" style="border:1px solid rgba(91,79,232,0.3); background:rgba(91,79,232,0.07)">
+          <div class="px-4 pt-4 pb-2 flex items-center justify-between">
+            <div class="flex items-center gap-2">
+              <span class="w-2 h-2 rounded-full bg-indigo-400 pulse"></span>
+              <span class="text-xs font-black text-indigo-400 uppercase tracking-widest">Active Now</span>
+            </div>
+            <span class="text-xs text-outline">1 job running</span>
+          </div>
+          <div class="px-4 pb-4">
+            <div class="flex items-center gap-3 mb-3">
+              <div class="w-10 h-10 rounded-xl flex items-center justify-center" style="background:rgba(99,102,241,0.15)">
+                <span class="msymbol text-indigo-400 spin" style="font-size:20px">refresh</span>
+              </div>
+              <div class="flex-1 min-w-0">
+                <p class="font-bold text-on-surface text-sm light-text truncate">Project_Alpha.mp4</p>
+                <p class="text-xs text-outline">Video Compress · 4K Render</p>
+              </div>
+              <span class="text-sm font-black text-indigo-400">74%</span>
+            </div>
+            <div class="h-1.5 w-full rounded-full" style="background:rgba(255,255,255,0.08)">
+              <div class="h-full rounded-full progress-fill" style="background:linear-gradient(90deg,#5b4fe8,#c4c0ff); box-shadow:0 0 8px rgba(91,79,232,0.3); width:74%"></div>
+            </div>
+            <div class="flex justify-between mt-2">
+              <span class="text-xs text-outline">~18s remaining</span>
+              <button onclick="showToast('Job cancelled')" class="text-xs font-bold text-outline uppercase tracking-wider">Cancel</button>
+            </div>
+          </div>
+        </div>
+
+        <!-- TODAY section -->
+        <div>
+          <div class="flex items-center gap-3 mb-3">
+            <span class="section-label">Today</span>
+            <div class="flex-1 h-px" style="background:rgba(255,255,255,0.06)"></div>
+          </div>
+          <div class="space-y-2">
+
+            <!-- Success item -->
+            <div class="glass rounded-2xl p-4 flex items-center gap-3">
+              <div class="w-10 h-10 rounded-xl flex items-center justify-center flex-shrink-0" style="background:rgba(16,185,129,0.12)">
+                <span class="msymbol filled text-merge-teal" style="font-size:18px">audio_file</span>
+              </div>
+              <div class="flex-1 min-w-0">
+                <p class="text-sm font-bold text-on-surface truncate light-text">VO_Track_01.mp3</p>
+                <div class="flex items-center gap-2 mt-0.5">
+                  <span class="text-xs text-outline">Extract Audio</span>
+                  <span class="text-outline" style="font-size:8px">•</span>
+                  <span class="text-xs text-outline">2 min ago · 4.2 MB</span>
+                </div>
+              </div>
+              <div class="flex items-center gap-1.5 flex-shrink-0">
+                <div class="w-5 h-5 rounded-full bg-merge-teal/20 flex items-center justify-center">
+                  <span class="msymbol filled text-merge-teal" style="font-size:11px">check</span>
+                </div>
+                <button onclick="showToast('Opening file...')" class="text-xs font-bold text-on-surface light-text px-3 py-1.5 rounded-full glass">Open</button>
+              </div>
+            </div>
+
+            <!-- Success item -->
+            <div class="glass rounded-2xl p-4 flex items-center gap-3">
+              <div class="w-10 h-10 rounded-xl flex items-center justify-center flex-shrink-0" style="background:rgba(99,102,241,0.12)">
+                <span class="msymbol filled text-doc-indigo" style="font-size:18px">picture_as_pdf</span>
+              </div>
+              <div class="flex-1 min-w-0">
+                <p class="text-sm font-bold text-on-surface truncate light-text">report_q4_final.pdf</p>
+                <div class="flex items-center gap-2 mt-0.5">
+                  <span class="text-xs text-outline">Convert Doc</span>
+                  <span class="text-outline" style="font-size:8px">•</span>
+                  <span class="text-xs text-outline">1 hr ago · 840 KB</span>
+                </div>
+              </div>
+              <div class="flex items-center gap-1.5 flex-shrink-0">
+                <div class="w-5 h-5 rounded-full bg-merge-teal/20 flex items-center justify-center">
+                  <span class="msymbol filled text-merge-teal" style="font-size:11px">check</span>
+                </div>
+                <button onclick="showToast('Opening file...')" class="text-xs font-bold text-on-surface light-text px-3 py-1.5 rounded-full glass">Open</button>
+              </div>
+            </div>
+
+            <!-- Success item -->
+            <div class="glass rounded-2xl p-4 flex items-center gap-3">
+              <div class="w-10 h-10 rounded-xl flex items-center justify-center flex-shrink-0" style="background:rgba(16,185,129,0.12)">
+                <span class="msymbol text-merge-teal" style="font-size:18px">layers</span>
+              </div>
+              <div class="flex-1 min-w-0">
+                <p class="text-sm font-bold text-on-surface truncate light-text">Batch Export: Instagram_Stories</p>
+                <div class="flex items-center gap-2 mt-0.5">
+                  <span class="text-xs text-outline">Merge PDF</span>
+                  <span class="text-outline" style="font-size:8px">•</span>
+                  <span class="text-xs text-outline">3 hrs ago · 128 MB</span>
+                </div>
+              </div>
+              <div class="flex items-center gap-1.5 flex-shrink-0">
+                <div class="w-5 h-5 rounded-full bg-merge-teal/20 flex items-center justify-center">
+                  <span class="msymbol filled text-merge-teal" style="font-size:11px">check</span>
+                </div>
+                <button onclick="showToast('Showing in folder...')" class="text-xs font-bold text-on-surface light-text px-3 py-1.5 rounded-full glass" style="font-size:10px">Folder</button>
+              </div>
+            </div>
+
+            <!-- Failed item -->
+            <div class="glass rounded-2xl p-4 flex items-center gap-3" style="border-left:3px solid #E8507C">
+              <div class="w-10 h-10 rounded-xl flex items-center justify-center flex-shrink-0" style="background:rgba(232,80,124,0.1)">
+                <span class="msymbol filled text-video-purple" style="font-size:18px">movie</span>
+              </div>
+              <div class="flex-1 min-w-0">
+                <p class="text-sm font-bold text-on-surface truncate light-text">RAW_Footage_04.mp4</p>
+                <div class="flex items-center gap-2 mt-0.5">
+                  <span class="text-xs text-audio-rose font-bold">Failed</span>
+                  <span class="text-outline" style="font-size:8px">•</span>
+                  <span class="text-xs text-outline">Disk space low · 5 hrs ago</span>
+                </div>
+              </div>
+              <button onclick="showToast('Retrying...')" class="text-xs font-bold text-audio-rose px-3 py-1.5 rounded-full flex-shrink-0" style="background:rgba(232,80,124,0.1); border:1px solid rgba(232,80,124,0.2)">Retry</button>
+            </div>
+
+            <!-- Queued item -->
+            <div class="glass rounded-2xl p-4 flex items-center gap-3" style="opacity:0.7">
+              <div class="w-10 h-10 rounded-xl flex items-center justify-center flex-shrink-0" style="background:rgba(245,158,11,0.1)">
+                <span class="msymbol text-split-amber" style="font-size:18px">schedule</span>
+              </div>
+              <div class="flex-1 min-w-0">
+                <p class="text-sm font-bold text-on-surface truncate light-text">Cloud Backup: Studio_Assets</p>
+                <div class="flex items-center gap-2 mt-0.5">
+                  <span class="text-xs text-split-amber font-bold">Queued</span>
+                  <span class="text-outline" style="font-size:8px">•</span>
+                  <span class="text-xs text-outline">Waiting for connection</span>
+                </div>
+              </div>
+              <div class="w-2 h-2 rounded-full bg-split-amber pulse flex-shrink-0"></div>
+            </div>
+
+          </div>
+        </div>
+
+        <!-- YESTERDAY section -->
+        <div>
+          <div class="flex items-center gap-3 mb-3">
+            <span class="section-label">Yesterday</span>
+            <div class="flex-1 h-px" style="background:rgba(255,255,255,0.06)"></div>
+          </div>
+          <div class="space-y-2">
+
+            <div class="glass rounded-2xl p-4 flex items-center gap-3">
+              <div class="w-10 h-10 rounded-xl flex items-center justify-center flex-shrink-0" style="background:rgba(99,102,241,0.12)">
+                <span class="msymbol filled text-doc-indigo" style="font-size:18px">picture_as_pdf</span>
+              </div>
+              <div class="flex-1 min-w-0">
+                <p class="text-sm font-bold text-on-surface truncate light-text">report_q4_final.pdf</p>
+                <div class="flex items-center gap-2 mt-0.5">
+                  <span class="text-xs text-outline">Convert Doc</span>
+                  <span class="text-outline" style="font-size:8px">•</span>
+                  <span class="text-xs text-outline">Yesterday · 1.1 MB</span>
+                </div>
+              </div>
+              <div class="flex items-center gap-1.5 flex-shrink-0">
+                <div class="w-5 h-5 rounded-full bg-merge-teal/20 flex items-center justify-center">
+                  <span class="msymbol filled text-merge-teal" style="font-size:11px">check</span>
+                </div>
+                <button onclick="showToast('Opening file...')" class="text-xs font-bold text-on-surface light-text px-3 py-1.5 rounded-full glass">Open</button>
+              </div>
+            </div>
+
+            <div class="glass rounded-2xl p-4 flex items-center gap-3">
+              <div class="w-10 h-10 rounded-xl flex items-center justify-center flex-shrink-0" style="background:rgba(249,115,22,0.12)">
+                <span class="msymbol text-compress-orange" style="font-size:18px">compress</span>
+              </div>
+              <div class="flex-1 min-w-0">
+                <p class="text-sm font-bold text-on-surface truncate light-text">wedding_highlight_reel.mp4</p>
+                <div class="flex items-center gap-2 mt-0.5">
+                  <span class="text-xs text-outline">Compress Video</span>
+                  <span class="text-outline" style="font-size:8px">•</span>
+                  <span class="text-xs text-outline">Yesterday · 284 MB</span>
+                </div>
+              </div>
+              <div class="flex items-center gap-1.5 flex-shrink-0">
+                <div class="w-5 h-5 rounded-full bg-merge-teal/20 flex items-center justify-center">
+                  <span class="msymbol filled text-merge-teal" style="font-size:11px">check</span>
+                </div>
+                <button onclick="showToast('Opening file...')" class="text-xs font-bold text-on-surface light-text px-3 py-1.5 rounded-full glass">Open</button>
+              </div>
+            </div>
+
+          </div>
+        </div>
+
+      </div>
+    </div>
+
+    <!-- ==================== SETTINGS ==================== -->
+    <div id="screen-settings" class="screen flex-col h-full">
+      <div class="topbar">
+        <div>
+          <p class="text-xs font-black text-primary uppercase tracking-widest">Preferences</p>
+          <h1 class="font-black text-on-surface light-text text-xl tracking-tight">Settings</h1>
+        </div>
+        <button onclick="showToast('Secure Server')" class="text-xs font-bold text-indigo-400 px-3 py-1.5 rounded-full glass">Secure Server</button>
+      </div>
+      <div class="content-area px-5 pb-28 pt-5 space-y-6 stagger">
+        <!-- Theme -->
+        <div>
+          <p class="section-label mb-3">Appearance</p>
+          <div class="glass rounded-2xl p-5 flex items-center justify-between">
+            <div class="flex items-center gap-4">
+              <div class="w-11 h-11 rounded-full bg-indigo-500/15 flex items-center justify-center">
+                <span class="msymbol filled text-indigo-400" id="settings-theme-icon" style="font-size:22px">dark_mode</span>
+              </div>
+              <div>
+                <p class="font-bold text-on-surface light-text text-sm" id="settings-theme-label">Prism Night</p>
+                <p class="text-xs text-outline" id="settings-theme-sub">Dark Mode Active</p>
+              </div>
+            </div>
+            <!-- Animated Sun/Moon Face Toggle -->
+            <div id="theme-face-toggle" class="theme-face-toggle dark-tog" onclick="toggleTheme()">
+              <!-- Stars (dark bg) -->
+              <div class="toggle-track-stars">
+                <div class="star-dot" style="width:3px;height:3px;top:8px;left:56px;"></div>
+                <div class="star-dot" style="width:2px;height:2px;top:14px;left:68px;"></div>
+                <div class="star-dot" style="width:2px;height:2px;top:22px;left:60px;"></div>
+                <div class="star-dot" style="width:3px;height:3px;top:30px;left:72px;"></div>
+              </div>
+              <!-- Clouds (light bg) -->
+              <div class="toggle-track-clouds">
+                <div class="cloud-puff" style="width:18px;height:12px;top:10px;left:8px;border-radius:6px;"></div>
+                <div class="cloud-puff" style="width:12px;height:8px;top:14px;left:14px;border-radius:4px;"></div>
+                <div class="cloud-puff" style="width:14px;height:9px;top:28px;left:12px;border-radius:5px;"></div>
+              </div>
+              <!-- Face Ball -->
+              <div id="face-ball" class="face-ball dark">
+                <svg class="face-svg" viewBox="0 0 28 28" fill="none" xmlns="http://www.w3.org/2000/svg">
+                  <!-- Sun rays (hidden in dark) -->
+                  <g class="rays-group">
+                    <line class="sun-ray" x1="14" y1="0" x2="14" y2="3" stroke="#ffcc00" stroke-width="2" stroke-linecap="round"/>
+                    <line class="sun-ray" x1="14" y1="25" x2="14" y2="28" stroke="#ffcc00" stroke-width="2" stroke-linecap="round"/>
+                    <line class="sun-ray" x1="0" y1="14" x2="3" y2="14" stroke="#ffcc00" stroke-width="2" stroke-linecap="round"/>
+                    <line class="sun-ray" x1="25" y1="14" x2="28" y2="14" stroke="#ffcc00" stroke-width="2" stroke-linecap="round"/>
+                    <line class="sun-ray" x1="3.5" y1="3.5" x2="5.6" y2="5.6" stroke="#ffcc00" stroke-width="1.8" stroke-linecap="round"/>
+                    <line class="sun-ray" x1="22.4" y1="22.4" x2="24.5" y2="24.5" stroke="#ffcc00" stroke-width="1.8" stroke-linecap="round"/>
+                    <line class="sun-ray" x1="24.5" y1="3.5" x2="22.4" y2="5.6" stroke="#ffcc00" stroke-width="1.8" stroke-linecap="round"/>
+                    <line class="sun-ray" x1="5.6" y1="22.4" x2="3.5" y2="24.5" stroke="#ffcc00" stroke-width="1.8" stroke-linecap="round"/>
+                  </g>
+                  <!-- Moon craters (hidden in light) -->
+                  <circle class="moon-crater" cx="9" cy="9" r="2" fill="rgba(100,110,170,0.4)"/>
+                  <circle class="moon-crater" cx="18" cy="16" r="1.3" fill="rgba(100,110,170,0.35)"/>
+                  <circle class="moon-crater" cx="11" cy="19" r="1" fill="rgba(100,110,170,0.3)"/>
+                  <!-- Eyes -->
+                  <ellipse class="eye left-eye" cx="10.5" cy="12" rx="1.4" ry="1.6" fill="#2a2550"/>
+                  <ellipse class="eye right-eye" cx="17.5" cy="12" rx="1.4" ry="1.6" fill="#2a2550"/>
+                  <!-- Smile -->
+                  <path class="face-smile" d="M10 17 Q14 20.5 18 17" stroke="#2a2550" stroke-width="1.5" stroke-linecap="round" fill="none"/>
+                </svg>
+              </div>
+            </div>
+          </div>
+        </div>
+        <!-- Storage -->
+        <div>
+          <p class="section-label mb-3">Storage</p>
+          <div class="glass rounded-2xl p-5 space-y-4">
+            <div class="flex items-center justify-between">
+              <div class="flex items-center gap-3">
+                <div class="w-11 h-11 rounded-full bg-doc-indigo/15 flex items-center justify-center">
+                  <span class="msymbol text-doc-indigo" style="font-size:22px">database</span>
+                </div>
+                <div>
+                  <p class="font-bold text-on-surface light-text text-sm">Storage Dashboard</p>
+                  <p class="text-xs text-outline uppercase tracking-widest">Summary Available</p>
+                </div>
+              </div>
+              <span class="msymbol text-outline" style="font-size:20px">chevron_right</span>
+            </div>
+            <div class="space-y-2">
+              <div class="flex justify-between items-center">
+                <span class="text-xs text-outline">Storage Used</span>
+                <span class="text-xs font-bold text-tertiary">4.2 GB / 5 GB (84%)</span>
+              </div>
+              <div class="h-2 w-full rounded-full" style="background:rgba(255,255,255,0.08)">
+                <div class="h-full rounded-full" style="width:84%; background:linear-gradient(90deg,#5b4fe8,#4cd7f6); box-shadow:0 0 12px rgba(76,215,246,0.3)"></div>
+              </div>
+              <div class="flex justify-between text-xs text-outline">
+                <span>1,240 Files</span>
+                <span>800 MB Free</span>
+              </div>
+            </div>
+          </div>
+        </div>
+        <!-- Output Folders -->
+        <div>
+          <p class="section-label mb-3">Output Folders</p>
+          <div class="grid grid-cols-2 gap-3">
+            <div class="glass rounded-2xl p-4 flex flex-col gap-3 cursor-pointer hover:bg-white/5 transition-colors" onclick="showToast('Documents folder: /Downloads/docs')">
+              <span class="msymbol filled text-doc-indigo" style="font-size:24px">description</span>
+              <div>
+                <p class="text-sm font-bold text-on-surface light-text">Documents</p>
+                <p class="text-xs text-outline">243 Files</p>
+              </div>
+            </div>
+            <div class="glass rounded-2xl p-4 flex flex-col gap-3 cursor-pointer hover:bg-white/5 transition-colors" onclick="showToast('PDFs folder: /Downloads/pdfs')">
+              <span class="msymbol filled text-red-400" style="font-size:24px">picture_as_pdf</span>
+              <div>
+                <p class="text-sm font-bold text-on-surface light-text">PDFs</p>
+                <p class="text-xs text-outline">124 Files</p>
+              </div>
+            </div>
+            <div class="glass rounded-2xl p-4 flex flex-col gap-3 cursor-pointer hover:bg-white/5 transition-colors" onclick="showToast('Videos folder: /Downloads/videos')">
+              <span class="msymbol filled text-video-purple" style="font-size:24px">movie</span>
+              <div>
+                <p class="text-sm font-bold text-on-surface light-text">Videos</p>
+                <p class="text-xs text-outline">56 Files</p>
+              </div>
+            </div>
+            <div class="glass rounded-2xl p-4 flex flex-col gap-3 cursor-pointer hover:bg-white/5 transition-colors" onclick="showToast('Audio folder: /Downloads/audio')">
+              <span class="msymbol filled text-compress-orange" style="font-size:24px">audiotrack</span>
+              <div>
+                <p class="text-sm font-bold text-on-surface light-text">Audio</p>
+                <p class="text-xs text-outline">89 Files</p>
+              </div>
+            </div>
+          </div>
+        </div>
+        <!-- Converting Engines -->
+        <div>
+          <p class="section-label mb-3">Converting Engines</p>
+          <div class="glass rounded-2xl overflow-hidden">
+            <!-- Formatica Document Server -->
+            <div class="p-4 flex items-center gap-3 border-b border-white/5 light-border">
+              <div class="w-10 h-10 rounded-xl flex items-center justify-center flex-shrink-0" style="background:rgba(99,102,241,0.12)">
+                <span class="msymbol text-doc-indigo" style="font-size:18px">cloud</span>
+              </div>
+              <div class="flex-1 min-w-0">
+                <p class="text-sm font-bold text-on-surface light-text">Formatica Document Server</p>
+                <p class="text-xs text-outline">Cloud-assisted document processing</p>
+              </div>
+              <div class="flex items-center gap-1.5 flex-shrink-0">
+                <div class="w-2 h-2 rounded-full bg-merge-teal pulse"></div>
+                <span class="text-xs font-bold text-merge-teal">Online</span>
+              </div>
+            </div>
+            <!-- Latency row -->
+            <div class="px-4 py-2.5 flex justify-between items-center border-b border-white/5 light-border" style="background:rgba(255,255,255,0.02)">
+              <span class="text-xs text-outline">Server Latency</span>
+              <span class="text-xs font-mono font-bold text-on-surface light-text">24ms</span>
+            </div>
+            <!-- FFmpeg Engine -->
+            <div class="p-4 flex items-center gap-3">
+              <div class="w-10 h-10 rounded-xl flex items-center justify-center flex-shrink-0" style="background:rgba(249,115,22,0.12)">
+                <span class="msymbol text-compress-orange" style="font-size:18px">memory</span>
+              </div>
+              <div class="flex-1 min-w-0">
+                <p class="text-sm font-bold text-on-surface light-text">FFmpeg Engine</p>
+                <p class="text-xs text-outline">On-device · Powers all media tools</p>
+              </div>
+              <div class="flex items-center gap-1.5 flex-shrink-0">
+                <div class="w-2 h-2 rounded-full bg-compress-orange pulse"></div>
+                <span class="text-xs font-bold text-compress-orange">Active</span>
+              </div>
+            </div>
+          </div>
+        </div>
+        <!-- About -->
+        <div>
+          <p class="section-label mb-3">About</p>
+          <div class="glass rounded-2xl overflow-hidden">
+            <div class="p-4 flex items-center justify-between border-b border-white/5 light-border hover:bg-white/5 transition-colors cursor-pointer">
+              <span class="text-sm text-on-surface light-text">App Version</span>
+              <span class="text-xs text-primary font-bold">v4.2.0-beta</span>
+            </div>
+            <div class="p-4 flex items-center justify-between border-b border-white/5 light-border hover:bg-white/5 transition-colors cursor-pointer" onclick="showToast('Opening Privacy Policy...')">
+              <span class="text-sm text-on-surface light-text">Privacy Policy</span>
+              <span class="msymbol text-outline" style="font-size:18px">chevron_right</span>
+            </div>
+            <div class="p-4 cursor-pointer hover:bg-white/5 transition-colors" onclick="toggleFolderStructure()">
+              <div class="flex items-center justify-between mb-0" id="folder-row-header">
+                <span class="text-sm text-on-surface light-text">File Structure</span>
+                <span class="msymbol text-outline transition-transform" id="folder-chevron" style="font-size:18px">expand_more</span>
+              </div>
+              <div id="folder-structure" style="display:none" class="mt-3 rounded-xl p-3 font-mono text-xs space-y-0.5" style="background:rgba(255,255,255,0.04)">
+                <div style="background:rgba(255,255,255,0.04); border-radius:10px; padding:12px; line-height:1.8">
+                  <p class="text-primary font-bold">📁 /storage/Formatica/</p>
+                  <p class="text-on-surface-var pl-4">📁 /pdf</p>
+                  <p class="text-outline pl-8">Convert Doc, Images→PDF, Merge, Split, Greyscale</p>
+                  <p class="text-on-surface-var pl-4">📁 /videos</p>
+                  <p class="text-outline pl-8">Compress Video, Convert Video</p>
+                  <p class="text-on-surface-var pl-4">📁 /audio</p>
+                  <p class="text-outline pl-8">Extract Audio</p>
+                  <p class="text-on-surface-var pl-4">📁 /images</p>
+                  <p class="text-outline pl-8">Convert Image</p>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+        <!-- Footer -->
+        <div class="flex items-center justify-center gap-2 text-outline text-xs py-2">
+          <span class="msymbol" style="font-size:14px">lock</span>
+          End-to-End Encrypted Cloud Storage
+        </div>
+      </div>
+    </div>
+
+  </div><!-- end screens container -->
+
+  <!-- ===== BOTTOM NAV ===== -->
+  <div class="bottom-nav" id="bottom-nav">
+    <button class="nav-btn active" id="nav-home" onclick="navigate('home')">
+      <span class="msymbol" style="font-size:22px">home</span>
+    </button>
+    <button class="nav-btn" id="nav-history" onclick="navigate('history')">
+      <span class="msymbol" style="font-size:22px">history</span>
+    </button>
+    <button class="nav-btn" id="nav-settings" onclick="navigate('settings')">
+      <span class="msymbol" style="font-size:22px">settings</span>
+    </button>
+  </div>
+
+</div><!-- end #app -->
+
+<script>
+// ===== STATE =====
+let currentScreen = 'home';
+let previousScreen = 'home';
+let isDark = true;
+let processingTimer = null;
+
+// ===== NAVIGATION =====
+function navigate(to, from) {
+  // Hide all screens
+  document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+  // Show target
+  const target = document.getElementById('screen-' + to);
+  if (!target) return;
+  target.classList.add('active');
+  previousScreen = currentScreen;
+  currentScreen = to;
+
+  // Nav bar visibility
+  const isToolScreen = !['home','history','settings','processing','success'].includes(to);
+  const nav = document.getElementById('bottom-nav');
+  nav.style.display = (to === 'processing' || to === 'success') ? 'none' : 'flex';
+
+  // Active nav btn
+  ['home','history','settings'].forEach(id => {
+    document.getElementById('nav-'+id)?.classList.toggle('active', id === to);
+  });
+
+  // Processing screen logic
+  if (to === 'processing') startProcessing(from || previousScreen);
+}
+
+function goBack() {
+  const toolScreens = ['extract-audio','convert-doc','images-pdf','merge-pdf','split-pdf','compress-video','convert-video','greyscale-pdf','convert-image'];
+  if (toolScreens.includes(currentScreen)) {
+    navigate('home');
+  } else {
+    navigate(previousScreen);
+  }
+}
+
+// ===== PROCESSING SIMULATION =====
+function startProcessing(toolName) {
+  const labels = {
+    'extract-audio': 'Extracting Audio...',
+    'convert-doc': 'Converting Document...',
+    'images-pdf': 'Creating PDF...',
+    'merge-pdf': 'Merging PDFs...',
+    'split-pdf': 'Splitting PDF...',
+    'compress-video': 'Compressing Video...',
+    'convert-video': 'Converting Video...',
+    'greyscale-pdf': 'Converting to Greyscale...',
+  };
+  const step2Labels = {
+    'extract-audio': 'Extracting audio stream...',
+    'convert-doc': 'Rendering document...',
+    'images-pdf': 'Assembling pages...',
+    'merge-pdf': 'Merging documents...',
+    'split-pdf': 'Splitting pages...',
+    'compress-video': 'Encoding with FFmpeg...',
+    'convert-video': 'Transcoding video...',
+    'greyscale-pdf': 'Applying greyscale filter...',
+  };
+  const outputFiles = {
+    'extract-audio': ['cinematic_sequence_01.mp3', 'MP3 Audio · 12.8 MB'],
+    'convert-doc': ['Report.pdf', 'PDF Document · 840 KB'],
+    'images-pdf': ['images_bundle.pdf', 'PDF Document · 3.2 MB'],
+    'merge-pdf': ['merged_output.pdf', 'PDF Document · 6.8 MB'],
+    'split-pdf': ['split_pages.zip', 'ZIP Archive · 4.1 MB'],
+    'compress-video': ['compressed_output.mp4', 'MP4 Video · 28.4 MB'],
+    'convert-video': ['studio_reel_final.mp4', 'MP4 Video · 98.7 MB'],
+    'greyscale-pdf': ['greyscale_output.pdf', 'PDF Document · 5.6 MB'],
+  };
+
+  document.getElementById('processing-label').textContent = labels[toolName] || 'Processing...';
+  document.getElementById('step2-label').textContent = step2Labels[toolName] || 'Processing...';
+  document.getElementById('proc-bar').style.width = '0%';
+  document.getElementById('proc-percent').textContent = '0%';
+  document.getElementById('proc-eta').textContent = 'Estimating...';
+
+  let progress = 0;
+  clearInterval(processingTimer);
+  processingTimer = setInterval(() => {
+    progress += Math.random() * 6 + 2;
+    if (progress >= 100) {
+      progress = 100;
+      clearInterval(processingTimer);
+      document.getElementById('proc-bar').style.width = '100%';
+      document.getElementById('proc-percent').textContent = '100%';
+      document.getElementById('proc-eta').textContent = 'Done!';
+      // Go to success
+      const [fname, fmeta] = outputFiles[toolName] || ['output.pdf', 'File · 1 MB'];
+      document.getElementById('output-filename').textContent = fname;
+      document.getElementById('output-meta').textContent = fmeta;
+      setTimeout(() => navigate('success'), 600);
+    } else {
+      document.getElementById('proc-bar').style.width = progress + '%';
+      document.getElementById('proc-percent').textContent = Math.floor(progress) + '%';
+      const secs = Math.ceil((100 - progress) / 8);
+      document.getElementById('proc-eta').textContent = secs + 's remaining';
+    }
+  }, 180);
+}
+
+function cancelProcessing() {
+  clearInterval(processingTimer);
+  navigate(previousScreen);
+  showToast('Processing cancelled');
+}
+
+// ===== THEME TOGGLE =====
+function toggleTheme() {
+  isDark = !isDark;
+  document.documentElement.classList.toggle('dark', isDark);
+  document.body.classList.toggle('light-mode', !isDark);
+  document.getElementById('app').classList.toggle('mesh-light', !isDark);
+  document.getElementById('app').classList.toggle('mesh-dark', isDark);
+  document.getElementById('theme-icon').textContent = isDark ? 'dark_mode' : 'light_mode';
+  document.getElementById('settings-theme-icon').textContent = isDark ? 'dark_mode' : 'light_mode';
+  document.getElementById('settings-theme-label').textContent = isDark ? 'Prism Night' : 'Ethereal Prism';
+  document.getElementById('settings-theme-sub').textContent = isDark ? 'Dark Mode Active' : 'Light Mode Active';
+  // Face toggle animation
+  const tog = document.getElementById('theme-face-toggle');
+  const ball = document.getElementById('face-ball');
+  if (isDark) {
+    tog.classList.remove('light-tog'); tog.classList.add('dark-tog');
+    ball.classList.remove('light'); ball.classList.add('dark');
+  } else {
+    tog.classList.remove('dark-tog'); tog.classList.add('light-tog');
+    ball.classList.remove('dark'); ball.classList.add('light');
+  }
+}
+
+// ===== FOLDER STRUCTURE TOGGLE =====
+function toggleFolderStructure() {
+  const fs = document.getElementById('folder-structure');
+  const ch = document.getElementById('folder-chevron');
+  const open = fs.style.display === 'none';
+  fs.style.display = open ? '' : 'none';
+  ch.style.transform = open ? 'rotate(180deg)' : '';
+}
+
+// ===== CHIP SELECTION =====
+function selectChip(el, groupId, activeColor, activeBg) {
+  const group = document.getElementById(groupId);
+  if (!group) return;
+  group.querySelectorAll('.format-chip').forEach(c => {
+    c.classList.remove('selected');
+    c.style.borderColor = '';
+    c.style.background = '';
+    c.style.color = '';
+  });
+  el.classList.add('selected');
+  el.style.borderColor = activeColor;
+  el.style.background = activeBg;
+  el.style.color = activeColor;
+}
+
+// ===== QUALITY PILL SELECTION =====
+function selectQuality(el, groupId) {
+  const group = document.getElementById(groupId);
+  if (!group) return;
+  group.querySelectorAll('.quality-pill').forEach(p => p.classList.remove('selected'));
+  el.classList.add('selected');
+}
+
+// ===== INLINE TOOL PROCESSING =====
+const toolTimers = {};
+
+function startInlineProcess(tool, gradient, glow) {
+  document.getElementById('sbar-'+tool+'-cta').style.display = 'none';
+  const proc = document.getElementById('sbar-'+tool+'-proc');
+  proc.style.display = '';
+  const fill = document.getElementById('sbar-'+tool+'-fill');
+  const pct  = document.getElementById('sbar-'+tool+'-pct');
+  const eta  = document.getElementById('sbar-'+tool+'-eta');
+  let p = 0;
+  clearInterval(toolTimers[tool]);
+  toolTimers[tool] = setInterval(() => {
+    p += Math.random() * 5 + 2;
+    if (p >= 100) {
+      p = 100;
+      clearInterval(toolTimers[tool]);
+      fill.style.width = '100%';
+      pct.textContent = '100%';
+      eta.textContent = 'Complete!';
+      setTimeout(() => {
+        proc.style.display = 'none';
+        document.getElementById('sbar-'+tool+'-done').style.display = '';
+      }, 500);
+    } else {
+      fill.style.width = p + '%';
+      pct.textContent = Math.floor(p) + '%';
+      eta.textContent = Math.ceil((100 - p) / 7) + 's remaining';
+    }
+  }, 200);
+}
+
+function cancelInlineProcess(tool) {
+  clearInterval(toolTimers[tool]);
+  document.getElementById('sbar-'+tool+'-proc').style.display = 'none';
+  document.getElementById('sbar-'+tool+'-cta').style.display = '';
+  showToast('Processing cancelled');
+}
+
+function resetTool(tool) {
+  document.getElementById('sbar-'+tool+'-done').style.display = 'none';
+  document.getElementById('sbar-'+tool+'-cta').style.display = '';
+}
+
+// ===== IMAGE QUALITY LABEL =====
+function updateImgQuality(val) {
+  val = parseInt(val);
+  const label = val >= 90 ? 'Maximum' : val >= 75 ? 'High' : val >= 50 ? 'Medium' : 'Low';
+  document.getElementById('img-quality-val').textContent = val + ' — ' + label;
+}
+
+// ===== RESIZE TOGGLE =====
+function toggleResize() {
+  const t = document.getElementById('resize-toggle');
+  t.classList.toggle('on');
+  const inp = document.getElementById('resize-inputs');
+  inp.style.display = t.classList.contains('on') ? '' : 'none';
+}
+
+
+function updateCRF(val) {
+  val = parseInt(val);
+  let label = val < 18 ? 'High Quality' : val < 28 ? 'Medium' : val < 36 ? 'Low' : 'Very Low';
+  document.getElementById('crf-value').textContent = val + ' (' + label + ')';
+}
+
+// ===== SEARCH / FILTER =====
+function filterTools() {
+  const q = document.getElementById('search-input').value.toLowerCase().trim();
+  const allCards = document.querySelectorAll('.tool-card');
+  let anyVisible = false;
+  allCards.forEach(card => {
+    const text = card.querySelector('span:last-child')?.textContent.toLowerCase() || '';
+    const show = !q || text.includes(q);
+    card.style.display = show ? '' : 'none';
+    if (show) anyVisible = true;
+  });
+  // Show/hide sections based on content
+  ['doc-section','media-section','recent-section'].forEach(id => {
+    const el = document.getElementById(id);
+    if (el) {
+      const visibleTools = el.querySelectorAll('.tool-card');
+      const anyToolVisible = [...visibleTools].some(c => c.style.display !== 'none');
+      el.style.display = (!q || anyToolVisible || id === 'recent-section') ? '' : 'none';
+    }
+  });
+  document.getElementById('no-results').classList.toggle('hidden', anyVisible || !q);
+}
+
+// ===== TOAST =====
+let toastTimer;
+function showToast(msg) {
+  const t = document.getElementById('toast');
+  t.textContent = msg;
+  t.classList.add('show');
+  clearTimeout(toastTimer);
+  toastTimer = setTimeout(() => t.classList.remove('show'), 2200);
+}
+
+// ===== INIT =====
+navigate('home');
+</script>
+</body>
+</html>

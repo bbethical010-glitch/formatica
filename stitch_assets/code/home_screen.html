@@ -1,0 +1,319 @@
+<!DOCTYPE html>
+
+<html class="dark" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Formatica - The Ethereal Prism</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;600;700;800&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    "colors": {
+                        "error": "#ffb4ab",
+                        "background": "#0b1326",
+                        "secondary": "#d0bcff",
+                        "surface-container-lowest": "#060e20",
+                        "primary-fixed-dim": "#c4c0ff",
+                        "on-secondary-fixed": "#23005c",
+                        "on-primary": "#2200a3",
+                        "primary-container": "#5b4fe8",
+                        "tertiary-container": "#007286",
+                        "surface-tint": "#c4c0ff",
+                        "tertiary-fixed": "#acedff",
+                        "on-tertiary-fixed": "#001f26",
+                        "on-error": "#690005",
+                        "tertiary": "#4cd7f6",
+                        "on-secondary-container": "#c4abff",
+                        "on-surface": "#dae2fd",
+                        "on-tertiary-container": "#bcf0ff",
+                        "inverse-surface": "#dae2fd",
+                        "secondary-container": "#571bc1",
+                        "surface-variant": "#2d3449",
+                        "surface-container-highest": "#2d3449",
+                        "primary": "#c4c0ff",
+                        "on-surface-variant": "#c8c4d8",
+                        "surface-dim": "#0b1326",
+                        "on-tertiary": "#003640",
+                        "inverse-primary": "#5244de",
+                        "on-secondary-fixed-variant": "#5516be",
+                        "secondary-fixed": "#e9ddff",
+                        "outline": "#918fa1",
+                        "surface-container": "#171f33",
+                        "on-primary-container": "#e8e4ff",
+                        "on-primary-fixed-variant": "#3824c7",
+                        "surface-container-high": "#222a3d",
+                        "on-error-container": "#ffdad6",
+                        "primary-fixed": "#e3dfff",
+                        "on-tertiary-fixed-variant": "#004e5c",
+                        "on-primary-fixed": "#120068",
+                        "tertiary-fixed-dim": "#4cd7f6",
+                        "outline-variant": "#464555",
+                        "error-container": "#93000a",
+                        "surface": "#0b1326",
+                        "on-background": "#dae2fd",
+                        "surface-container-low": "#131b2e",
+                        "on-secondary": "#3c0091",
+                        "secondary-fixed-dim": "#d0bcff",
+                        "inverse-on-surface": "#283044",
+                        "surface-bright": "#31394d"
+                    },
+                    "borderRadius": {
+                        "DEFAULT": "1rem",
+                        "lg": "2rem",
+                        "xl": "3rem",
+                        "full": "9999px"
+                    },
+                    "fontFamily": {
+                        "headline": ["Manrope"],
+                        "body": ["Manrope"],
+                        "label": ["Manrope"]
+                    }
+                },
+            },
+        }
+    </script>
+<style>
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+        }
+        .glass-card {
+            background: rgba(255, 255, 255, 0.07);
+            backdrop-filter: blur(28px);
+            border-top: 1px solid rgba(255, 255, 255, 0.2);
+            border-left: 1px solid rgba(255, 255, 255, 0.2);
+        }
+        .light .glass-card {
+            background: rgba(255, 255, 255, 0.75);
+            border-top: 1px solid rgba(255, 255, 255, 0.4);
+            border-left: 1px solid rgba(255, 255, 255, 0.4);
+        }
+        .mesh-gradient-dark {
+            background: radial-gradient(at 0% 0%, #0b1326 0%, transparent 50%),
+                        radial-gradient(at 100% 0%, #5b4fe822 0%, transparent 50%),
+                        radial-gradient(at 100% 100%, #8b5cf622 0%, transparent 50%),
+                        radial-gradient(at 0% 100%, #0b1326 0%, transparent 50%);
+            background-color: #0b1326;
+        }
+        .mesh-gradient-light {
+            background: radial-gradient(at 0% 0%, #e8e4ff 0%, transparent 50%),
+                        radial-gradient(at 100% 0%, #ffffff 0%, transparent 50%),
+                        radial-gradient(at 100% 100%, #d0bcff44 0%, transparent 50%),
+                        radial-gradient(at 0% 100%, #ffffff 0%, transparent 50%);
+            background-color: #f8f9ff;
+        }
+    </style>
+<style>
+    body {
+      min-height: max(884px, 100dvh);
+    }
+  </style>
+  </head>
+<body class="bg-surface text-on-surface font-body overflow-x-hidden">
+<div class="flex flex-col md:flex-row items-center justify-center gap-12 p-8 min-h-screen">
+<!-- LEFT SCREEN: DARK MODE -->
+<div class="relative w-[390px] h-[844px] rounded-[3rem] overflow-hidden shadow-2xl border-[8px] border-slate-900 mesh-gradient-dark">
+<!-- TopAppBar -->
+<header class="h-14 fixed top-0 w-[374px] z-50 flex justify-between items-center px-6 bg-slate-950/70 backdrop-blur-3xl border-b border-white/20">
+<div class="flex items-center gap-2">
+<div class="w-8 h-8 rounded-lg bg-gradient-to-br from-indigo-500 to-purple-600 flex items-center justify-center font-bold text-white shadow-lg">F</div>
+<span class="font-manrope font-bold text-slate-100">Formatica</span>
+</div>
+<div class="flex items-center gap-4">
+<span class="material-symbols-outlined text-slate-400 hover:bg-white/10 transition-colors p-1 rounded-full scale-95 active:scale-90 transition-transform">history</span>
+<span class="material-symbols-outlined text-indigo-500 hover:bg-white/10 transition-colors p-1 rounded-full scale-95 active:scale-90 transition-transform">dark_mode</span>
+</div>
+</header>
+<main class="pt-20 px-6 pb-32 space-y-8 h-full overflow-y-auto scrollbar-hide">
+<!-- Status Chip -->
+<div class="flex justify-center">
+<div class="glass-card px-4 py-1.5 rounded-full flex items-center gap-2 text-[11px] font-bold tracking-[1px] uppercase text-indigo-400">
+<span class="w-2 h-2 rounded-full bg-amber-500 shadow-[0_0_8px_rgba(245,158,11,0.6)]"></span>
+                        On-device mode
+                    </div>
+</div>
+<!-- Search Bar -->
+<div class="relative">
+<div class="absolute inset-y-0 left-4 flex items-center pointer-events-none">
+<span class="material-symbols-outlined text-slate-400 text-xl">search</span>
+</div>
+<input class="w-full h-12 bg-black/20 border-none rounded-2xl pl-12 text-sm text-on-surface placeholder:text-slate-500 focus:ring-1 focus:ring-indigo-500/50 backdrop-blur-md" placeholder="Search tools..." type="text"/>
+</div>
+<!-- Document Tools -->
+<section class="space-y-4">
+<div class="flex justify-between items-end">
+<h2 class="font-manrope font-bold text-[11px] tracking-[1.4px] uppercase text-slate-400">DOCUMENT TOOLS</h2>
+<span class="px-2 py-0.5 rounded-md bg-white/5 text-[10px] font-bold text-indigo-400 border border-white/10">6 TOOLS</span>
+</div>
+<div class="grid grid-cols-2 gap-4">
+<div class="glass-card aspect-square rounded-2xl p-4 flex flex-col justify-between hover:bg-white/5 transition-all group cursor-pointer active:scale-95">
+<span class="material-symbols-outlined text-indigo-500 text-3xl">picture_as_pdf</span>
+<span class="text-xs font-semibold text-slate-200">Convert Document</span>
+</div>
+<div class="glass-card aspect-square rounded-2xl p-4 flex flex-col justify-between hover:bg-white/5 transition-all group cursor-pointer active:scale-95">
+<span class="material-symbols-outlined text-teal-400 text-3xl">image</span>
+<span class="text-xs font-semibold text-slate-200">Images to PDF</span>
+</div>
+<div class="glass-card aspect-square rounded-2xl p-4 flex flex-col justify-between hover:bg-white/5 transition-all group cursor-pointer active:scale-95">
+<span class="material-symbols-outlined text-teal-400 text-3xl">merge</span>
+<span class="text-xs font-semibold text-slate-200">Merge PDF</span>
+</div>
+<div class="glass-card aspect-square rounded-2xl p-4 flex flex-col justify-between hover:bg-white/5 transition-all group cursor-pointer active:scale-95">
+<span class="material-symbols-outlined text-amber-400 text-3xl">call_split</span>
+<span class="text-xs font-semibold text-slate-200">Split PDF</span>
+</div>
+</div>
+</section>
+<!-- Media Tools -->
+<section class="space-y-4">
+<div class="flex justify-between items-end">
+<h2 class="font-manrope font-bold text-[11px] tracking-[1.4px] uppercase text-slate-400">MEDIA TOOLS</h2>
+<span class="px-2 py-0.5 rounded-md bg-white/5 text-[10px] font-bold text-rose-400 border border-white/10">4 TOOLS</span>
+</div>
+<div class="grid grid-cols-2 gap-4">
+<div class="glass-card aspect-square rounded-2xl p-4 flex flex-col justify-between hover:bg-white/5 transition-all group cursor-pointer active:scale-95">
+<span class="material-symbols-outlined text-[#E8507C] text-3xl">audio_file</span>
+<span class="text-xs font-semibold text-slate-200">Extract Audio</span>
+</div>
+<div class="glass-card aspect-square rounded-2xl p-4 flex flex-col justify-between hover:bg-white/5 transition-all group cursor-pointer active:scale-95">
+<span class="material-symbols-outlined text-[#F97316] text-3xl">compress</span>
+<span class="text-xs font-semibold text-slate-200">Compress Video</span>
+</div>
+</div>
+</section>
+<!-- Recent Activity -->
+<section class="space-y-3">
+<h2 class="font-manrope font-bold text-[11px] tracking-[1.4px] uppercase text-slate-400">RECENT ACTIVITY</h2>
+<div class="glass-card rounded-2xl p-3 flex items-center justify-between gap-3">
+<div class="flex items-center gap-3">
+<div class="w-8 h-8 rounded-full bg-indigo-500/20 flex items-center justify-center text-indigo-400">
+<span class="material-symbols-outlined text-lg">check_circle</span>
+</div>
+<div class="flex flex-col">
+<span class="text-xs font-bold text-slate-200">report_q4_final.pdf</span>
+<span class="text-[10px] text-slate-500">Converted • 2m ago</span>
+</div>
+</div>
+<span class="material-symbols-outlined text-slate-500 text-sm">more_vert</span>
+</div>
+</section>
+</main>
+<!-- BottomNavBar -->
+<nav class="fixed bottom-8 left-[195px] -translate-x-1/2 z-50 flex justify-around items-center w-[280px] h-[68px] rounded-[34px] border border-white/20 bg-white/10 backdrop-blur-[28px] shadow-[0_32px_64px_rgba(91,79,232,0.06)]">
+<div class="flex items-center justify-center bg-indigo-500/20 text-indigo-400 rounded-full w-12 h-12 shadow-[0_0_12px_rgba(91,79,232,0.3)] hover:text-indigo-300 transition-all spring-duration-300 transform-gpu active:scale-90">
+<span class="material-symbols-outlined">home</span>
+</div>
+<div class="flex items-center justify-center text-slate-400 w-12 h-12 hover:text-indigo-300 transition-all spring-duration-300 transform-gpu active:scale-90">
+<span class="material-symbols-outlined">history</span>
+</div>
+<div class="flex items-center justify-center text-slate-400 w-12 h-12 hover:text-indigo-300 transition-all spring-duration-300 transform-gpu active:scale-90">
+<span class="material-symbols-outlined">settings</span>
+</div>
+</nav>
+</div>
+<!-- RIGHT SCREEN: LIGHT MODE -->
+<div class="relative w-[390px] h-[844px] rounded-[3rem] overflow-hidden shadow-2xl border-[8px] border-slate-200 mesh-gradient-light light">
+<!-- TopAppBar -->
+<header class="h-14 fixed top-0 w-[374px] z-50 flex justify-between items-center px-6 bg-white/40 backdrop-blur-3xl border-b border-indigo-100">
+<div class="flex items-center gap-2">
+<div class="w-8 h-8 rounded-lg bg-gradient-to-br from-indigo-400 to-purple-500 flex items-center justify-center font-bold text-white shadow-lg">F</div>
+<span class="font-manrope font-bold text-indigo-900">Formatica</span>
+</div>
+<div class="flex items-center gap-4">
+<span class="material-symbols-outlined text-indigo-300 hover:bg-black/5 transition-colors p-1 rounded-full scale-95 active:scale-90 transition-transform">history</span>
+<span class="material-symbols-outlined text-indigo-600 hover:bg-black/5 transition-colors p-1 rounded-full scale-95 active:scale-90 transition-transform">light_mode</span>
+</div>
+</header>
+<main class="pt-20 px-6 pb-32 space-y-8 h-full overflow-y-auto scrollbar-hide">
+<!-- Status Chip -->
+<div class="flex justify-center">
+<div class="glass-card px-4 py-1.5 rounded-full flex items-center gap-2 text-[11px] font-bold tracking-[1px] uppercase text-indigo-600">
+<span class="w-2 h-2 rounded-full bg-amber-500 shadow-[0_0_8px_rgba(245,158,11,0.3)]"></span>
+                        On-device mode
+                    </div>
+</div>
+<!-- Search Bar -->
+<div class="relative">
+<div class="absolute inset-y-0 left-4 flex items-center pointer-events-none">
+<span class="material-symbols-outlined text-indigo-300 text-xl">search</span>
+</div>
+<input class="w-full h-12 bg-white/50 border-none rounded-2xl pl-12 text-sm text-indigo-900 placeholder:text-indigo-300 focus:ring-1 focus:ring-indigo-200 backdrop-blur-md" placeholder="Search tools..." type="text"/>
+</div>
+<!-- Document Tools -->
+<section class="space-y-4">
+<div class="flex justify-between items-end">
+<h2 class="font-manrope font-bold text-[11px] tracking-[1.4px] uppercase text-indigo-400">DOCUMENT TOOLS</h2>
+<span class="px-2 py-0.5 rounded-md bg-indigo-50 text-[10px] font-bold text-indigo-600 border border-indigo-100">6 TOOLS</span>
+</div>
+<div class="grid grid-cols-2 gap-4">
+<div class="glass-card aspect-square rounded-2xl p-4 flex flex-col justify-between hover:bg-white/50 transition-all group cursor-pointer active:scale-95 shadow-sm">
+<span class="material-symbols-outlined text-indigo-500 text-3xl">picture_as_pdf</span>
+<span class="text-xs font-semibold text-indigo-900">Convert Document</span>
+</div>
+<div class="glass-card aspect-square rounded-2xl p-4 flex flex-col justify-between hover:bg-white/50 transition-all group cursor-pointer active:scale-95 shadow-sm">
+<span class="material-symbols-outlined text-teal-600 text-3xl">image</span>
+<span class="text-xs font-semibold text-indigo-900">Images to PDF</span>
+</div>
+<div class="glass-card aspect-square rounded-2xl p-4 flex flex-col justify-between hover:bg-white/50 transition-all group cursor-pointer active:scale-95 shadow-sm">
+<span class="material-symbols-outlined text-teal-600 text-3xl">merge</span>
+<span class="text-xs font-semibold text-indigo-900">Merge PDF</span>
+</div>
+<div class="glass-card aspect-square rounded-2xl p-4 flex flex-col justify-between hover:bg-white/50 transition-all group cursor-pointer active:scale-95 shadow-sm">
+<span class="material-symbols-outlined text-amber-600 text-3xl">call_split</span>
+<span class="text-xs font-semibold text-indigo-900">Split PDF</span>
+</div>
+</div>
+</section>
+<!-- Media Tools -->
+<section class="space-y-4">
+<div class="flex justify-between items-end">
+<h2 class="font-manrope font-bold text-[11px] tracking-[1.4px] uppercase text-indigo-400">MEDIA TOOLS</h2>
+<span class="px-2 py-0.5 rounded-md bg-rose-50 text-[10px] font-bold text-rose-600 border border-rose-100">4 TOOLS</span>
+</div>
+<div class="grid grid-cols-2 gap-4">
+<div class="glass-card aspect-square rounded-2xl p-4 flex flex-col justify-between hover:bg-white/50 transition-all group cursor-pointer active:scale-95 shadow-sm">
+<span class="material-symbols-outlined text-[#E8507C] text-3xl">audio_file</span>
+<span class="text-xs font-semibold text-indigo-900">Extract Audio</span>
+</div>
+<div class="glass-card aspect-square rounded-2xl p-4 flex flex-col justify-between hover:bg-white/50 transition-all group cursor-pointer active:scale-95 shadow-sm">
+<span class="material-symbols-outlined text-[#F97316] text-3xl">compress</span>
+<span class="text-xs font-semibold text-indigo-900">Compress Video</span>
+</div>
+</div>
+</section>
+<!-- Recent Activity -->
+<section class="space-y-3">
+<h2 class="font-manrope font-bold text-[11px] tracking-[1.4px] uppercase text-indigo-400">RECENT ACTIVITY</h2>
+<div class="glass-card rounded-2xl p-3 flex items-center justify-between gap-3 shadow-sm">
+<div class="flex items-center gap-3">
+<div class="w-8 h-8 rounded-full bg-indigo-50 flex items-center justify-center text-indigo-600">
+<span class="material-symbols-outlined text-lg">check_circle</span>
+</div>
+<div class="flex flex-col">
+<span class="text-xs font-bold text-indigo-900">report_q4_final.pdf</span>
+<span class="text-[10px] text-indigo-400">Converted • 2m ago</span>
+</div>
+</div>
+<span class="material-symbols-outlined text-indigo-200 text-sm">more_vert</span>
+</div>
+</section>
+</main>
+<!-- BottomNavBar -->
+<nav class="fixed bottom-8 left-[195px] -translate-x-1/2 z-50 flex justify-around items-center w-[280px] h-[68px] rounded-[34px] border border-indigo-100 bg-white/60 backdrop-blur-[28px] shadow-[0_32px_64px_rgba(91,79,232,0.1)]">
+<div class="flex items-center justify-center bg-indigo-500 text-white rounded-full w-12 h-12 shadow-[0_0_12px_rgba(91,79,232,0.4)] hover:opacity-90 transition-all spring-duration-300 transform-gpu active:scale-90">
+<span class="material-symbols-outlined">home</span>
+</div>
+<div class="flex items-center justify-center text-indigo-300 w-12 h-12 hover:text-indigo-600 transition-all spring-duration-300 transform-gpu active:scale-90">
+<span class="material-symbols-outlined">history</span>
+</div>
+<div class="flex items-center justify-center text-indigo-300 w-12 h-12 hover:text-indigo-600 transition-all spring-duration-300 transform-gpu active:scale-90">
+<span class="material-symbols-outlined">settings</span>
+</div>
+</nav>
+</div>
+</div>
+</body></html>

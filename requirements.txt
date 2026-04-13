@@ -1,0 +1,5 @@
+click
+rich
+Pillow
+pytest
+pytest-cov

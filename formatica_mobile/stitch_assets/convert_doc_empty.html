@@ -1,0 +1,217 @@
+<!DOCTYPE html>
+
+<html class="dark" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;700;800&amp;family=Inter:wght@400;500;600&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<script id="tailwind-config">
+        tailwind.config = {
+          darkMode: "class",
+          theme: {
+            extend: {
+              "colors": {
+                      "primary-dim": "#695ef6",
+                      "inverse-on-surface": "#55545b",
+                      "on-background": "#f9f5fd",
+                      "tertiary-fixed": "#c39fff",
+                      "primary-fixed-dim": "#8b84ff",
+                      "error-container": "#a70138",
+                      "background": "#0e0e13",
+                      "surface-container-high": "#1f1f26",
+                      "on-primary-fixed": "#000000",
+                      "tertiary-dim": "#8d51ea",
+                      "surface-container-lowest": "#000000",
+                      "on-error": "#490013",
+                      "surface-variant": "#25252d",
+                      "inverse-surface": "#fcf8ff",
+                      "secondary-fixed-dim": "#5debc4",
+                      "error-dim": "#d73357",
+                      "inverse-primary": "#5245df",
+                      "surface": "#0e0e13",
+                      "on-secondary-container": "#defff1",
+                      "on-surface": "#f9f5fd",
+                      "on-secondary": "#005d4a",
+                      "secondary-container": "#006b55",
+                      "primary": "#a9a4ff",
+                      "tertiary-container": "#9d62fb",
+                      "surface-container-low": "#131319",
+                      "on-secondary-fixed": "#004939",
+                      "surface-tint": "#a9a4ff",
+                      "secondary-dim": "#5debc4",
+                      "surface-bright": "#2c2b33",
+                      "on-surface-variant": "#acaab1",
+                      "on-primary-fixed-variant": "#1f0097",
+                      "on-primary": "#20009e",
+                      "error": "#ff6e84",
+                      "primary-fixed": "#9a94ff",
+                      "on-tertiary-container": "#000000",
+                      "tertiary": "#b486ff",
+                      "on-primary-container": "#17007c",
+                      "surface-container": "#19191f",
+                      "secondary-fixed": "#6dfad2",
+                      "outline": "#76747b",
+                      "on-tertiary": "#2d0062",
+                      "secondary": "#6dfad2",
+                      "surface-container-highest": "#25252d",
+                      "on-tertiary-fixed-variant": "#4d00a0",
+                      "on-secondary-fixed-variant": "#006853",
+                      "on-tertiary-fixed": "#22004e",
+                      "on-error-container": "#ffb2b9",
+                      "surface-dim": "#0e0e13",
+                      "primary-container": "#9a94ff",
+                      "tertiary-fixed-dim": "#b88dff",
+                      "outline-variant": "#48474d"
+              },
+              "borderRadius": {
+                      "DEFAULT": "0.25rem",
+                      "lg": "1.0rem",
+                      "xl": "1.25rem",
+                      "full": "9999px"
+              },
+              "fontFamily": {
+                      "headline": ["Manrope"],
+                      "body": ["Inter"],
+                      "label": ["Inter"]
+              }
+            },
+          },
+        }
+      </script>
+<style>
+    body {
+      min-height: max(884px, 100dvh);
+    }
+  </style>
+  </head>
+<body class="bg-background text-on-surface font-body selection:bg-primary/30 min-h-screen">
+<!-- TopAppBar -->
+<header class="fixed top-0 left-0 right-0 z-[60] bg-[#0e0e13]/80 backdrop-blur-xl flex justify-between items-center px-6 h-16 w-full">
+<div class="flex items-center gap-4">
+<button class="text-[#a9a4ff] hover:bg-[#1f1f26] transition-colors p-2 rounded-full scale-95 active:duration-100">
+<span class="material-symbols-outlined">arrow_back</span>
+</button>
+<h1 class="font-headline font-bold tracking-tight text-xl text-[#a9a4ff]">Convert Document</h1>
+</div>
+<div class="text-[#a9a4ff] p-2">
+<span class="material-symbols-outlined">lock</span>
+</div>
+</header>
+<main class="pt-24 pb-32 px-6 max-w-2xl mx-auto">
+<!-- Privacy Banner -->
+<section class="mb-8 relative overflow-hidden bg-[#25252d]/40 backdrop-blur-[24px] border-l-4 border-secondary-fixed p-5 rounded-r-xl outline-variant/15 outline outline-1">
+<div class="flex items-start gap-4">
+<span class="material-symbols-outlined text-secondary-fixed mt-0.5" style="font-variation-settings: 'FILL' 1;">verified_user</span>
+<div>
+<p class="text-on-surface font-medium mb-1">Privacy Guarantee</p>
+<p class="text-on-surface-variant text-sm leading-relaxed">Converted via secure server. Deleted in 30 seconds.</p>
+</div>
+</div>
+</section>
+<!-- Tool Context / Editorial Header -->
+<div class="mb-10">
+<h2 class="font-headline text-3xl font-extrabold tracking-tight mb-2">High-Precision <span class="text-primary">Conversion</span></h2>
+<p class="text-on-surface-variant max-w-sm">Professional grade document processing with local encryption.</p>
+</div>
+<!-- File Picker Zone -->
+<section class="mb-10">
+<div class="h-[110px] w-full border-[1.5px] border-dashed border-outline-variant/50 rounded-xl bg-surface-container-low flex flex-col items-center justify-center hover:bg-surface-container-high transition-all cursor-pointer group">
+<div class="flex items-center gap-3">
+<span class="material-symbols-outlined text-primary group-hover:scale-110 transition-transform">upload_file</span>
+<span class="font-headline font-bold text-on-surface">Tap to select document</span>
+</div>
+<p class="text-on-surface-variant text-xs mt-2 uppercase tracking-widest font-semibold">PDF â¢ DOCX â¢ JPG â¢ PNG</p>
+</div>
+</section>
+<!-- Output Format Selection -->
+<section class="mb-12">
+<h3 class="label-sm text-on-surface-variant uppercase tracking-widest mb-4 ml-1">Output Format</h3>
+<div class="flex overflow-x-auto pb-4 gap-3 no-scrollbar">
+<!-- DOCX Chip -->
+<div class="flex-shrink-0 px-6 py-2.5 rounded-xl bg-secondary-fixed text-on-secondary font-bold text-sm tracking-wide shadow-lg shadow-secondary/10">
+                    DOCX
+                </div>
+<!-- PDF Chip -->
+<div class="flex-shrink-0 px-6 py-2.5 rounded-xl bg-surface-container-high border border-outline-variant/30 text-on-surface-variant font-bold text-sm tracking-wide hover:bg-surface-container-highest transition-colors">
+                    PDF
+                </div>
+<!-- TXT Chip -->
+<div class="flex-shrink-0 px-6 py-2.5 rounded-xl bg-surface-container-high border border-outline-variant/30 text-on-surface-variant font-bold text-sm tracking-wide hover:bg-surface-container-highest transition-colors">
+                    TXT
+                </div>
+<!-- HTML Chip -->
+<div class="flex-shrink-0 px-6 py-2.5 rounded-xl bg-surface-container-high border border-outline-variant/30 text-on-surface-variant font-bold text-sm tracking-wide hover:bg-surface-container-highest transition-colors">
+                    HTML
+                </div>
+<!-- RTF Chip -->
+<div class="flex-shrink-0 px-6 py-2.5 rounded-xl bg-surface-container-high border border-outline-variant/30 text-on-surface-variant font-bold text-sm tracking-wide hover:bg-surface-container-highest transition-colors">
+                    RTF
+                </div>
+</div>
+</section>
+<!-- Featured Action -->
+<section class="mb-12">
+<button class="w-full h-14 rounded-lg bg-gradient-to-br from-[#a9a4ff] to-[#695ef6] text-[#0e0e13] font-headline font-bold text-lg shadow-2xl shadow-primary-dim/20 hover:scale-[1.02] active:scale-95 transition-all">
+                Convert Document
+            </button>
+</section>
+<!-- Recent Activity Bento -->
+<section>
+<h3 class="label-sm text-on-surface-variant uppercase tracking-widest mb-4 ml-1">Recent Conversions</h3>
+<div class="grid grid-cols-1 gap-3">
+<div class="bg-surface-container-low p-4 rounded-xl flex items-center justify-between border-t border-white/5">
+<div class="flex items-center gap-4">
+<div class="w-10 h-10 rounded-lg bg-surface-container-high flex items-center justify-center">
+<span class="material-symbols-outlined text-primary text-xl">description</span>
+</div>
+<div>
+<p class="font-semibold text-sm">Invoice_March.pdf</p>
+<p class="text-xs text-on-surface-variant">Converted to DOCX â¢ 2m ago</p>
+</div>
+</div>
+<span class="material-symbols-outlined text-on-surface-variant">chevron_right</span>
+</div>
+<div class="bg-surface-container-low p-4 rounded-xl flex items-center justify-between border-t border-white/5">
+<div class="flex items-center gap-4">
+<div class="w-10 h-10 rounded-lg bg-surface-container-high flex items-center justify-center">
+<span class="material-symbols-outlined text-primary text-xl">image</span>
+</div>
+<div>
+<p class="font-semibold text-sm">Design_Specs_v2.png</p>
+<p class="text-xs text-on-surface-variant">Converted to PDF â¢ 1h ago</p>
+</div>
+</div>
+<span class="material-symbols-outlined text-on-surface-variant">chevron_right</span>
+</div>
+</div>
+</section>
+</main>
+<!-- BottomNavBar -->
+<nav class="fixed bottom-4 left-0 right-0 z-50 flex justify-around items-center px-4">
+<div class="bg-[#25252d]/60 backdrop-blur-[24px] w-[calc(100%-32px)] max-w-md h-[72px] rounded-full border border-white/15 shadow-[0_40px_40px_-10px_rgba(0,0,0,0.4)] flex justify-around items-center px-4">
+<!-- Home (Active) -->
+<button class="bg-gradient-to-br from-[#a9a4ff] to-[#695ef6] text-[#0e0e13] rounded-full p-4 scale-110 transition-transform">
+<span class="material-symbols-outlined" style="font-variation-settings: 'FILL' 1;">home</span>
+</button>
+<!-- History -->
+<button class="text-[#acaab1] p-4 hover:text-white transition-all">
+<span class="material-symbols-outlined">history</span>
+</button>
+<!-- Settings -->
+<button class="text-[#acaab1] p-4 hover:text-white transition-all">
+<span class="material-symbols-outlined">settings</span>
+</button>
+</div>
+</nav>
+<style>
+        .no-scrollbar::-webkit-scrollbar {
+            display: none;
+        }
+        .no-scrollbar {
+            -ms-overflow-style: none;
+            scrollbar-width: none;
+        }
+    </style>
+</body></html>

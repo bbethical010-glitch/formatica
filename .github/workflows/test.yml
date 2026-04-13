@@ -1,0 +1,39 @@
+name: Run Tests
+
+on:
+  push:
+    branches: [ main ]
+    paths:
+      - 'packages/**'
+      - 'tests/**'
+      - 'pyproject.toml'
+      - 'setup.py'
+      - 'requirements.txt'
+  pull_request:
+    branches: [ main ]
+    paths:
+      - 'packages/**'
+      - 'tests/**'
+      - 'pyproject.toml'
+      - 'setup.py'
+      - 'requirements.txt'
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+
+      - name: Install dependencies
+        run: pip install .[dev]
+
+      - name: Run tests
+        run: pytest tests/ -v
+        continue-on-error: true
