@@ -49,18 +49,18 @@ class _MainShellState extends State<MainShell> {
           onTap: (index) => setState(() => _currentIndex = index),
           items: const [
             DockItem(
-              icon: Icons.grid_view_outlined,
-              activeIcon: Icons.grid_view_rounded,
+              icon: Icons.home_outlined,
+              activeIcon: Icons.home_rounded,
               label: 'Studio',
             ),
             DockItem(
-              icon: Icons.auto_awesome_motion_outlined,
-              activeIcon: Icons.auto_awesome_motion_rounded,
+              icon: Icons.history_rounded,
+              activeIcon: Icons.history_rounded,
               label: 'History',
             ),
             DockItem(
-              icon: Icons.tune_outlined,
-              activeIcon: Icons.tune_rounded,
+              icon: Icons.settings_outlined,
+              activeIcon: Icons.settings_rounded,
               label: 'Settings',
             ),
           ],

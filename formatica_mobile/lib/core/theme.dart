@@ -21,13 +21,17 @@ class AppColors {
   
   // Tool Specific
   static const Color audioRose = Color(0xFFE8507C);
+  static const Color audioViolet = Color(0xFFAA5CF6);
   static const Color videoPurple = Color(0xFF8B5CF6);
   static const Color compressOrange = Color(0xFFF97316);
   static const Color mergeTeal = Color(0xFF10B981);
   static const Color splitAmber = Color(0xFFF59E0B);
   static const Color docIndigo = Color(0xFF6366F1);
+  static const Color imageCyan = Color(0xFF22D3EE);
   static const Color greySlate = Color(0xFF64748B);
   static const Color error = Color(0xFFFFB4AB);
+  static const Color darkTextPrimary = Color(0xFFDAE2FD);
+  static const Color darkTextSecondary = Color(0xFFC8C4D8);
 
   // Light Mode Equivalents
   static const Color lightBg = Color(0xFFF8F9FF);

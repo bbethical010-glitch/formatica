@@ -141,7 +141,7 @@ class VideoService {
 
     final base = p.basenameWithoutExtension(inputFilePath);
     final outDir =
-        await FileService.getOutputDirectoryForCategory(OutputCategory.videos);
+        await FileService.getOutputDirectoryForCategory(OutputCategory.video);
     final ts = DateTime.now().millisecondsSinceEpoch;
     final outPath = '$outDir/${base}_converted_$ts.$outputFormat';
 
@@ -217,7 +217,7 @@ class VideoService {
 
     final base = p.basenameWithoutExtension(inputFilePath);
     final outDir =
-        await FileService.getOutputDirectoryForCategory(OutputCategory.videos);
+        await FileService.getOutputDirectoryForCategory(OutputCategory.video);
     final ts = DateTime.now().millisecondsSinceEpoch;
     final outPath = '$outDir/${base}_compressed_$ts.mp4';
 

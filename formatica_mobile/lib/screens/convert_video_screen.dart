@@ -67,7 +67,7 @@ class _ConvertVideoScreenState extends State<ConvertVideoScreen> {
                     'TARGET CONTAINER',
                     style: AppTextStyles.studioLabel.copyWith(
                       fontSize: 10,
-                      color: isDark ? Colors.white30 : Colors.black38,
+                      color: isDark ? Colors.white38 : Colors.black38,
                     ),
                   ),
                   const SizedBox(height: 16),
@@ -150,7 +150,7 @@ class _ConvertVideoScreenState extends State<ConvertVideoScreen> {
                       FileService.formatFileSize(_fileSizeBytes!),
                       style: AppTextStyles.bodyMedium.copyWith(
                         fontSize: 11,
-                        color: isDark ? Colors.white30 : Colors.black38,
+                        color: isDark ? Colors.white38 : Colors.black38,
                       ),
                     ),
                     const SizedBox(height: 16),
@@ -381,8 +381,9 @@ class _ConvertVideoScreenState extends State<ConvertVideoScreen> {
     setState(() { _isConverting = true; _errorMessage = null; });
     final provider = context.read<TaskProvider>();
     final taskId = provider.addTask(
-      '$_fileName → ${_selectedFormat!.toUpperCase()}',
+      _fileName!,
       'convertVideo',
+      subtext: 'Transcoding to ${_selectedFormat!.toUpperCase()}',
     );
     _currentTaskId = taskId;
     
@@ -398,7 +399,7 @@ class _ConvertVideoScreenState extends State<ConvertVideoScreen> {
           }
         },
       );
-      provider.completeTask(taskId, outputPath);
+      await provider.completeTask(taskId, outputPath);
       if (mounted) {
         setState(() { _outputPath = outputPath; _isConverting = false; });
       }
@@ -500,7 +501,7 @@ class _ConvertVideoScreenState extends State<ConvertVideoScreen> {
               onPressed: () => Navigator.pop(ctx),
               child: Text(
                 'RESUME', 
-                style: AppTextStyles.studioLabel.copyWith(color: Colors.white30),
+                style: AppTextStyles.studioLabel.copyWith(color: Colors.white38),
               ),
             ),
             TextButton(

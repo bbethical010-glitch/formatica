@@ -53,12 +53,7 @@ class _HomeScreenState extends State<HomeScreen> with SingleTickerProviderStateM
                       letterSpacing: 4.0,
                     ),
                   ),
-                  ThemeFaceToggle(
-                    isDark: isDark,
-                    onToggle: () {
-                      // Note: Theme toggle logic would ideally be in a Provider
-                    },
-                  ),
+                  const SizedBox.shrink(),
                 ],
               ),
             ),
@@ -170,7 +165,7 @@ class _HomeScreenState extends State<HomeScreen> with SingleTickerProviderStateM
                     child: const Icon(Icons.description_outlined, color: AppColors.primary, size: 28),
                   ),
                   const SizedBox(width: 20),
-                  const Expanded(
+                  Expanded(
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [

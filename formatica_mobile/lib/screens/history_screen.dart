@@ -1,3 +1,4 @@
+import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'dart:ui';
@@ -7,7 +8,6 @@ import '../models/task_status.dart';
 import '../providers/task_provider.dart';
 import '../services/file_service.dart';
 import '../widgets/liquid_glass.dart';
-import '../widgets/top_bar.dart';
 
 class HistoryScreen extends StatelessWidget {
   const HistoryScreen({super.key});
@@ -19,33 +19,8 @@ class HistoryScreen extends StatelessWidget {
     return MeshBackground(
       child: Scaffold(
         backgroundColor: Colors.transparent,
-        appBar: StudioTopBar(
-          title: 'Chronology',
-          trailing: Consumer<TaskProvider>(
-            builder: (context, provider, _) {
-              if (provider.completedTasks.isEmpty) return const SizedBox.shrink();
-              return GestureDetector(
-                onTap: () => _confirmClear(context, provider),
-                child: Container(
-                  padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
-                  decoration: BoxDecoration(
-                    borderRadius: BorderRadius.circular(12),
-                    color: AppColors.audioRose.withOpacity(0.1),
-                  ),
-                  child: Text(
-                    'PURGE',
-                    style: AppTextStyles.studioLabel.copyWith(
-                      fontSize: 9,
-                      fontWeight: FontWeight.bold,
-                      color: AppColors.audioRose,
-                    ),
-                  ),
-                ),
-              );
-            },
-          ),
-        ),
         body: SafeArea(
+          bottom: false,
           child: Consumer<TaskProvider>(
             builder: (ctx, provider, _) {
               final active = provider.activeTasks;
@@ -55,42 +30,35 @@ class HistoryScreen extends StatelessWidget {
                 return _buildEmptyState(context, isDark);
               }
 
-              return CustomScrollView(
-                physics: const BouncingScrollPhysics(),
-                slivers: [
-                  if (active.isNotEmpty) ...[
-                    _buildSectionHeader('SEQUENCES IN FLIGHT', AppColors.docIndigo),
-                    SliverPadding(
-                      padding: const EdgeInsets.symmetric(horizontal: 20),
-                      sliver: SliverList(
-                        delegate: SliverChildBuilderDelegate(
-                          (ctx, i) => Padding(
-                            padding: const EdgeInsets.only(bottom: 12),
-                            child: _ActiveTaskCard(task: active[i]),
+              return Column(
+                children: [
+                  _buildHeader(context, provider, isDark),
+                  Expanded(
+                    child: CustomScrollView(
+                      physics: const BouncingScrollPhysics(),
+                      slivers: [
+                        if (active.isNotEmpty) ...[
+                          _buildSectionHeader('ACTIVE NOW', AppColors.primary),
+                          SliverPadding(
+                            padding: const EdgeInsets.symmetric(horizontal: 20),
+                            sliver: SliverList(
+                              delegate: SliverChildBuilderDelegate(
+                                (ctx, i) => Padding(
+                                  padding: const EdgeInsets.only(bottom: 16),
+                                  child: _ActiveJobCard(task: active[i]),
+                                ),
+                                childCount: active.length,
+                              ),
+                            ),
                           ),
-                          childCount: active.length,
-                        ),
-                      ),
-                    ),
-                  ],
+                        ],
 
-                  if (completed.isNotEmpty) ...[
-                    _buildSectionHeader('ARCHIVED LOGS', isDark ? Colors.white24 : Colors.black26),
-                    SliverPadding(
-                      padding: const EdgeInsets.symmetric(horizontal: 20),
-                      sliver: SliverList(
-                        delegate: SliverChildBuilderDelegate(
-                          (ctx, i) => Padding(
-                            padding: const EdgeInsets.only(bottom: 12),
-                            child: _CompletedTaskCard(task: completed[i]),
-                          ),
-                          childCount: completed.length,
-                        ),
-                      ),
-                    ),
-                  ],
+                        if (completed.isNotEmpty) ..._buildCompletedSections(completed, isDark),
 
-                  const SliverToBoxAdapter(child: SizedBox(height: 120)),
+                        const SliverToBoxAdapter(child: SizedBox(height: 140)),
+                      ],
+                    ),
+                  ),
                 ],
               );
             },
@@ -98,6 +66,106 @@ class HistoryScreen extends StatelessWidget {
         ),
       ),
     );
+  }
+
+  Widget _buildHeader(BuildContext context, TaskProvider provider, bool isDark) {
+    return Padding(
+      padding: const EdgeInsets.fromLTRB(28, 20, 24, 20),
+      child: Row(
+        crossAxisAlignment: CrossAxisAlignment.end,
+        children: [
+          Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(
+                'ACTIVITY LOG',
+                style: AppTextStyles.studioLabel.copyWith(
+                  letterSpacing: 1.5,
+                  fontSize: 10,
+                  color: isDark ? Colors.white38 : Colors.black38,
+                ),
+              ),
+              const SizedBox(height: 4),
+              Text(
+                'History',
+                style: AppTextStyles.displayLarge.copyWith(
+                  fontSize: 32,
+                  color: isDark ? Colors.white : Colors.black,
+                ),
+              ),
+            ],
+          ),
+          const Spacer(),
+          if (provider.completedTasks.isNotEmpty)
+            GestureDetector(
+              onTap: () => _confirmClear(context, provider),
+              child: Container(
+                padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+                decoration: BoxDecoration(
+                  borderRadius: BorderRadius.circular(20),
+                  color: AppColors.error.withOpacity(0.1),
+                  border: Border.all(color: AppColors.error.withOpacity(0.2)),
+                ),
+                child: Text(
+                  'CLEAR ALL',
+                  style: AppTextStyles.studioLabel.copyWith(
+                    color: AppColors.error,
+                    fontSize: 10,
+                    fontWeight: FontWeight.w900,
+                  ),
+                ),
+              ),
+            ),
+        ],
+      ),
+    );
+  }
+
+  List<Widget> _buildCompletedSections(List<Task> tasks, bool isDark) {
+    final grouped = _groupTasksByDate(tasks);
+    final List<Widget> slivers = [];
+
+    grouped.forEach((dateLabel, dateTasks) {
+      slivers.add(_buildSectionHeader(dateLabel, isDark ? Colors.white24 : Colors.black26));
+      slivers.add(
+        SliverPadding(
+          padding: const EdgeInsets.symmetric(horizontal: 20),
+          sliver: SliverList(
+            delegate: SliverChildBuilderDelegate(
+              (ctx, i) => Padding(
+                padding: const EdgeInsets.only(bottom: 12),
+                child: _HistoryItemCard(task: dateTasks[i]),
+              ),
+              childCount: dateTasks.length,
+            ),
+          ),
+        ),
+      );
+    });
+
+    return slivers;
+  }
+
+  Map<String, List<Task>> _groupTasksByDate(List<Task> tasks) {
+    final Map<String, List<Task>> groups = {};
+    final now = DateTime.now();
+    final today = DateTime(now.year, now.month, now.day);
+    final yesterday = today.subtract(const Duration(days: 1));
+
+    for (var task in tasks) {
+      final taskDate = DateTime(task.createdAt.year, task.createdAt.month, task.createdAt.day);
+      String label;
+      if (taskDate == today) {
+        label = 'TODAY';
+      } else if (taskDate == yesterday) {
+        label = 'YESTERDAY';
+      } else {
+        label = 'OLDER';
+      }
+
+      groups.putIfAbsent(label, () => []).add(task);
+    }
+    return groups;
   }
 
   Widget _buildSectionHeader(String title, Color color) {
@@ -109,7 +177,7 @@ class HistoryScreen extends StatelessWidget {
           style: AppTextStyles.studioLabel.copyWith(
             color: color, 
             fontSize: 10,
-            fontWeight: FontWeight.bold,
+            fontWeight: FontWeight.w900,
           ),
         ),
       ),
@@ -123,7 +191,7 @@ class HistoryScreen extends StatelessWidget {
         children: [
           Icon(
             Icons.history_outlined, 
-            size: 64, 
+            size: 80, 
             color: isDark ? Colors.white.withOpacity(0.05) : Colors.black.withOpacity(0.05),
           ),
           const SizedBox(height: 24),
@@ -131,7 +199,7 @@ class HistoryScreen extends StatelessWidget {
             'CHRONOLOGY IS EMPTY',
             style: AppTextStyles.studioLabel.copyWith(
               color: isDark ? Colors.white12 : Colors.black12,
-              letterSpacing: 3,
+              letterSpacing: 4,
             ),
           ),
         ],
@@ -143,27 +211,27 @@ class HistoryScreen extends StatelessWidget {
     showDialog(
       context: context,
       builder: (ctx) => BackdropFilter(
-        filter: ImageFilter.blur(sigmaX: 10, sigmaY: 10),
+        filter: ImageFilter.blur(sigmaX: 12, sigmaY: 12),
         child: AlertDialog(
-          backgroundColor: Colors.black.withOpacity(0.8),
+          backgroundColor: Colors.black.withOpacity(0.85),
           shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(24), 
+            borderRadius: BorderRadius.circular(28), 
             side: BorderSide(color: Colors.white.withOpacity(0.1)),
           ),
           title: Text(
-            'Data Purge', 
+            'Clear History', 
             style: AppTextStyles.headlineSmall.copyWith(color: Colors.white, fontSize: 18),
           ),
           content: Text(
-            'Permanently remove all archived operation logs?', 
+            'This will permanently remove all finished operation logs from this view.', 
             style: AppTextStyles.bodyMedium.copyWith(color: Colors.white70),
           ),
           actions: [
             TextButton(
               onPressed: () => Navigator.pop(ctx),
               child: Text(
-                'RETAIN', 
-                style: AppTextStyles.studioLabel.copyWith(color: Colors.white30),
+                'KEEP', 
+                style: AppTextStyles.studioLabel.copyWith(color: Colors.white38),
               ),
             ),
             TextButton(
@@ -172,8 +240,8 @@ class HistoryScreen extends StatelessWidget {
                 Navigator.pop(ctx); 
               },
               child: Text(
-                'PURGE', 
-                style: AppTextStyles.studioLabel.copyWith(color: AppColors.audioRose),
+                'CLEAR', 
+                style: AppTextStyles.studioLabel.copyWith(color: AppColors.error),
               ),
             ),
           ],
@@ -183,252 +251,299 @@ class HistoryScreen extends StatelessWidget {
   }
 }
 
-class _ActiveTaskCard extends StatelessWidget {
+class _ActiveJobCard extends StatelessWidget {
   final Task task;
-  const _ActiveTaskCard({required this.task});
+  const _ActiveJobCard({required this.task});
+
+  String _calculateETA() {
+    if (task.progress <= 0 || task.startTime == null) return "Estimating...";
+    final elapsed = DateTime.now().difference(task.startTime!).inSeconds;
+    if (elapsed < 1) return "Estimating...";
+    final totalSec = elapsed / task.progress;
+    final remaining = (totalSec - elapsed).toInt();
+    if (remaining <= 0) return "Finishing...";
+    return "~${remaining}s remaining";
+  }
 
   @override
   Widget build(BuildContext context) {
     final isDark = Theme.of(context).brightness == Brightness.dark;
-    final isRunning = task.status == TaskStatus.running;
-    final statusColor = isRunning ? AppColors.docIndigo : AppColors.compressOrange;
-
-    return LiquidGlassContainer(
-      padding: const EdgeInsets.all(20),
-      blur: 24,
-      color: isDark ? Colors.white.withOpacity(0.03) : Colors.black.withOpacity(0.02),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Row(
-            children: [
-              if (isRunning) ...[
-                SizedBox(
-                  width: 14, height: 14,
-                  child: CircularProgressIndicator(
-                    value: task.progress,
-                    strokeWidth: 2,
-                    color: statusColor,
-                    backgroundColor: statusColor.withOpacity(0.1),
-                  ),
+    
+    return Container(
+      decoration: BoxDecoration(
+        borderRadius: BorderRadius.circular(30),
+        boxShadow: [
+          BoxShadow(
+            color: AppColors.primaryContainer.withOpacity(0.12),
+            blurRadius: 40,
+            spreadRadius: -10,
+          )
+        ],
+      ),
+      child: ClipRRect(
+        borderRadius: BorderRadius.circular(30),
+        child: BackdropFilter(
+          filter: ImageFilter.blur(sigmaX: 30, sigmaY: 30),
+          child: Container(
+            padding: const EdgeInsets.all(24),
+            decoration: BoxDecoration(
+              color: isDark ? const Color(0xFF1E2435).withOpacity(0.8) : Colors.white.withOpacity(0.8),
+              borderRadius: BorderRadius.circular(30),
+              border: Border.all(color: Colors.white.withOpacity(0.08)),
+            ),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Row(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Expanded(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(
+                            task.label,
+                            style: AppTextStyles.bodyMedium.copyWith(
+                              fontSize: 15,
+                              fontWeight: FontWeight.w900,
+                              color: isDark ? Colors.white : Colors.black,
+                            ),
+                            maxLines: 1,
+                            overflow: TextOverflow.ellipsis,
+                          ),
+                          const SizedBox(height: 4),
+                          Text(
+                            task.subtext ?? "Processing...",
+                            style: AppTextStyles.bodyMedium.copyWith(
+                              fontSize: 12,
+                              color: isDark ? Colors.white38 : Colors.black38,
+                              fontWeight: FontWeight.w600,
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                    Text(
+                      '${(task.progress * 100).toInt()}%',
+                      style: AppTextStyles.displayLarge.copyWith(
+                        fontSize: 24,
+                        color: AppColors.videoPurple,
+                        letterSpacing: -1,
+                      ),
+                    ),
+                  ],
                 ),
-              ] else ...[
-                Icon(Icons.schedule_rounded, size: 14, color: statusColor),
-              ],
-              const SizedBox(width: 14),
-              Expanded(
-                child: Text(
-                  task.label.toUpperCase(),
-                  style: AppTextStyles.bodyMedium.copyWith(
-                    fontSize: 13,
-                    fontWeight: FontWeight.bold,
-                    color: isDark ? Colors.white : Colors.black87,
-                  ),
-                  overflow: TextOverflow.ellipsis,
-                ),
-              ),
-              Text(
-                isRunning ? '${(task.progress * 100).toInt()}%' : 'QUEUED',
-                style: AppTextStyles.studioLabel.copyWith(
-                  color: statusColor,
-                  fontSize: 10,
-                  fontWeight: FontWeight.w900,
-                ),
-              ),
-            ],
-          ),
-          if (isRunning) ...[
-            const SizedBox(height: 16),
-            Container(
-              height: 4,
-              width: double.infinity,
-              decoration: BoxDecoration(
-                color: isDark ? Colors.white.withOpacity(0.05) : Colors.black.withOpacity(0.05),
-                borderRadius: BorderRadius.circular(2),
-              ),
-              child: FractionallySizedBox(
-                alignment: Alignment.centerLeft,
-                widthFactor: task.progress,
-                child: Container(
+                const SizedBox(height: 24),
+                // Custom Large Progress Bar
+                Container(
+                  height: 10,
+                  width: double.infinity,
                   decoration: BoxDecoration(
-                    color: statusColor,
-                    borderRadius: BorderRadius.circular(2),
-                    boxShadow: [
-                      BoxShadow(color: statusColor.withOpacity(0.3), blurRadius: 6),
+                    color: isDark ? Colors.white.withOpacity(0.05) : Colors.black.withOpacity(0.05),
+                    borderRadius: BorderRadius.circular(5),
+                  ),
+                  child: Stack(
+                    children: [
+                      FractionallySizedBox(
+                        alignment: Alignment.centerLeft,
+                        widthFactor: task.progress.clamp(0.01, 1.0),
+                        child: Container(
+                          decoration: BoxDecoration(
+                            borderRadius: BorderRadius.circular(5),
+                            gradient: const LinearGradient(
+                              colors: [AppColors.audioViolet, AppColors.videoPurple],
+                            ),
+                          ),
+                        ),
+                      ),
                     ],
                   ),
                 ),
-              ),
-            ),
-          ],
-          const SizedBox(height: 16),
-          Align(
-            alignment: Alignment.centerRight,
-            child: GestureDetector(
-              onTap: () => _confirmCancel(context, task.id),
-              child: Container(
-                padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
-                decoration: BoxDecoration(
-                  borderRadius: BorderRadius.circular(8),
-                  color: AppColors.audioRose.withOpacity(0.1),
-                ),
-                child: Row(
-                  mainAxisSize: MainAxisSize.min,
+                const SizedBox(height: 20),
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
-                    const Icon(Icons.stop_rounded, size: 12, color: AppColors.audioRose),
-                    const SizedBox(width: 4),
                     Text(
-                      'TERMINATE',
+                      _calculateETA(),
                       style: AppTextStyles.studioLabel.copyWith(
-                        fontSize: 9,
-                        fontWeight: FontWeight.bold,
-                        color: AppColors.audioRose,
+                        fontSize: 10,
+                        color: isDark ? Colors.white38 : Colors.black38,
+                      ),
+                    ),
+                    GestureDetector(
+                      onTap: () => context.read<TaskProvider>().cancelTask(task.id),
+                      child: Text(
+                        'CANCEL',
+                        style: AppTextStyles.studioLabel.copyWith(
+                          fontSize: 10,
+                          fontWeight: FontWeight.w900,
+                          color: AppColors.error,
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+              ],
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+class _HistoryItemCard extends StatelessWidget {
+  final Task task;
+  const _HistoryItemCard({required this.task});
+
+  String _getTimeAgo() {
+    final diff = DateTime.now().difference(task.createdAt);
+    if (diff.inDays > 0) return "${diff.inDays}d ago";
+    if (diff.inHours > 0) return "${diff.inHours}h ago";
+    if (diff.inMinutes > 0) return "${diff.inMinutes}m ago";
+    return "just now";
+  }
+
+  String _getFileSizeDisplay() {
+    if (task.fileSize == null) return "";
+    final bytes = task.fileSize!.toInt();
+    if (bytes < 1024) return "${bytes}B";
+    if (bytes < 1024 * 1024) return "${(bytes / 1024).toStringAsFixed(1)}KB";
+    return "${(bytes / 1024 / 1024).toStringAsFixed(1)}MB";
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    final isSuccess = task.status == TaskStatus.success;
+    
+    Color iconColor;
+    IconData iconData;
+    
+    switch (task.featureType) {
+      case 'extractAudio':
+        iconColor = const Color(0xFF10B981); // Green
+        iconData = Icons.music_note_rounded;
+        break;
+      case 'imagesToPdf':
+      case 'mergePdf':
+      case 'splitPdf':
+      case 'greyscalePdf':
+        iconColor = AppColors.docIndigo;
+        iconData = Icons.description_rounded;
+        break;
+      case 'convertVideo':
+      case 'compressVideo':
+        iconColor = AppColors.videoPurple;
+        iconData = Icons.movie_rounded;
+        break;
+      case 'convertImage':
+        iconColor = AppColors.imageCyan;
+        iconData = Icons.image_rounded;
+        break;
+      default:
+        iconColor = AppColors.greySlate;
+        iconData = Icons.insert_drive_file_rounded;
+    }
+
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
+      decoration: BoxDecoration(
+        color: isDark ? Colors.white.withOpacity(0.04) : Colors.black.withOpacity(0.03),
+        borderRadius: BorderRadius.circular(24),
+        border: Border.all(
+          color: task.status == TaskStatus.failed 
+              ? AppColors.error.withOpacity(0.1) 
+              : Colors.white.withOpacity(0.02)
+        ),
+      ),
+      child: Column(
+        children: [
+          Row(
+            children: [
+              // Circular Icon
+              Container(
+                width: 44,
+                height: 44,
+                decoration: BoxDecoration(
+                  color: iconColor.withOpacity(0.12),
+                  shape: BoxShape.circle,
+                ),
+                child: Center(
+                  child: Icon(iconData, color: iconColor, size: 20),
+                ),
+              ),
+              const SizedBox(width: 16),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      task.label,
+                      style: AppTextStyles.bodyMedium.copyWith(
+                        fontWeight: FontWeight.w800,
+                        fontSize: 14,
+                        color: isDark ? Colors.white.withOpacity(0.9) : Colors.black87,
+                      ),
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                    ),
+                    const SizedBox(height: 4),
+                    Text(
+                      "${_getTimeAgo()} • ${_getFileSizeDisplay()}",
+                      style: AppTextStyles.bodyMedium.copyWith(
+                        fontSize: 11,
+                        color: isDark ? Colors.white24 : Colors.black38,
+                        fontWeight: FontWeight.w600,
                       ),
                     ),
                   ],
                 ),
               ),
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-
-  void _confirmCancel(BuildContext context, String taskId) {
-    showDialog(
-      context: context,
-      builder: (ctx) => BackdropFilter(
-        filter: ImageFilter.blur(sigmaX: 10, sigmaY: 10),
-        child: AlertDialog(
-          backgroundColor: Colors.black.withOpacity(0.8),
-          shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(24), 
-            side: BorderSide(color: Colors.white.withOpacity(0.1)),
-          ),
-          title: Text(
-            'Sequence Break', 
-            style: AppTextStyles.headlineSmall.copyWith(color: Colors.white, fontSize: 18),
-          ),
-          content: Text(
-            'Abort this active processing sequence?', 
-            style: AppTextStyles.bodyMedium.copyWith(color: Colors.white70),
-          ),
-          actions: [
-            TextButton(
-              onPressed: () => Navigator.pop(ctx),
-              child: Text(
-                'REMAIN', 
-                style: AppTextStyles.studioLabel.copyWith(color: Colors.white30),
-              ),
-            ),
-            TextButton(
-              onPressed: () {
-                context.read<TaskProvider>().cancelTask(taskId);
-                Navigator.pop(ctx);
-              },
-              child: Text(
-                'ABORT', 
-                style: AppTextStyles.studioLabel.copyWith(color: AppColors.audioRose),
-              ),
-            ),
-          ],
-        ),
-      ),
-    );
-  }
-}
-
-class _CompletedTaskCard extends StatelessWidget {
-  final Task task;
-  const _CompletedTaskCard({required this.task});
-
-  @override
-  Widget build(BuildContext context) {
-    final isDark = Theme.of(context).brightness == Brightness.dark;
-    Color statusColor;
-    IconData statusIcon;
-    String statusLabel;
-
-    switch (task.status) {
-      case TaskStatus.success:
-        statusColor = AppColors.imageCyan;
-        statusIcon = Icons.check_circle_rounded;
-        statusLabel = 'RESOLVED';
-        break;
-      case TaskStatus.failed:
-        statusColor = AppColors.audioRose;
-        statusIcon = Icons.error_rounded;
-        statusLabel = 'FAILED';
-        break;
-      default:
-        statusColor = isDark ? Colors.white24 : Colors.black26;
-        statusIcon = Icons.cancel_rounded;
-        statusLabel = 'VOID';
-    }
-
-    return LiquidGlassContainer(
-      padding: const EdgeInsets.all(18),
-      blur: 16,
-      color: isDark ? Colors.white.withOpacity(0.01) : Colors.black.withOpacity(0.01),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Row(
-            children: [
-              Icon(statusIcon, size: 14, color: statusColor),
-              const SizedBox(width: 12),
-              Expanded(
-                child: Text(
-                  task.label.toUpperCase(),
-                  style: AppTextStyles.bodyMedium.copyWith(
-                    color: isDark ? Colors.white.withOpacity(0.85) : Colors.black87,
-                    fontSize: 13,
-                    fontWeight: FontWeight.w600,
-                  ),
-                  overflow: TextOverflow.ellipsis,
-                ),
-              ),
-              Text(
-                statusLabel,
-                style: AppTextStyles.studioLabel.copyWith(
-                  color: statusColor,
-                  fontSize: 9,
-                  fontWeight: FontWeight.w900,
-                ),
-              ),
+              if (!isSuccess && task.status != TaskStatus.cancelled)
+                const Icon(Icons.error_outline_rounded, color: AppColors.error, size: 20)
+              else if (isSuccess)
+                Icon(Icons.check_circle_rounded, color: Colors.white.withOpacity(0.05), size: 18),
             ],
           ),
-          if (task.status == TaskStatus.failed && task.errorMessage != null) ...[
-            const SizedBox(height: 12),
-            Text(
-              task.errorMessage!,
-              style: AppTextStyles.bodyMedium.copyWith(
-                color: AppColors.audioRose.withOpacity(0.7), 
-                fontSize: 11,
-              ),
-              maxLines: 2,
-              overflow: TextOverflow.ellipsis,
-            ),
-          ],
-          if (task.status == TaskStatus.success && task.outputPath != null) ...[
+          if (isSuccess && task.outputPath != null) ...[
             const SizedBox(height: 16),
             Row(
               children: [
-                _miniAction(
-                  label: 'OPEN',
-                  icon: Icons.open_in_new_rounded,
-                  color: AppColors.imageCyan,
-                  onTap: () => FileService.openFile(task.outputPath!),
+                Expanded(
+                  child: _actionButton(
+                    label: 'Open',
+                    onTap: () => FileService.openFile(task.outputPath!),
+                    isDark: isDark,
+                  ),
                 ),
-                const SizedBox(width: 10),
-                _miniAction(
-                  label: 'VAULT',
-                  icon: Icons.folder_open_rounded,
-                  color: AppColors.docIndigo,
-                  onTap: () => FileService.showInFolder(task.outputPath!),
+                const SizedBox(width: 12),
+                Expanded(
+                  child: _actionButton(
+                    label: 'Folder',
+                    onTap: () => FileService.showInFolder(task.outputPath!),
+                    isDark: isDark,
+                  ),
                 ),
               ],
+            )
+          ],
+          if (task.status == TaskStatus.failed) ...[
+            const SizedBox(height: 12),
+            Container(
+              width: double.infinity,
+              padding: const EdgeInsets.all(12),
+              decoration: BoxDecoration(
+                color: AppColors.error.withOpacity(0.05),
+                borderRadius: BorderRadius.circular(12),
+              ),
+              child: Text(
+                task.errorMessage ?? "Operation failed unexpectedly.",
+                style: AppTextStyles.bodyMedium.copyWith(
+                  fontSize: 11,
+                  color: AppColors.error.withOpacity(0.7),
+                ),
+              ),
             ),
           ],
         ],
@@ -436,29 +551,25 @@ class _CompletedTaskCard extends StatelessWidget {
     );
   }
 
-  Widget _miniAction({required String label, required IconData icon, required Color color, required VoidCallback onTap}) {
+  Widget _actionButton({required String label, required VoidCallback onTap, required bool isDark}) {
     return GestureDetector(
       onTap: onTap,
       child: Container(
-        padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+        height: 38,
         decoration: BoxDecoration(
-          borderRadius: BorderRadius.circular(8),
-          color: color.withOpacity(0.05),
-          border: Border.all(color: color.withOpacity(0.1)),
+          color: isDark ? Colors.white.withOpacity(0.04) : Colors.black.withOpacity(0.05),
+          borderRadius: BorderRadius.circular(15),
+          border: Border.all(color: Colors.white.withOpacity(0.05)),
         ),
-        child: Row(
-          children: [
-            Icon(icon, size: 11, color: color),
-            const SizedBox(width: 6),
-            Text(
-              label,
-              style: AppTextStyles.studioLabel.copyWith(
-                fontSize: 9,
-                fontWeight: FontWeight.bold,
-                color: color,
-              ),
+        child: Center(
+          child: Text(
+            label,
+            style: AppTextStyles.bodyMedium.copyWith(
+              fontSize: 12,
+              fontWeight: FontWeight.w800,
+              color: isDark ? Colors.white : Colors.black,
             ),
-          ],
+          ),
         ),
       ),
     );

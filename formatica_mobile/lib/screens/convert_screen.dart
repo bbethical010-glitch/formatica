@@ -68,7 +68,7 @@ class _ConvertScreenState extends State<ConvertScreen> {
                     'OUTPUT FORMAT',
                     style: AppTextStyles.studioLabel.copyWith(
                       fontSize: 10,
-                      color: isDark ? Colors.white30 : Colors.black38,
+                      color: isDark ? Colors.white38 : Colors.black38,
                     ),
                   ),
                   const SizedBox(height: 16),
@@ -198,7 +198,7 @@ class _ConvertScreenState extends State<ConvertScreen> {
                             FileService.formatFileSize(_fileSizeBytes!),
                             style: AppTextStyles.bodyMedium.copyWith(
                               fontSize: 11,
-                              color: isDark ? Colors.white30 : Colors.black38,
+                              color: isDark ? Colors.white38 : Colors.black38,
                             ),
                           ),
                         ],
@@ -451,7 +451,7 @@ class _ConvertScreenState extends State<ConvertScreen> {
               onPressed: () => Navigator.pop(ctx),
               child: Text(
                 'RESUME',
-                style: AppTextStyles.studioLabel.copyWith(color: Colors.white30),
+                style: AppTextStyles.studioLabel.copyWith(color: Colors.white38),
               ),
             ),
             const SizedBox(width: 8),
@@ -509,7 +509,10 @@ class _ConvertScreenState extends State<ConvertScreen> {
 
     final provider = context.read<TaskProvider>();
     final taskId = provider.addTask(
-        '$_fileName → ${_selectedFormat!.toUpperCase()}', 'convert');
+      _fileName!,
+      'convert',
+      subtext: 'Re-indexing to ${_selectedFormat!.toUpperCase()}',
+    );
     _currentTaskId = taskId;
 
     try {
@@ -544,7 +547,7 @@ class _ConvertScreenState extends State<ConvertScreen> {
         },
       );
 
-      provider.completeTask(taskId, outputPath);
+      await provider.completeTask(taskId, outputPath);
       if (mounted) {
         setState(() {
           _outputPath = outputPath;

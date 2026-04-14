@@ -70,7 +70,7 @@ class _ConvertImageScreenState extends State<ConvertImageScreen> {
                     'FORMAT ARRAY',
                     style: AppTextStyles.studioLabel.copyWith(
                       fontSize: 10,
-                      color: isDark ? Colors.white30 : Colors.black38,
+                      color: isDark ? Colors.white38 : Colors.black38,
                     ),
                   ),
                   const SizedBox(height: 16),
@@ -83,7 +83,7 @@ class _ConvertImageScreenState extends State<ConvertImageScreen> {
                         'SPECULAR QUALITY',
                         style: AppTextStyles.studioLabel.copyWith(
                           fontSize: 10,
-                          color: isDark ? Colors.white30 : Colors.black38,
+                          color: isDark ? Colors.white38 : Colors.black38,
                         ),
                       ),
                       const SizedBox(height: 16),
@@ -185,7 +185,7 @@ class _ConvertImageScreenState extends State<ConvertImageScreen> {
                             FileService.formatFileSize(_fileSizeBytes!),
                             style: AppTextStyles.bodyMedium.copyWith(
                               fontSize: 11,
-                              color: isDark ? Colors.white30 : Colors.black38,
+                              color: isDark ? Colors.white38 : Colors.black38,
                             ),
                           ),
                         ],
@@ -466,8 +466,9 @@ class _ConvertImageScreenState extends State<ConvertImageScreen> {
     setState(() { _isConverting = true; _errorMessage = null; });
     final provider = context.read<TaskProvider>();
     final taskId = provider.addTask(
-      '$_fileName → ${_selectedFormat!.toUpperCase()}',
+      _fileName!,
       'convertImage',
+      subtext: 'Synthesizing as ${_selectedFormat!.toUpperCase()} (${_quality.toInt()}%)',
     );
     _currentTaskId = taskId;
 
@@ -483,7 +484,7 @@ class _ConvertImageScreenState extends State<ConvertImageScreen> {
           }
         },
       );
-      provider.completeTask(taskId, outputPath);
+      await provider.completeTask(taskId, outputPath);
       if (mounted) {
         setState(() { _outputPath = outputPath; _isConverting = false; });
       }
@@ -587,7 +588,7 @@ class _ConvertImageScreenState extends State<ConvertImageScreen> {
               onPressed: () => Navigator.pop(ctx),
               child: Text(
                 'RESUME',
-                style: AppTextStyles.studioLabel.copyWith(color: Colors.white30),
+                style: AppTextStyles.studioLabel.copyWith(color: Colors.white38),
               ),
             ),
             const SizedBox(width: 8),

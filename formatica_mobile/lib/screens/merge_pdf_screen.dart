@@ -182,7 +182,7 @@ class _MergePdfScreenState extends State<MergePdfScreen> {
                         FileService.formatFileSize(file.size),
                         style: AppTextStyles.bodyMedium.copyWith(
                           fontSize: 11,
-                          color: isDark ? Colors.white30 : Colors.black38,
+                          color: isDark ? Colors.white38 : Colors.black38,
                         ),
                       ),
                     ],
@@ -384,7 +384,11 @@ class _MergePdfScreenState extends State<MergePdfScreen> {
   Future<void> _onConvert() async {
     setState(() { _isConverting = true; _errorMessage = null; });
     final provider = context.read<TaskProvider>();
-    final taskId = provider.addTask('Merge ${_selectedFiles.length} PDFs', 'mergePdf');
+    final taskId = provider.addTask(
+      'Formatica Fusion',
+      'mergePdf',
+      subtext: 'Synthesizing ${_selectedFiles.length} PDF channels',
+    );
     _currentTaskId = taskId;
     
     try {
@@ -399,7 +403,7 @@ class _MergePdfScreenState extends State<MergePdfScreen> {
           }
         },
       );
-      provider.completeTask(taskId, outputPath);
+      await provider.completeTask(taskId, outputPath);
       if (mounted) {
         setState(() { _outputPath = outputPath; _isConverting = false; });
       }
@@ -500,7 +504,7 @@ class _MergePdfScreenState extends State<MergePdfScreen> {
               onPressed: () => Navigator.pop(ctx),
               child: Text(
                 'RESUME',
-                style: AppTextStyles.studioLabel.copyWith(color: Colors.white30),
+                style: AppTextStyles.studioLabel.copyWith(color: Colors.white38),
               ),
             ),
             const SizedBox(width: 8),

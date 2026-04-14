@@ -136,7 +136,7 @@ class _GreyscalePdfScreenState extends State<GreyscalePdfScreen> {
                       FileService.formatFileSize(_fileSizeBytes!),
                       style: AppTextStyles.bodyMedium.copyWith(
                         fontSize: 11,
-                        color: isDark ? Colors.white30 : Colors.black38,
+                        color: isDark ? Colors.white38 : Colors.black38,
                       ),
                     ),
                     const SizedBox(height: 16),
@@ -325,7 +325,11 @@ class _GreyscalePdfScreenState extends State<GreyscalePdfScreen> {
       _errorMessage = null;
     });
     final provider = context.read<TaskProvider>();
-    final taskId = provider.addTask('Greyscale $_fileName', 'convert');
+    final taskId = provider.addTask(
+      _fileName!,
+      'convert',
+      subtext: 'Isolating luma for monochrome output',
+    );
     _currentTaskId = taskId;
     
     try {
@@ -339,7 +343,7 @@ class _GreyscalePdfScreenState extends State<GreyscalePdfScreen> {
           }
         },
       );
-      provider.completeTask(taskId, outputPath);
+      await provider.completeTask(taskId, outputPath);
       if (mounted) {
         setState(() {
           _outputPath = outputPath;

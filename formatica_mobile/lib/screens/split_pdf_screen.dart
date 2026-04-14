@@ -178,7 +178,7 @@ class _SplitPdfScreenState extends State<SplitPdfScreen> {
                       FileService.formatFileSize(_fileSizeBytes!),
                       style: AppTextStyles.bodyMedium.copyWith(
                         fontSize: 11,
-                        color: isDark ? Colors.white30 : Colors.black38,
+                        color: isDark ? Colors.white38 : Colors.black38,
                       ),
                     ),
                     const SizedBox(height: 12),
@@ -213,7 +213,7 @@ class _SplitPdfScreenState extends State<SplitPdfScreen> {
         decoration: InputDecoration(
           labelText: label,
           labelStyle: AppTextStyles.studioLabel.copyWith(
-            color: isDark ? Colors.white30 : Colors.black38,
+            color: isDark ? Colors.white38 : Colors.black38,
             fontSize: 10,
           ),
           border: InputBorder.none,
@@ -398,7 +398,11 @@ class _SplitPdfScreenState extends State<SplitPdfScreen> {
 
     setState(() { _isConverting = true; _errorMessage = null; });
     final provider = context.read<TaskProvider>();
-    final taskId = provider.addTask('Split $_fileName', 'split');
+    final taskId = provider.addTask(
+      _fileName!,
+      'split',
+      subtext: 'Isolating fragments from page $st to ${ed == 0 ? "terminus" : ed}',
+    );
     _currentTaskId = taskId;
     
     try {
@@ -414,7 +418,7 @@ class _SplitPdfScreenState extends State<SplitPdfScreen> {
           }
         },
       );
-      provider.completeTask(taskId, outputPath);
+      await provider.completeTask(taskId, outputPath);
       if (mounted) {
         setState(() { _outputPath = outputPath; _isConverting = false; });
       }

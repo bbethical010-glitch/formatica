@@ -13,7 +13,7 @@ enum OutputCategory {
   documents, // Convert Document
   pdfs,      // Images to PDF, Merge, Split, Greyscale
   audio,     // Extract Audio
-  videos,    // Convert Video, Compress Video
+  video,     // Convert Video, Compress Video
   images,    // Convert Image
 }
 
@@ -324,7 +324,7 @@ class FileService {
       case OutputCategory.documents: return 'Documents';
       case OutputCategory.pdfs:     return 'PDFs';
       case OutputCategory.audio:    return 'Audio';
-      case OutputCategory.videos:   return 'Videos';
+      case OutputCategory.video:    return 'Videos';
       case OutputCategory.images:   return 'Images';
     }
   }
@@ -346,8 +346,8 @@ class FileService {
       case 'convert':      return OutputCategory.documents;
       case 'imagesToPdf':  return OutputCategory.pdfs;
       case 'extractAudio': return OutputCategory.audio;
-      case 'convertVideo': return OutputCategory.videos;
-      case 'compressVideo':return OutputCategory.videos;
+      case 'convertVideo': return OutputCategory.video;
+      case 'compressVideo':return OutputCategory.video;
       case 'convertImage': return OutputCategory.images;
       case 'mergePdf':     return OutputCategory.pdfs;
       case 'splitPdf':     return OutputCategory.pdfs;

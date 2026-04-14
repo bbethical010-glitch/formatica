@@ -24,12 +24,14 @@ class TaskProvider with ChangeNotifier {
       .reversed
       .toList();
 
-  String addTask(String label, String featureType) {
+  String addTask(String label, String featureType, {String? subtext}) {
     final String id = DateTime.now().millisecondsSinceEpoch.toString();
     final task = Task(
       id: id,
       label: label,
       featureType: featureType,
+      createdAt: DateTime.now(),
+      subtext: subtext,
     );
     _tasks.add(task);
     notifyListeners();
@@ -39,29 +41,43 @@ class TaskProvider with ChangeNotifier {
   void updateProgress(String id, double progress) {
     final int index = _tasks.indexWhere((t) => t.id == id);
     if (index != -1) {
-      _tasks[index] = _tasks[index].copyWith(
+      final current = _tasks[index];
+      _tasks[index] = current.copyWith(
         status: TaskStatus.running,
         progress: progress,
+        startTime: current.startTime ?? DateTime.now(),
       );
       notifyListeners();
     }
   }
 
-  void completeTask(String id, String outputPath) {
+  Future<void> completeTask(String id, String outputPath) async {
     _cancelHooks.remove(id);
     final int index = _tasks.indexWhere((t) => t.id == id);
     if (index != -1) {
       if (_tasks[index].status == TaskStatus.cancelled) return;
+      
+      double? size;
+      try {
+        final file = File(outputPath);
+        if (await file.exists()) {
+          size = (await file.length()).toDouble();
+        }
+      } catch (e) {
+        debugPrint('TaskProvider: Error fetching file size: $e');
+      }
+
       _tasks[index] = _tasks[index].copyWith(
         status: TaskStatus.success,
         progress: 1.0,
         outputPath: outputPath,
+        fileSize: size,
       );
       notifyListeners();
     }
   }
 
-  void failTask(String id, String errorMessage) {
+  void failTask(String id, String errorMessage, {String? subtext}) {
     _cancelHooks.remove(id);
     final int index = _tasks.indexWhere((t) => t.id == id);
     if (index != -1) {
@@ -69,6 +85,7 @@ class TaskProvider with ChangeNotifier {
       _tasks[index] = _tasks[index].copyWith(
         status: TaskStatus.failed,
         errorMessage: errorMessage,
+        subtext: subtext ?? _tasks[index].subtext,
       );
       notifyListeners();
     }

@@ -9,6 +9,7 @@ import '../core/theme.dart';
 import '../services/file_service.dart';
 import '../widgets/liquid_glass.dart';
 import '../widgets/top_bar.dart';
+import '../widgets/theme_face_toggle.dart';
 
 class SettingsScreen extends StatefulWidget {
   const SettingsScreen({super.key});
@@ -58,6 +59,15 @@ class _SettingsScreenState extends State<SettingsScreen> {
     }
   }
 
+  Future<void> _toggleTheme() async {
+    final isDark = themeNotifier.value == ThemeMode.dark;
+    final newMode = isDark ? ThemeMode.light : ThemeMode.dark;
+    themeNotifier.value = newMode;
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.setString('theme', isDark ? 'light' : 'dark');
+    if (mounted) setState(() {});
+  }
+
   @override
   Widget build(BuildContext context) {
     final isDark = Theme.of(context).brightness == Brightness.dark;
@@ -83,18 +93,9 @@ class _SettingsScreenState extends State<SettingsScreen> {
                   icon: Icons.dark_mode_rounded,
                   title: 'NOCTURNAL PROTOCOL',
                   subtitle: 'DARK MODE UI INTERFACE',
-                  trailing: Switch(
-                    value: themeNotifier.value == ThemeMode.dark,
-                    activeTrackColor: AppColors.docIndigo,
-                    activeColor: Colors.white,
-                    inactiveTrackColor: isDark ? Colors.white10 : Colors.black12,
-                    onChanged: (value) async {
-                      final mode = value ? ThemeMode.dark : ThemeMode.light;
-                      themeNotifier.value = mode;
-                      final prefs = await SharedPreferences.getInstance();
-                      await prefs.setString('theme', value ? 'dark' : 'light');
-                      setState(() {});
-                    },
+                  trailing: ThemeFaceToggle(
+                    isDark: isDark,
+                    onToggle: _toggleTheme,
                   ),
                 ),
                 
@@ -228,7 +229,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
                   Text(
                     subtitle,
                     style: AppTextStyles.bodyMedium.copyWith(
-                      color: isDark ? Colors.white30 : Colors.black26, 
+                      color: isDark ? Colors.white38 : Colors.black26, 
                       fontSize: 10,
                     ),
                   ),
@@ -314,7 +315,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
                     dir, 
                     style: AppTextStyles.bodyMedium.copyWith(
                       fontSize: 11, 
-                      color: isDark ? Colors.white30 : Colors.black38,
+                      color: isDark ? Colors.white38 : Colors.black38,
                     ),
                   ),
                 ],
@@ -468,7 +469,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
       children: [
         Text(
           label, 
-          style: AppTextStyles.bodyMedium.copyWith(color: Colors.white30, fontSize: 11),
+          style: AppTextStyles.bodyMedium.copyWith(color: Colors.white38, fontSize: 11),
         ),
         Text(
           value, 
@@ -502,7 +503,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
               onPressed: () => Navigator.pop(ctx), 
               child: Text(
                 'CANCEL', 
-                style: AppTextStyles.studioLabel.copyWith(color: Colors.white30),
+                style: AppTextStyles.studioLabel.copyWith(color: Colors.white38),
               ),
             ),
             TextButton(

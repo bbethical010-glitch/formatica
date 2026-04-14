@@ -1,3 +1,6 @@
+import 'package:flutter/material.dart';
+import 'dart:ui';
+import 'package:file_picker/file_picker.dart';
 import 'package:provider/provider.dart';
 import '../core/theme.dart';
 import '../services/audio_service.dart';
@@ -120,7 +123,7 @@ class _ExtractAudioScreenState extends State<ExtractAudioScreen> {
                       'MP4 · MKV · MOV · AVI',
                       style: AppTextStyles.studioLabel.copyWith(
                         fontSize: 10,
-                        color: isDark ? Colors.white30 : Colors.black30,
+                        color: isDark ? Colors.white38 : Colors.black38,
                       ),
                     ),
                   ],
@@ -209,7 +212,7 @@ class _ExtractAudioScreenState extends State<ExtractAudioScreen> {
                         fontSize: 12,
                         color: active 
                             ? (isDark ? Colors.white : AppColors.audioRose) 
-                            : (isDark ? Colors.white30 : Colors.black30),
+                            : (isDark ? Colors.white38 : Colors.black38),
                       ),
                     ),
                   ),
@@ -245,7 +248,7 @@ class _ExtractAudioScreenState extends State<ExtractAudioScreen> {
                   b,
                   style: AppTextStyles.studioLabel.copyWith(
                     fontSize: 10,
-                    color: active ? AppColors.audioRose : (isDark ? Colors.white24 : Colors.black24),
+                    color: active ? AppColors.audioRose : (isDark ? Colors.white24 : Colors.black26),
                   ),
                 ),
               ),
@@ -383,7 +386,7 @@ class _ExtractAudioScreenState extends State<ExtractAudioScreen> {
                   color: AppColors.audioRose,
                   borderRadius: BorderRadius.circular(16),
                 ),
-                child: const Text(
+                child: Text(
                   'OPEN FILE',
                   style: AppTextStyles.studioLabel.copyWith(color: Colors.white, fontSize: 13),
                 ),
@@ -402,7 +405,7 @@ class _ExtractAudioScreenState extends State<ExtractAudioScreen> {
       label: _isExtracting ? 'ABORT EXTRACTION' : 'ENGAGE EXTRACTION',
       onTap: canEngage ? _onExtract : (_isExtracting ? () => _showCancelDialog(context, _currentTaskId!) : () => {}),
       accentColor: _isExtracting ? AppColors.audioRose.withOpacity(0.3) : AppColors.audioRose,
-      loading: false, // We handle progress separately in this screen
+      isLoading: false, // We handle progress separately in this screen
     );
   }
 
@@ -423,7 +426,11 @@ class _ExtractAudioScreenState extends State<ExtractAudioScreen> {
   Future<void> _onExtract() async {
     setState(() { _isExtracting = true; _errorMessage = null; });
     final provider = context.read<TaskProvider>();
-    final taskId = provider.addTask('$_fileName → ${_selectedFormat.toUpperCase()}', 'extractAudio');
+    final taskId = provider.addTask(
+      _fileName!,
+      'extractAudio',
+      subtext: 'Extracting ${_selectedFormat.toUpperCase()} at ${_selectedBitrate}',
+    );
     _currentTaskId = taskId;
 
     try {
@@ -434,7 +441,7 @@ class _ExtractAudioScreenState extends State<ExtractAudioScreen> {
         onCancelSetup: (hook) => provider.setCancelHook(taskId, hook),
         onProgress: (p) => setState(() { _progress = p; provider.updateProgress(taskId, p); }),
       );
-      provider.completeTask(taskId, outputPath);
+      await provider.completeTask(taskId, outputPath);
       setState(() { _outputPath = outputPath; _isExtracting = false; });
     } catch (e) {
       if (e.toString().contains('cancelled')) return;
@@ -478,7 +485,7 @@ class _ExtractAudioScreenState extends State<ExtractAudioScreen> {
               onPressed: () => Navigator.pop(ctx),
               child: Text(
                 'RESUME',
-                style: AppTextStyles.studioLabel.copyWith(color: Colors.white30),
+                style: AppTextStyles.studioLabel.copyWith(color: Colors.white38),
               ),
             ),
             const SizedBox(width: 8),

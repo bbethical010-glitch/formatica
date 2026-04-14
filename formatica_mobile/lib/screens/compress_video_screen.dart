@@ -70,7 +70,7 @@ class _CompressVideoScreenState extends State<CompressVideoScreen> {
                     'BITRATE INTENSITY (CRF)',
                     style: AppTextStyles.studioLabel.copyWith(
                       fontSize: 10,
-                      color: isDark ? Colors.white30 : Colors.black38,
+                      color: isDark ? Colors.white38 : Colors.black38,
                     ),
                   ),
                   const SizedBox(height: 16),
@@ -81,7 +81,7 @@ class _CompressVideoScreenState extends State<CompressVideoScreen> {
                     'EFFICIENCY PRESET',
                     style: AppTextStyles.studioLabel.copyWith(
                       fontSize: 10,
-                      color: isDark ? Colors.white30 : Colors.black38,
+                      color: isDark ? Colors.white38 : Colors.black38,
                     ),
                   ),
                   const SizedBox(height: 16),
@@ -92,7 +92,7 @@ class _CompressVideoScreenState extends State<CompressVideoScreen> {
                     'RESOLUTION SCALING',
                     style: AppTextStyles.studioLabel.copyWith(
                       fontSize: 10,
-                      color: isDark ? Colors.white30 : Colors.black38,
+                      color: isDark ? Colors.white38 : Colors.black38,
                     ),
                   ),
                   const SizedBox(height: 16),
@@ -178,7 +178,7 @@ class _CompressVideoScreenState extends State<CompressVideoScreen> {
                             FileService.formatFileSize(_fileSizeBytes!),
                             style: AppTextStyles.bodyMedium.copyWith(
                               fontSize: 11,
-                              color: isDark ? Colors.white30 : Colors.black38,
+                              color: isDark ? Colors.white38 : Colors.black38,
                             ),
                           ),
                         ],
@@ -506,7 +506,11 @@ class _CompressVideoScreenState extends State<CompressVideoScreen> {
   Future<void> _onConvert() async {
     setState(() { _isConverting = true; _errorMessage = null; });
     final provider = context.read<TaskProvider>();
-    final taskId = provider.addTask('Compress $_fileName', 'compressVideo');
+    final taskId = provider.addTask(
+      _fileName!,
+      'compressVideo',
+      subtext: 'Optimal: ${_preset.toUpperCase()} @ ${_resolution}',
+    );
     _currentTaskId = taskId;
     
     String apiRes;
@@ -531,7 +535,7 @@ class _CompressVideoScreenState extends State<CompressVideoScreen> {
           }
         },
       );
-      provider.completeTask(taskId, outputPath);
+      await provider.completeTask(taskId, outputPath);
       if (mounted) {
         setState(() { _outputPath = outputPath; _isConverting = false; });
       }
@@ -635,7 +639,7 @@ class _CompressVideoScreenState extends State<CompressVideoScreen> {
               onPressed: () => Navigator.pop(ctx),
               child: Text(
                 'RESUME', 
-                style: AppTextStyles.studioLabel.copyWith(color: Colors.white30),
+                style: AppTextStyles.studioLabel.copyWith(color: Colors.white38),
               ),
             ),
             TextButton(

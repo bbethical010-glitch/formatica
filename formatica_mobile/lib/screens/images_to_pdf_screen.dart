@@ -154,7 +154,7 @@ class _ImagesToPdfScreenState extends State<ImagesToPdfScreen> {
                 children: [
                   Icon(
                     Icons.add_photo_alternate_outlined,
-                    color: isDark ? Colors.white30 : Colors.black26,
+                    color: isDark ? Colors.white38 : Colors.black26,
                     size: 24,
                   ),
                   const SizedBox(height: 8),
@@ -162,7 +162,7 @@ class _ImagesToPdfScreenState extends State<ImagesToPdfScreen> {
                     'ADD',
                     style: AppTextStyles.studioLabel.copyWith(
                       fontSize: 10,
-                      color: isDark ? Colors.white30 : Colors.black26,
+                      color: isDark ? Colors.white38 : Colors.black26,
                     ),
                   ),
                 ],
@@ -309,7 +309,11 @@ class _ImagesToPdfScreenState extends State<ImagesToPdfScreen> {
       _outputPath = null;
     });
     final provider = context.read<TaskProvider>();
-    final taskId = provider.addTask('${_selectedImagePaths.length} images → PDF', 'imagesToPdf');
+    final taskId = provider.addTask(
+      'Formatica Capture',
+      'imagesToPdf',
+      subtext: 'Encapsulating ${_selectedImagePaths.length} visual prisms',
+    );
     _currentTaskId = taskId;
     provider.updateProgress(taskId, 0.1);
 
@@ -327,7 +331,7 @@ class _ImagesToPdfScreenState extends State<ImagesToPdfScreen> {
       final filename = "formatica_${DateTime.now().millisecondsSinceEpoch}.pdf";
       final outPath = await FileService.saveToCategory(
         pdfBytes, filename, OutputCategory.pdfs);
-      provider.completeTask(taskId, outPath);
+      await provider.completeTask(taskId, outPath);
 
       if (mounted) {
         setState(() {
