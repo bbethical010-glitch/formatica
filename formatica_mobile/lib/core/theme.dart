@@ -33,6 +33,16 @@ class AppColors {
   static const Color darkTextPrimary = Color(0xFFDAE2FD);
   static const Color darkTextSecondary = Color(0xFFC8C4D8);
 
+  // Mesh Gradients
+  static const Color meshIndigo = Color(0xFF1A1B3A);
+  static const Color meshPurple = Color(0xFF2D1633);
+  static const Color meshNavy = Color(0xFF0F1628);
+
+  // Borders & Dividers
+  static const Color dividerWhite = Color(0x0FFFFFFF); // rgba(255,255,255,0.06)
+  static const Color ghostBorder = Color(0x14FFFFFF); // rgba(255,255,255,0.08)
+  static const Color ghostBorderStrong = Color(0x1EFFFFFF); // rgba(255,255,255,0.12)
+
   // Light Mode Equivalents
   static const Color lightBg = Color(0xFFF8F9FF);
   static const Color lightText = Color(0xFF1E293B);

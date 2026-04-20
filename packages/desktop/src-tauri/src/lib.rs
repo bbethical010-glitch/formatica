@@ -54,6 +54,15 @@ fn ytdlp_path() -> String {
     if managed.exists() {
         return managed.to_string_lossy().to_string();
     }
+
+    #[cfg(target_os = "macos")]
+    {
+        let paths = ["/opt/homebrew/bin/yt-dlp", "/usr/local/bin/yt-dlp"];
+        for p in paths {
+            if std::path::Path::new(p).exists() { return p.to_string(); }
+        }
+    }
+
     // Check PATH
     find_bin("yt-dlp")
 }
@@ -141,6 +150,14 @@ fn ffmpeg_path() -> String {
         }
     }
 
+    #[cfg(target_os = "macos")]
+    {
+        let paths = ["/opt/homebrew/bin/ffmpeg", "/usr/local/bin/ffmpeg"];
+        for p in paths {
+            if std::path::Path::new(p).exists() { return p.to_string(); }
+        }
+    }
+
     // Check PATH
     find_bin("ffmpeg")
 }
@@ -170,15 +187,19 @@ fn libreoffice_path() -> String {
 }
 
 fn python_path() -> String {
+    #[cfg(target_os = "macos")]
+    {
+        let paths = ["/opt/homebrew/bin/python3", "/usr/local/bin/python3", "/usr/bin/python3"];
+        for p in paths {
+            if std::path::Path::new(p).exists() { return p.to_string(); }
+        }
+    }
+
     let p = find_bin("python");
     if !p.is_empty() { return p; }
     let p3 = find_bin("python3");
     if !p3.is_empty() { return p3; }
     
-    // Check standard macOS path
-    let mac_p3 = "/usr/bin/python3";
-    if std::path::Path::new(mac_p3).exists() { return mac_p3.to_string(); }
-
     if cfg!(windows) { "python.exe".to_string() } else { "python3".to_string() }
 }
 
@@ -850,29 +871,38 @@ async fn download_media(
 
 #[tauri::command]
 async fn images_to_pdf(image_paths: Vec<String>, output_path: String, layout: String) -> TaskResult {
-    let paths_str = image_paths.iter().map(|p| format!("r'{}'", p.replace("\\", "\\\\"))).collect::<Vec<_>>().join(",");
-    let script = format!(
-        "from PIL import Image\n\
-         imgs=[]\n\
-         for p in [{}]:\n\
-         {}img = Image.open(p).convert('RGB')\n\
-         {}if '{}' == 'A4':\n\
-         {}a4_w, a4_h = 2480, 3508\n\
-         {}img.thumbnail((a4_w, a4_h), Image.Resampling.LANCZOS if hasattr(Image, 'Resampling') else Image.LANCZOS)\n\
-         {}new_img = Image.new('RGB', (a4_w, a4_h), (255, 255, 255))\n\
-         {}new_img.paste(img, ((a4_w - img.width) // 2, (a4_h - img.height) // 2))\n\
-         {}imgs.append(new_img)\n\
-         {}else:\n\
-         {}imgs.append(img)\n\
-         if imgs: imgs[0].save(r'{}', save_all=True, append_images=imgs[1:])", 
-        paths_str, 
-        "    ", "    ", layout, "        ", "        ", "        ", "        ", "        ", "    ", "        ",
-        output_path.replace("\\", "\\\\")
-    );
+    let paths_json = serde_json::to_string(&image_paths).unwrap_or_else(|_| "[]".to_string());
     
+    let script = r#"
+import json, sys
+from PIL import Image
+try:
+    paths = json.loads(sys.argv[1])
+    layout = sys.argv[2]
+    out = sys.argv[3]
+    imgs = []
+    for p in paths:
+        img = Image.open(p).convert('RGB')
+        if layout == 'A4':
+            a4_w, a4_h = 2480, 3508
+            resample = Image.Resampling.LANCZOS if hasattr(Image, 'Resampling') else Image.LANCZOS
+            img.thumbnail((a4_w, a4_h), resample)
+            new_img = Image.new('RGB', (a4_w, a4_h), (255, 255, 255))
+            new_img.paste(img, ((a4_w - img.width) // 2, (a4_h - img.height) // 2))
+            imgs.append(new_img)
+        else:
+            imgs.append(img)
+    if imgs:
+        imgs[0].save(out, save_all=True, append_images=imgs[1:])
+except Exception as e:
+    print(str(e), file=sys.stderr)
+    sys.exit(1)
+"#;
+
+    let out_p = output_path.clone();
     let result = tokio::task::spawn_blocking(move || {
         Command::new(python_path())
-            .args(["-c", &script])
+            .args(["-c", script, &paths_json, &layout, &out_p])
             .hide_window()
             .output()
     }).await.unwrap();
